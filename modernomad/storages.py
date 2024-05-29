@@ -4,8 +4,8 @@ import os
 # https://github.com/jschneier/django-storages/issues/382
 # https://github.com/matthewwithanm/django-imagekit/issues/391
 
-class CustomS3Boto3Storage(S3Boto3Storage):
 
+class CustomS3Boto3Storage(S3Boto3Storage):
     def _save_content(self, obj, content, parameters):
         """
         We create a clone of the content file as when this is passed to boto3 it wrongly closes
@@ -21,7 +21,9 @@ class CustomS3Boto3Storage(S3Boto3Storage):
         content_autoclose.write(content.read())
 
         # Upload the object which will auto close the content_autoclose instance
-        super(CustomS3Boto3Storage, self)._save_content(obj, content_autoclose, parameters)
+        super(CustomS3Boto3Storage, self)._save_content(
+            obj, content_autoclose, parameters
+        )
 
         # Cleanup if this is fixed upstream our duplicate should always close
         if not content_autoclose.closed:

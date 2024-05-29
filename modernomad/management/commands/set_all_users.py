@@ -1,8 +1,3 @@
-import os
-import time
-import urllib
-import sys
-import datetime
 import logging
 
 from django.core.management.base import BaseCommand, CommandError
@@ -17,7 +12,8 @@ class Command(BaseCommand):
     requires_system_checks = True
 
     def handle(self, *labels, **options):
-        if not labels or len(labels) < 1: raise CommandError('Args: <email_address> <password> <customer_id>')
+        if not labels or len(labels) < 1:
+            raise CommandError("Args: <email_address> <password> <customer_id>")
         new_email_address = labels[0]
         logger.debug("Setting all emails:'%s' " % new_email_address)
         new_password = None

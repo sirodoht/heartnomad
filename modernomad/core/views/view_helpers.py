@@ -9,11 +9,13 @@ def _get_user_and_perms(request, username):
     try:
         user = User.objects.get(username=username)
     except:
-        messages.add_message(request, messages.INFO, 'There is no user with that username.')
-        return HttpResponseRedirect('/404')
+        messages.add_message(
+            request, messages.INFO, "There is no user with that username."
+        )
+        return HttpResponseRedirect("/404")
 
     user_is_house_admin_somewhere = False
-    for location in Location.objects.filter(visibility='public'):
+    for location in Location.objects.filter(visibility="public"):
         if request.user in location.house_admins.all():
             user_is_house_admin_somewhere = True
             break

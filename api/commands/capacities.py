@@ -1,62 +1,66 @@
 from api.command import *
 from datetime import datetime
-from django.core.exceptions import ValidationError
 from modernomad.core.models import Resource
 from modernomad.core.models import CapacityChange
 
+
 def user_can_administer_a_resource(user, resource):
     return (
-        user and
-        resource and
-        resource.location and
-        (
-            user in resource.backers()
-            or
-            user in resource.location.house_admins.all()
-        )
+        user
+        and resource
+        and resource.location
+        and (user in resource.backers() or user in resource.location.house_admins.all())
     )
+
 
 def in_the_past(capacity):
     tz = capacity.resource.tz()
     now = datetime.now(tz).date()
     return capacity.start_date < now
 
+
 def get_or_create_unsaved_capacity(data):
     # if there is an existing capacity change for this date, then we're updating. otherwise we're adding.
-    capacity = CapacityChange.objects.filter(start_date=data['start_date'], resource=data['resource']).first()
+    capacity = CapacityChange.objects.filter(
+        start_date=data["start_date"], resource=data["resource"]
+    ).first()
     if capacity:
-        capacity.quantity = data['quantity']
-        capacity.accept_drft = data['accept_drft']
+        capacity.quantity = data["quantity"]
+        capacity.accept_drft = data["accept_drft"]
     else:
-        start_date = datetime.strptime(data['start_date'], "%Y-%m-%d").date()
+        start_date = datetime.strptime(data["start_date"], "%Y-%m-%d").date()
         capacity = CapacityChange(
-                start_date=start_date,
-                resource=Resource.objects.get(id=data['resource']),
-                accept_drft=data['accept_drft'],
-                quantity=data['quantity']
-            )
+            start_date=start_date,
+            resource=Resource.objects.get(id=data["resource"]),
+            accept_drft=data["accept_drft"],
+            quantity=data["quantity"],
+        )
     return capacity
 
+
 def update_capacities_as_appropriate(capacity):
-    ''' checks various policiies about neighboring capacities and updates (or
-    not) as appropriate.'''
+    """checks various policiies about neighboring capacities and updates (or
+    not) as appropriate."""
     warnings = {}
     errors = {}
     if in_the_past(capacity):
-        errors['start_date'] = u'The start date must not be in the past'
+        errors["start_date"] = "The start date must not be in the past"
 
     elif CapacityChange.objects.would_not_change_previous_quantity(capacity):
-        warnings['Oops'] = u'This is not a change from the previous capacity'
+        warnings["Oops"] = "This is not a change from the previous capacity"
 
     elif CapacityChange.objects.same_as_next_quantity(capacity):
         CapacityChange.objects.delete_next_quantity(capacity)
         capacity.save()
-        warnings['FYI'] = u'The capacity change was combined with the one following it, which was the same.'
+        warnings["FYI"] = (
+            "The capacity change was combined with the one following it, which was the same."
+        )
 
     else:
         capacity.save()
 
     return (errors, warnings)
+
 
 class CapacityCommandHelpers:
     def tz(self):
@@ -70,12 +74,14 @@ class CapacityCommandHelpers:
 
     def _validate_not_in_past(self):
         if self.start_date() < self.current_date_for_tz():
-            self.add_error('start_date', u'The start date must not be in the past')
+            self.add_error("start_date", "The start date must not be in the past")
+
 
 class DeleteCapacityChange(Command, CapacityCommandHelpers):
-    ''' this is being used in views/capacities.py.'''
+    """this is being used in views/capacities.py."""
+
     def capacity(self):
-        return self.input_data['capacity']
+        return self.input_data["capacity"]
 
     def start_date(self):
         return self.capacity().start_date
@@ -97,7 +103,7 @@ class DeleteCapacityChange(Command, CapacityCommandHelpers):
         for record in to_delete:
             record.delete()
 
-        self.result_data = {'deleted': {'capacities': keys}}
+        self.result_data = {"deleted": {"capacities": keys}}
 
     def _to_delete(self):
         result = [self.capacity()]
@@ -105,6 +111,6 @@ class DeleteCapacityChange(Command, CapacityCommandHelpers):
 
         if next_avail:
             previous_avail = CapacityChange.objects._previous_capacity(self.capacity())
-            if (previous_avail and previous_avail.quantity == next_avail.quantity):
+            if previous_avail and previous_avail.quantity == next_avail.quantity:
                 result.append(next_avail)
         return result

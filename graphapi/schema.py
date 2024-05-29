@@ -8,11 +8,7 @@ import graphapi.schemas.bookings as bookings
 
 
 class Query(
-    occupants.Query,
-    locations.Query,
-    users.Query,
-    resources.Query,
-    graphene.ObjectType
+    occupants.Query, locations.Query, users.Query, resources.Query, graphene.ObjectType
 ):
     pass
 
