@@ -21,8 +21,7 @@ class Provider(BaseProvider):
     def slug(self, name):
         fake = Faker()
         value = getattr(fake, name)()
-        return value.replace(' ', '-')
+        return value.replace(" ", "-")
 
 
 factory.Faker.add_provider(Provider)
-

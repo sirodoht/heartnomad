@@ -1,6 +1,7 @@
 import pytz
 
 from . import factory
+from factory.django import DjangoModelFactory
 from .location import LocationFactory
 
 from gather.models import EventAdminGroup
@@ -11,7 +12,7 @@ from gather.models import EventNotifications
 from .user import UserFactory, SuperUserFactory
 
 
-class EventAdminGroupFactory(factory.DjangoModelFactory):
+class EventAdminGroupFactory(DjangoModelFactory):
     class Meta:
         model = EventAdminGroup
 
@@ -31,37 +32,37 @@ class EventAdminGroupFactory(factory.DjangoModelFactory):
             self.users.add(SuperUserFactory())
 
 
-class EventSeriesFactory(factory.DjangoModelFactory):
+class EventSeriesFactory(DjangoModelFactory):
     class Meta:
         model = EventSeries
 
-    name = factory.Faker('word')
-    description = factory.Faker('paragraph')
+    name = factory.Faker("word")
+    description = factory.Faker("paragraph")
 
 
-class EventFactory(factory.DjangoModelFactory):
+class EventFactory(DjangoModelFactory):
     class Meta:
         model = Event
 
-    created = factory.Faker('past_datetime', tzinfo=pytz.UTC)
-    updated = factory.Faker('past_datetime', tzinfo=pytz.UTC)
-    start = factory.Faker('future_datetime', tzinfo=pytz.UTC)
-    end = factory.Faker('future_datetime', tzinfo=pytz.UTC)
+    created = factory.Faker("past_datetime", tzinfo=pytz.UTC)
+    updated = factory.Faker("past_datetime", tzinfo=pytz.UTC)
+    start = factory.Faker("future_datetime", tzinfo=pytz.UTC)
+    end = factory.Faker("future_datetime", tzinfo=pytz.UTC)
 
-    title = factory.Faker('word')
-    slug = factory.Faker('word')
+    title = factory.Faker("word")
+    slug = factory.Faker("word")
 
-    description = factory.Faker('paragraph')
-    image = factory.django.ImageField(color='gray')
+    description = factory.Faker("paragraph")
+    image = factory.django.ImageField(color="gray")
 
-    notifications = factory.Faker('pybool')
+    notifications = factory.Faker("pybool")
 
-    where = factory.Faker('city')
+    where = factory.Faker("city")
     creator = factory.SubFactory(UserFactory)
 
-    organizer_notes = factory.Faker('paragraph')
+    organizer_notes = factory.Faker("paragraph")
 
-    limit = factory.Faker('random_digit')
+    limit = factory.Faker("random_digit")
     visibility = Event.PUBLIC
     status = Event.PENDING
 
@@ -97,12 +98,12 @@ class EventFactory(factory.DjangoModelFactory):
                 self.endorsements.add(users)
 
 
-class EventNotificationFactory(factory.DjangoModelFactory):
+class EventNotificationFactory(DjangoModelFactory):
     class Meta:
         model = EventNotifications
 
     user = factory.SubFactory(UserFactory)
-    reminders = factory.Faker('pybool')
+    reminders = factory.Faker("pybool")
 
     @factory.post_generation
     def location_weekly(self, create, extracted, **kwargs):

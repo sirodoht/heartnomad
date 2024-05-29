@@ -1,31 +1,35 @@
 from . import factory
 import factory.fuzzy
+from factory.django import DjangoModelFactory
 from bank.models import Currency
 from bank.models import Account
 from .user import UserFactory
 
 
-class DRFTCurrencyFactory(factory.DjangoModelFactory):
+class DRFTCurrencyFactory(DjangoModelFactory):
     class Meta:
         model = Currency
         # Currencies are created in migrations, so use that if it exists
-        django_get_or_create = ('name',)
+        django_get_or_create = ("name",)
+
     name = "DRFT"
     symbol = "Ɖ"
 
 
-class USDCurrencyFactory(factory.DjangoModelFactory):
+class USDCurrencyFactory(DjangoModelFactory):
     class Meta:
         model = Currency
         # Currencies are created in migrations, so use that if it exists
-        django_get_or_create = ('name',)
+        django_get_or_create = ("name",)
+
     name = "USD"
     symbol = "$"
 
 
-class USDAccountFactory(factory.DjangoModelFactory):
+class USDAccountFactory(DjangoModelFactory):
     class Meta:
         model = Account
+
     currency = factory.SubFactory(USDCurrencyFactory)
     # JKS this is a hack. Just makes the primary superuser the account
     # owner/admin.
@@ -54,9 +58,10 @@ class USDAccountFactory(factory.DjangoModelFactory):
             self.owners.add(UserFactory())
 
 
-class DRFTAccountFactory(factory.DjangoModelFactory):
+class DRFTAccountFactory(DjangoModelFactory):
     class Meta:
         model = Account
+
     currency = factory.SubFactory(DRFTCurrencyFactory)
     # JKS this is a hack. Just makes the primary superuser the account
     # owner/admin.
@@ -85,13 +90,13 @@ class DRFTAccountFactory(factory.DjangoModelFactory):
             self.owners.add(UserFactory())
 
 
-class UserPrimaryAccountFactory(factory.DjangoModelFactory):
+class UserPrimaryAccountFactory(DjangoModelFactory):
     pass
 
 
-class HouseAccountFactory(factory.DjangoModelFactory):
+class HouseAccountFactory(DjangoModelFactory):
     pass
 
 
-class UseTransactionFactory(factory.DjangoModelFactory):
+class UseTransactionFactory(DjangoModelFactory):
     pass
