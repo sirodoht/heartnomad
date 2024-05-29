@@ -11,10 +11,17 @@ class ResourceCapacity:
         return self.resource.id
 
     def current_capacity(self):
-        return self.base_scope().filter(start_date__lte=self.date).order_by('-start_date').first()
+        return (
+            self.base_scope()
+            .filter(start_date__lte=self.date)
+            .order_by("-start_date")
+            .first()
+        )
 
     def upcoming_capacities(self):
-        return list(self.base_scope().filter(start_date__gt=self.date).order_by('start_date'))
+        return list(
+            self.base_scope().filter(start_date__gt=self.date).order_by("start_date")
+        )
 
     def base_scope(self):
         return CapacityChange.objects.filter(resource=self.resource)
@@ -22,11 +29,8 @@ class ResourceCapacity:
 
 class SerializedNullResourceCapacity:
     def as_dict(self):
-        return {
-            'resourceId': None,
-            'currentCapacity': None,
-            'upcomingCapacities': []
-        }
+        return {"resourceId": None, "currentCapacity": None, "upcomingCapacities": []}
+
 
 class SerializedResourceCapacity:
     def __init__(self, resource, date):
@@ -42,9 +46,9 @@ class SerializedResourceCapacity:
 
     def as_dict(self):
         return {
-            'resourceId': self.resource_capacity.resource_id(),
-            'currentCapacity': self.current_capacity(),
-            'upcomingCapacities': self.upcoming_capacities()
+            "resourceId": self.resource_capacity.resource_id(),
+            "currentCapacity": self.current_capacity(),
+            "upcomingCapacities": self.upcoming_capacities(),
         }
 
     def _serializeRecord(self, record):
