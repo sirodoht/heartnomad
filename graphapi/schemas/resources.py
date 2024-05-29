@@ -1,8 +1,8 @@
 import graphene
-from graphene import AbstractType, Field, Node
+from graphene import ObjectType, Node
 from graphene.types.datetime import *
 from graphene_django.types import DjangoObjectType
-from graphene_django.filter import DjangoFilterConnectionField
+from graphene_django.filter.fields import DjangoFilterConnectionField
 from datetime import timedelta
 from modernomad.core.models import Resource, Backing
 
@@ -15,24 +15,28 @@ class AvailabilityNode(graphene.ObjectType):
     date = DateTime()
     quantity = graphene.Int()
 
+
 class BackingNode(DjangoObjectType):
     class Meta:
         model = Backing
-        interfaces = (Node, )
+        interfaces = (Node,)
+
 
 class ResourceNode(DjangoObjectType):
     rid = graphene.Int()
-    availabilities = graphene.List(lambda: AvailabilityNode, arrive=DateTime(), depart=DateTime())
+    availabilities = graphene.List(
+        lambda: AvailabilityNode, arrive=DateTime(), depart=DateTime()
+    )
     backing = graphene.Field(BackingNode)
     has_future_drft_capacity = graphene.Boolean()
     accept_drft_these_dates = graphene.Boolean(arrive=DateTime(), depart=DateTime())
 
     class Meta:
         model = Resource
-        interfaces = (Node, )
+        interfaces = (Node,)
         filter_fields = {
-            'location': ['exact'],
-            'location__slug': ['exact'],
+            "location": ["exact"],
+            "location__slug": ["exact"],
         }
 
     def resolve_has_future_drft_capacity(self, info):
@@ -45,7 +49,7 @@ class ResourceNode(DjangoObjectType):
         start_date = arrive.date()
         end_date = depart.date() - timedelta(days=1)
 
-        logger.debug('%s drftable between? ' % self.name)
+        logger.debug("%s drftable between? " % self.name)
         logger.debug(self.drftable_between(start_date, end_date))
         return self.drftable_between(start_date, end_date)
 
@@ -57,7 +61,8 @@ class ResourceNode(DjangoObjectType):
 
         return [AvailabilityNode(*availability) for availability in availabilities]
 
-class Query(AbstractType):
+
+class Query(ObjectType):
     all_resources = DjangoFilterConnectionField(ResourceNode)
     all_drft_resources = DjangoFilterConnectionField(ResourceNode)
 

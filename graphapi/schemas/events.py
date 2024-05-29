@@ -1,8 +1,8 @@
 import graphene
-from graphene import AbstractType, Field, Node
+from graphene import ObjectType
 from graphene_django.types import DjangoObjectType
 from gather.models import Event
-from graphene_django.filter import DjangoFilterConnectionField
+from graphene_django.filter.fields import DjangoFilterConnectionField
 
 
 class EventNode(DjangoObjectType):
@@ -10,12 +10,20 @@ class EventNode(DjangoObjectType):
 
     class Meta:
         model = Event
-        filter_fields = ['slug', 'title']
+        filter_fields = ["slug", "title"]
 
     def resolve_url(self, info, **kwargs):
-        return "/locations/" + self.location.slug + "/events/" + str(self.id) + "/" + self.slug + "/"
+        return (
+            "/locations/"
+            + self.location.slug
+            + "/events/"
+            + str(self.id)
+            + "/"
+            + self.slug
+            + "/"
+        )
 
 
-class Query(AbstractType):
+class Query(ObjectType):
     # event = relay.NodeField(EventNode)
     all_events = DjangoFilterConnectionField(EventNode)

@@ -1,7 +1,7 @@
 import graphene
-from graphene import AbstractType, Field, Node
+from graphene import ObjectType, Node
 from graphene_django.types import DjangoObjectType
-from graphene_django.filter import DjangoFilterConnectionField
+from graphene_django.filter.fields import DjangoFilterConnectionField
 
 from django.contrib.auth.models import User
 from modernomad.core.models import UserProfile
@@ -10,7 +10,7 @@ from modernomad.core.models import UserProfile
 class UserProfileNode(DjangoObjectType):
     class Meta:
         model = UserProfile
-        interfaces = (Node, )
+        interfaces = (Node,)
 
 
 class UserNode(DjangoObjectType):
@@ -19,8 +19,8 @@ class UserNode(DjangoObjectType):
 
     class Meta:
         model = User
-        interfaces = (Node, )
-        filter_fields = ['id']
+        interfaces = (Node,)
+        filter_fields = ["id"]
 
     def resolve_name(self, info):
         return " ".join([self.first_name, self.last_name])
@@ -29,5 +29,5 @@ class UserNode(DjangoObjectType):
         return "/people/" + self.username
 
 
-class Query(AbstractType):
+class Query(ObjectType):
     all_users = DjangoFilterConnectionField(UserNode)
