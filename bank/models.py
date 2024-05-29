@@ -2,11 +2,13 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import pre_save
-from django.db.models import Q, Sum
+from django.db.models import Sum
 from django.utils import timezone
 from django.db.models.functions import Coalesce
 import logging
+
 logger = logging.getLogger(__name__)
+
 
 class Currency(models.Model):
     name = models.CharField(max_length=200, unique=True)
@@ -20,54 +22,74 @@ class Currency(models.Model):
 
     def save(self, *args, **kwargs):
         super(Currency, self).save(*args, **kwargs)
-        if not hasattr(self, 'systemaccounts'):
-            credit_account = Account.objects.create(currency=self, name="%s SYSTEM CREDIT" % self.name, type = Account.CREDIT)
-            debit_account = Account.objects.create(currency=self, name="%s SYSTEM DEBIT" % self.name, type = Account.DEBIT)
-            SystemAccounts.objects.create(currency=self, credit=credit_account, debit=debit_account)
+        if not hasattr(self, "systemaccounts"):
+            credit_account = Account.objects.create(
+                currency=self, name="%s SYSTEM CREDIT" % self.name, type=Account.CREDIT
+            )
+            debit_account = Account.objects.create(
+                currency=self, name="%s SYSTEM DEBIT" % self.name, type=Account.DEBIT
+            )
+            SystemAccounts.objects.create(
+                currency=self, credit=credit_account, debit=debit_account
+            )
+
 
 class Account(models.Model):
-    CREDIT = 'credit'
-    DEBIT = 'debit'
+    CREDIT = "credit"
+    DEBIT = "debit"
     ACCOUNT_TYPES = (
-            # first value stored in db, second value is what is shown to user
-            (CREDIT, 'Credit'),
-            (DEBIT, 'Debit'),
-        )
+        # first value stored in db, second value is what is shown to user
+        (CREDIT, "Credit"),
+        (DEBIT, "Debit"),
+    )
 
-    currency = models.ForeignKey(Currency, related_name="accounts")
-    admins = models.ManyToManyField(User, verbose_name="Admins (optional)",
-            related_name='accounts_administered', blank=True, help_text="May be blank"
-        )
-    owners = models.ManyToManyField(User, related_name='accounts_owned',
-            blank=True, help_text="May be blank for group accounts"
-        )
+    currency = models.ForeignKey(
+        Currency, related_name="accounts", on_delete=models.CASCADE
+    )
+    admins = models.ManyToManyField(
+        User,
+        verbose_name="Admins (optional)",
+        related_name="accounts_administered",
+        blank=True,
+        help_text="May be blank",
+    )
+    owners = models.ManyToManyField(
+        User,
+        related_name="accounts_owned",
+        blank=True,
+        help_text="May be blank for group accounts",
+    )
     created = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=50)
-    type = models.CharField(max_length=32, choices=ACCOUNT_TYPES, default=CREDIT,
-            help_text="A credit (expense, asset) account always has a balance > 0. A debit (revenue, liability) account always has a balance < 0. #helpfulnothelpful."
-        )
+    type = models.CharField(
+        max_length=32,
+        choices=ACCOUNT_TYPES,
+        default=CREDIT,
+        help_text="A credit (expense, asset) account always has a balance > 0. A debit (revenue, liability) account always has a balance < 0. #helpfulnothelpful.",
+    )
 
     def __str__(self):
         return self.name + " (%s)" % (self.currency)
 
     def is_credit(self):
-        return (self.type == Account.CREDIT)
+        return self.type == Account.CREDIT
 
     def is_debit(self):
-        return (self.type == Account.DEBIT)
+        return self.type == Account.DEBIT
 
     def get_balance(self):
         # sum all valid entries for this account
         return self.entries.filter(valid=True).aggregate(
-            total_amount = Coalesce(Sum('amount'), 0)
-        )['total_amount']
+            total_amount=Coalesce(Sum("amount"), 0)
+        )["total_amount"]
 
     def balance_at_entry(self, entry):
         # return the balance of the account after the entry was recorded
-        return self.entries.filter(valid=True).filter(
-            transaction__date__lte=entry.transaction.date).aggregate(
-            total_amount = Coalesce(Sum('amount'), 0)
-        )['total_amount']
+        return (
+            self.entries.filter(valid=True)
+            .filter(transaction__date__lte=entry.transaction.date)
+            .aggregate(total_amount=Coalesce(Sum("amount"), 0))["total_amount"]
+        )
 
     def owner_names(self):
         return [o.first_name for o in self.owners.all()]
@@ -76,9 +98,9 @@ class Account(models.Model):
 class SystemAccounts(models.Model):
     # money coming into or out of the system (either due to real transfers or
     # minting) is recorded in these accounts.
-    currency = models.OneToOneField(Currency)
-    credit = models.OneToOneField(Account, related_name="+")
-    debit = models.OneToOneField(Account, related_name="+")
+    currency = models.OneToOneField(Currency, on_delete=models.CASCADE)
+    credit = models.OneToOneField(Account, related_name="+", on_delete=models.CASCADE)
+    debit = models.OneToOneField(Account, related_name="+", on_delete=models.CASCADE)
 
 
 class Transaction(models.Model):
@@ -86,7 +108,13 @@ class Transaction(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     date = models.DateTimeField(default=timezone.now)
-    approver = models.ForeignKey(User, related_name="approved_transactions", blank=True, null=True)
+    approver = models.ForeignKey(
+        User,
+        related_name="approved_transactions",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
     valid = models.BooleanField(default=False)
 
     def __str__(self):
@@ -98,7 +126,7 @@ class Transaction(models.Model):
             # this is a fresh transaction, or only the first entry
             self.valid = False
 
-        else: # only if there are 2 transactions
+        else:  # only if there are 2 transactions
             if len(entries) != 2:
                 # the transaction object needs to be saved first without *any*
                 # entries before the entries can themselves link to the transaction
@@ -111,11 +139,15 @@ class Transaction(models.Model):
                 # Note that this effectively prevents us from editing a
                 # transaction as well, since one entry will get updated before
                 # the other, and cause this error.
-                raise Exception("Transaction entries must balance out and there must be only 2")
+                raise Exception(
+                    "Transaction entries must balance out and there must be only 2"
+                )
 
             # check that all entries are between accounts of the same type
             if len(set([e.account.currency for e in entries])) > 1:
-                raise Exception("Transaction entries must be between accounts of the same currency")
+                raise Exception(
+                    "Transaction entries must be between accounts of the same currency"
+                )
 
             self.valid = True
             # call update instead of save() so we don't end up in an infinite
@@ -128,13 +160,18 @@ class Transaction(models.Model):
         # the magnitude value of a transaction is the total amount it sums to
         # in either the positive or negative direction. It's required to be
         # symmetric, so we just pick one direction to sum over.
-        resp = self.entries.filter(amount__gt=0).aggregate(Sum('amount'))
-        return resp['amount__sum']
+        resp = self.entries.filter(amount__gt=0).aggregate(Sum("amount"))
+        return resp["amount__sum"]
+
 
 class Entry(models.Model):
-    account = models.ForeignKey(Account, related_name="entries")
+    account = models.ForeignKey(
+        Account, related_name="entries", on_delete=models.CASCADE
+    )
     amount = models.IntegerField()
-    transaction = models.ForeignKey(Transaction, related_name="entries")
+    transaction = models.ForeignKey(
+        Transaction, related_name="entries", on_delete=models.CASCADE
+    )
     # a transaction will always be invalid until it is linked to a second one
     # through a transaction. because the objects get saved in serial, we can't
     # avoid a temporary invalid state.
@@ -142,7 +179,7 @@ class Entry(models.Model):
 
     class Meta:
         verbose_name_plural = "Entries"
-        ordering=['-transaction__date']
+        ordering = ["-transaction__date"]
 
     def __str__(self):
         return "Entry: account %s for %d" % (self.account, self.amount)
@@ -151,7 +188,7 @@ class Entry(models.Model):
         # save the entry first so that we can validate any changes (since we're
         # pulling them from the DB)
         super(Entry, self).save(*args, **kwargs)
-        #if self.transaction:
+        # if self.transaction:
         entries = self.transaction.entries.all()
         balance = sum([e.amount for e in entries])
         if balance == 0:
@@ -166,26 +203,34 @@ class Entry(models.Model):
             other_entry = self.transaction.entries.exclude(id=self.id).first()
             return other_entry.account
         else:
-            logger.debug('Warning! found invalid transaction id=%d' % self.transaction.id)
+            logger.debug(
+                "Warning! found invalid transaction id=%d" % self.transaction.id
+            )
             return None
 
     def balance_at(self):
         return self.account.balance_at_entry(self)
+
 
 @receiver(pre_save, sender=Entry)
 def entry_pre_save(sender, instance, **kwargs):
     # enforce hard balance limits for debit and credit accounts.
     current_balance = instance.account.get_balance()
     if instance.account.is_debit() and (current_balance + instance.amount > 0):
-        raise Exception("Error: insufficient balance for transaction. Debit account %d must retain a balance less than 0." % instance.account.id)
+        raise Exception(
+            "Error: insufficient balance for transaction. Debit account %d must retain a balance less than 0."
+            % instance.account.id
+        )
     elif instance.account.is_credit() and (current_balance + instance.amount < 0):
-        raise Exception("Error: insufficient balance for transaction. Credit account %d must retain a balance greater than 0." % instance.account.id)
+        raise Exception(
+            "Error: insufficient balance for transaction. Credit account %d must retain a balance greater than 0."
+            % instance.account.id
+        )
 
 
-
-''' check that transaction entries sum to 0
+""" check that transaction entries sum to 0
     that the spending user will have an allowable balance after the transaction is completed.
     that the correct permissions are in place for both accounts
     transfer only between accounts of the same currency
     if entry is updated, update transaction: if entry is valid, then transaction is valid.
-'''
+"""
