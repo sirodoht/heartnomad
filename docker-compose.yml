@@ -7,7 +7,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - "DJANGO_SETTINGS_MODULE=modernomad.settings.local"
+      - "DJANGO_SETTINGS_MODULE=modernomad.settings"
       - "DATABASE_URL=psql://postgres:postgres@postgres:5432/postgres"
       # Read these envvars from .env or environment Compose is run in
       - "STRIPE_SECRET_KEY"
