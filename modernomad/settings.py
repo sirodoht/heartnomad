@@ -154,7 +154,7 @@ MIDDLEWARE = [
     # "basicauth.middleware.BasicAuthMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    'django.middleware.csrf.CsrfViewMiddleware',
+    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     # 'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
@@ -189,7 +189,6 @@ INSTALLED_APPS = [
     "django.contrib.flatpages",
     "django.contrib.admindocs",
     "django.contrib.humanize",
-
     # 3rd party
     # 'compressor',
     # 'django_extensions',
@@ -199,7 +198,6 @@ INSTALLED_APPS = [
     # 'rest_framework',
     # 'rules.apps.AutodiscoverRulesConfig',
     # 'webpack_loader',
-
     # modernomad
     "modernomad.core",
     "bank",

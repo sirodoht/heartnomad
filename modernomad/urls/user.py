@@ -75,15 +75,25 @@ urlpatterns = [
         r"^(?P<username>[\w\d\-\.@+_]+)/reservations/$", old_user_bookings_redirect
     ),
     re_path(r"^logout/$", auth_views.LogoutView.as_view()),
-    re_path(r"^password/reset/$", auth_views.PasswordResetView.as_view(), name="password_reset"),
-    re_path(r"^password/done/$", auth_views.PasswordResetDoneView.as_view(), name="password_reset_done"),
+    re_path(
+        r"^password/reset/$",
+        auth_views.PasswordResetView.as_view(),
+        name="password_reset",
+    ),
+    re_path(
+        r"^password/done/$",
+        auth_views.PasswordResetDoneView.as_view(),
+        name="password_reset_done",
+    ),
     re_path(
         r"^password/confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>.+)/$",
         auth_views.PasswordResetConfirmView.as_view(),
         name="password_reset_confirm",
     ),
     re_path(
-        r"^password/complete/$", auth_views.PasswordResetCompleteView.as_view(), name="password_reset_complete"
+        r"^password/complete/$",
+        auth_views.PasswordResetCompleteView.as_view(),
+        name="password_reset_complete",
     ),
 ]
 

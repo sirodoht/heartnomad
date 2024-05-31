@@ -155,7 +155,7 @@ class Location(models.Model):
     )
 
     class Meta:
-        ordering = ['name']
+        ordering = ["name"]
 
     def __str__(self):
         return self.name
@@ -420,7 +420,7 @@ class Resource(models.Model):
     objects = ResourceManager()
 
     class Meta:
-        ordering = ['name']
+        ordering = ["name"]
 
     def __str__(self):
         return self.name
@@ -1326,7 +1326,7 @@ class Use(models.Model):
     objects = UseManager()
 
     class Meta:
-        ordering = ['-created']
+        ordering = ["-created"]
 
     def __str__(self):
         return "%d" % self.id

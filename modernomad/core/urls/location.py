@@ -26,7 +26,9 @@ per_location_patterns = [
         name="location_community",
     ),
     re_path(r"^team/$", modernomad.core.views.unsorted.team, name="location_team"),
-    re_path(r"^guests/$", modernomad.core.views.unsorted.guests, name="location_guests"),
+    re_path(
+        r"^guests/$", modernomad.core.views.unsorted.guests, name="location_guests"
+    ),
     re_path(
         r"^occupancy/$",
         modernomad.core.views.unsorted.occupancy,
@@ -42,7 +44,9 @@ per_location_patterns = [
         modernomad.core.views.unsorted.calendar,
         name="location_calendar",
     ),
-    re_path(r"^thanks/$", modernomad.core.views.unsorted.thanks, name="location_thanks"),
+    re_path(
+        r"^thanks/$", modernomad.core.views.unsorted.thanks, name="location_thanks"
+    ),
     re_path(r"^today/$", modernomad.core.views.unsorted.today, name="location_today"),
     re_path(
         r"^json/room/$",

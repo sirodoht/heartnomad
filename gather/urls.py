@@ -5,7 +5,9 @@ import gather.views
 
 urlpatterns = [
     re_path(r"^create/$", gather.views.create_event, name="gather_create_event"),
-    re_path(r"^upcoming/$", gather.views.upcoming_events, name="gather_upcoming_events"),
+    re_path(
+        r"^upcoming/$", gather.views.upcoming_events, name="gather_upcoming_events"
+    ),
     re_path(r"^past/$", gather.views.past_events, name="gather_past_events"),
     re_path(r"^review/$", gather.views.needs_review, name="gather_needs_review"),
     re_path(r"^message/$", gather.emails.event_message, name="gather_event_message"),

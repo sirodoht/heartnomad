@@ -7,7 +7,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -16,61 +15,175 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Currency',
+            name="Currency",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, unique=True)),
-                ('symbol', models.CharField(max_length=5, unique=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=200, unique=True)),
+                ("symbol", models.CharField(max_length=5, unique=True)),
             ],
             options={
-                'verbose_name_plural': 'Currencies',
+                "verbose_name_plural": "Currencies",
             },
         ),
         migrations.CreateModel(
-            name='Account',
+            name="Account",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created', models.DateTimeField(auto_now_add=True)),
-                ('name', models.CharField(max_length=50)),
-                ('type', models.CharField(choices=[('credit', 'Credit'), ('debit', 'Debit')], default='credit', help_text='A credit (expense, asset) account always has a balance > 0. A debit (revenue, liability) account always has a balance < 0. #helpfulnothelpful.', max_length=32)),
-                ('admins', models.ManyToManyField(blank=True, help_text='May be blank', related_name='accounts_administered', to=settings.AUTH_USER_MODEL, verbose_name='Admins (optional)')),
-                ('owners', models.ManyToManyField(blank=True, help_text='May be blank for group accounts', related_name='accounts_owned', to=settings.AUTH_USER_MODEL)),
-                ('currency', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='accounts', to='bank.currency')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created", models.DateTimeField(auto_now_add=True)),
+                ("name", models.CharField(max_length=50)),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[("credit", "Credit"), ("debit", "Debit")],
+                        default="credit",
+                        help_text="A credit (expense, asset) account always has a balance > 0. A debit (revenue, liability) account always has a balance < 0. #helpfulnothelpful.",
+                        max_length=32,
+                    ),
+                ),
+                (
+                    "admins",
+                    models.ManyToManyField(
+                        blank=True,
+                        help_text="May be blank",
+                        related_name="accounts_administered",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Admins (optional)",
+                    ),
+                ),
+                (
+                    "owners",
+                    models.ManyToManyField(
+                        blank=True,
+                        help_text="May be blank for group accounts",
+                        related_name="accounts_owned",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "currency",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="accounts",
+                        to="bank.currency",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='SystemAccounts',
+            name="SystemAccounts",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('credit', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='bank.account')),
-                ('currency', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='bank.currency')),
-                ('debit', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='bank.account')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "credit",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="+",
+                        to="bank.account",
+                    ),
+                ),
+                (
+                    "currency",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE, to="bank.currency"
+                    ),
+                ),
+                (
+                    "debit",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="+",
+                        to="bank.account",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Transaction',
+            name="Transaction",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('reason', models.CharField(max_length=200)),
-                ('created', models.DateTimeField(auto_now_add=True)),
-                ('updated', models.DateTimeField(auto_now=True)),
-                ('date', models.DateTimeField(default=django.utils.timezone.now)),
-                ('valid', models.BooleanField(default=False)),
-                ('approver', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='approved_transactions', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("reason", models.CharField(max_length=200)),
+                ("created", models.DateTimeField(auto_now_add=True)),
+                ("updated", models.DateTimeField(auto_now=True)),
+                ("date", models.DateTimeField(default=django.utils.timezone.now)),
+                ("valid", models.BooleanField(default=False)),
+                (
+                    "approver",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="approved_transactions",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Entry',
+            name="Entry",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('amount', models.IntegerField()),
-                ('valid', models.BooleanField(default=False)),
-                ('account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='entries', to='bank.account')),
-                ('transaction', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='entries', to='bank.transaction')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("amount", models.IntegerField()),
+                ("valid", models.BooleanField(default=False)),
+                (
+                    "account",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="entries",
+                        to="bank.account",
+                    ),
+                ),
+                (
+                    "transaction",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="entries",
+                        to="bank.transaction",
+                    ),
+                ),
             ],
             options={
-                'verbose_name_plural': 'Entries',
-                'ordering': ['-transaction__date'],
+                "verbose_name_plural": "Entries",
+                "ordering": ["-transaction__date"],
             },
         ),
     ]

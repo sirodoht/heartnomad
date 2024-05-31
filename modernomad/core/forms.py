@@ -14,7 +14,6 @@ from modernomad.core.models import (
 from django.contrib.sites.models import Site
 
 
-
 def create_username(first_name, last_name, suffix=""):
     username = slugify("%s %s" % (first_name, last_name))
 

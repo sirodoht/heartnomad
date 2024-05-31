@@ -18,4 +18,3 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib import messages
 import json
 from gather import WAIT_FOR_FEEDBACK
-

@@ -8,4 +8,6 @@ class AuthGraphQLView(GraphQLView):
     pass
 
 
-urlpatterns = [re_path(r"^graphql", csrf_exempt(AuthGraphQLView.as_view(schema=schema)))]
+urlpatterns = [
+    re_path(r"^graphql", csrf_exempt(AuthGraphQLView.as_view(schema=schema)))
+]

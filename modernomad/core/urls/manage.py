@@ -4,7 +4,9 @@ from modernomad.core.views.unsorted import *
 # custom management patterns
 urlpatterns = [
     re_path(r"^payments/$", payments_today, name="location_payments_today"),
-    re_path(r"^payments/(?P<year>\d+)/(?P<month>\d+)$", payments, name="location_payments"),
+    re_path(
+        r"^payments/(?P<year>\d+)/(?P<month>\d+)$", payments, name="location_payments"
+    ),
     re_path(r"^today/$", manage_today, name="manage_today"),
     re_path(r"bookings/$", BookingManageList, name="booking_manage_list"),
     re_path(r"booking/create/$", BookingManageCreate, name="booking_manage_create"),
@@ -41,7 +43,9 @@ urlpatterns = [
     ),
     re_path(r"bill/(?P<bill_id>\d+)/charge/$", BillCharge, name="bill_charge"),
     re_path(r"bill/(?P<bill_id>\d+)/payment/$", ManagePayment, name="manage_payment"),
-    re_path(r"bill/(?P<bill_id>\d+)/addbillitem/$", AddBillLineItem, name="add_bill_item"),
+    re_path(
+        r"bill/(?P<bill_id>\d+)/addbillitem/$", AddBillLineItem, name="add_bill_item"
+    ),
     re_path(
         r"bill/(?P<bill_id>\d+)/deletebillitem/$",
         DeleteBillLineItem,
@@ -85,5 +89,7 @@ urlpatterns = [
         SubscriptionManageGenerateAllBills,
         name="subscription_manage_all_bills",
     ),
-    re_path(r"^subscriptions/$", SubscriptionsManageList, name="subscriptions_manage_list"),
+    re_path(
+        r"^subscriptions/$", SubscriptionsManageList, name="subscriptions_manage_list"
+    ),
 ]
