@@ -36,10 +36,7 @@ def issue_refund(payment, amount=None):
         return stripe_issue_refund(payment, amount)
     elif payment.payment_service == "USAePay" and settings.USA_E_PAY_KEY:
         return usaepay_issue_refund(payment, amount)
-    elif (
-        payment.payment_service != "Stripe"
-        and payment.payment_service != "USAePay"
-    ):
+    elif payment.payment_service != "Stripe" and payment.payment_service != "USAePay":
         logger.info(
             "issue_refund: Payment not issued through service so we can't refund it."
         )

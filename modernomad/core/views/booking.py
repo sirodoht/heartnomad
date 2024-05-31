@@ -3,24 +3,19 @@ import json
 import logging
 from json import JSONEncoder
 
+import dateutil
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.models import Site
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
+from django.template.loader import get_template
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import TemplateView
-
-try:
-    from django.template import get_template
-except ImportError:
-    from django.template.loader import get_template
-
-import dateutil
-from django.utils import timezone
 from rest_framework import generics, mixins
 
 from modernomad.core.emails.messages import new_booking_notify, send_booking_receipt
