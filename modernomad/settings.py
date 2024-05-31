@@ -8,7 +8,6 @@ from pathlib import Path
 from urllib import parse
 
 BASE_DIR = Path.cwd()
-# BASE_DIR = Path(__file__).resolve().parent.parent
 
 ALLOWED_HOSTS = [
     "localhost",
@@ -17,7 +16,7 @@ ALLOWED_HOSTS = [
 
 DEBUG = True
 
-SECRET_KEY = "xxx"
+SECRET_KEY = os.environ.get("SECRET_KEY", "xxx")
 
 STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY", "")
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
