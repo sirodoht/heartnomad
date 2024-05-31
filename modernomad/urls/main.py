@@ -4,10 +4,7 @@ from django.conf import settings
 from django.views.generic import RedirectView
 import modernomad.views
 import modernomad.core.urls.location
-import bank.urls
 import gather.views
-import api.urls
-import graphapi.urls
 import django.views
 
 
