@@ -1,8 +1,8 @@
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 
 from modernomad.core.models import *
-from django.contrib.auth.models import User
 
 
 def _get_user_and_perms(request, username):

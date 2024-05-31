@@ -1,27 +1,29 @@
-from django.test import TestCase
 import unittest
-from modernomad.core.factories import ResourceFactory
+from datetime import date, datetime, timedelta
+
 from django.contrib.auth.models import User
-from modernomad.core.models import (
-    Payment,
-    Use,
-    Booking,
-    UserProfile,
-    LocationEmailTemplate,
-)
+from django.test import TestCase
+from freezegun import freeze_time
+
 from modernomad.core.emails.messages import (
+    admin_daily_update,
     new_booking_notify,
     send_booking_receipt,
     updated_booking_notify,
-    admin_daily_update,
+)
+from modernomad.core.factories import ResourceFactory
+from modernomad.core.models import (
+    Booking,
+    LocationEmailTemplate,
+    Payment,
+    Use,
+    UserProfile,
 )
 from modernomad.core.tasks import (
+    guests_residents_daily_update,
     send_departure_email,
     send_guest_welcome,
-    guests_residents_daily_update,
 )
-from datetime import datetime, timedelta, date
-from freezegun import freeze_time
 
 TODAY = date(2019, 3, 14)
 

@@ -1,5 +1,5 @@
-from django.shortcuts import _get_queryset
 from django.http import Http404
+from django.shortcuts import _get_queryset
 
 
 def get_qs_or_404(klass, *args, **kwargs):

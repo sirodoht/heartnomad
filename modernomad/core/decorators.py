@@ -1,8 +1,10 @@
+from functools import wraps
+
+from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
 from django.http import HttpResponseRedirect
+
 from modernomad.core.models import get_location
-from functools import wraps
-from django.conf import settings
 
 
 def group_required(*group_names):

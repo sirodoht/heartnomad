@@ -1,14 +1,15 @@
+import logging
+import re
+
+from django import forms
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
-from django.urls import reverse
-from gather.models import Event
-from django import forms
-from lxml.html.clean import clean_html
-import re
 from django.core.exceptions import ObjectDoesNotExist
+from django.urls import reverse
 from django.utils.translation import gettext as _
+from lxml.html.clean import clean_html
 
-import logging
+from gather.models import Event
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +55,7 @@ class EventForm(forms.ModelForm):
         co_organizers = []
         for username in co_organizers_usernames:
             username = username.strip()
-            if not username == "":
+            if username != "":
                 try:
                     co_org_user = User.objects.get(username=username)
                     co_organizers.append(User.objects.get(username=username))

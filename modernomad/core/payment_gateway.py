@@ -1,11 +1,12 @@
+import logging
+from decimal import Decimal
+
+import stripe
+from django.conf import settings
 from django.contrib.sites.models import Site
 from django.urls import reverse
-from modernomad.core.models import Payment
-from django.conf import settings
-from decimal import Decimal
-import stripe
 
-import logging
+from modernomad.core.models import Payment
 
 logger = logging.getLogger(__name__)
 
@@ -36,8 +37,8 @@ def issue_refund(payment, amount=None):
     elif payment.payment_service == "USAePay" and settings.USA_E_PAY_KEY:
         return usaepay_issue_refund(payment, amount)
     elif (
-        not payment.payment_service == "Stripe"
-        and not payment.payment_service == "USAePay"
+        payment.payment_service != "Stripe"
+        and payment.payment_service != "USAePay"
     ):
         logger.info(
             "issue_refund: Payment not issued through service so we can't refund it."

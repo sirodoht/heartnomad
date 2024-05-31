@@ -1,8 +1,9 @@
-from graphene import ObjectType, Node, List, Boolean
-from graphene_django.types import DjangoObjectType
+from graphene import Boolean, List, Node, ObjectType
 from graphene_django.filter.fields import DjangoFilterConnectionField
+from graphene_django.types import DjangoObjectType
 
-from modernomad.core.models import Location, Fee
+from modernomad.core.models import Fee, Location
+
 from .resources import ResourceNode
 
 

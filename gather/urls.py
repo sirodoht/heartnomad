@@ -1,7 +1,7 @@
 from django.urls import re_path
-from gather.syndication import PublicEventsFeed
 
 import gather.views
+from gather.syndication import PublicEventsFeed
 
 urlpatterns = [
     re_path(r"^create/$", gather.views.create_event, name="gather_create_event"),

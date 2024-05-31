@@ -1,4 +1,5 @@
 from django.urls import re_path
+
 from modernomad.core.views.use import UseDetail
 
 urlpatterns = [

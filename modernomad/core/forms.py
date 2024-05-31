@@ -1,17 +1,18 @@
-from django.contrib.auth.models import User
 from django import forms
+from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
+from django.template import Context, Template
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-from django.template import Template, Context
+
 from modernomad.core.models import (
-    UserProfile,
-    Use,
-    Resource,
     Location,
     LocationMenu,
+    Resource,
     Subscription,
+    Use,
+    UserProfile,
 )
-from django.contrib.sites.models import Site
 
 
 def create_username(first_name, last_name, suffix=""):

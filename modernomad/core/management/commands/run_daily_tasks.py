@@ -1,7 +1,10 @@
 import datetime
+
 from django.core.management.base import BaseCommand
-from ... import tasks
+
 from gather import tasks as gather_tasks
+
+from ... import tasks
 
 
 class Command(BaseCommand):

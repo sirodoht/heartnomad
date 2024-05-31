@@ -1,18 +1,19 @@
-from modernomad.core.models import Location, Subscription, Use
-from modernomad.core.emails.messages import (
-    guests_residents_daily_update,
-    admin_daily_update,
-    guest_welcome,
-    goodbye_email,
-)
+import datetime
+import json
+import logging
+
+import httpx
 from django.conf import settings
 from django.contrib.sites.models import Site
-import datetime
-import httpx
-import json
 from django.urls import reverse
 
-import logging
+from modernomad.core.emails.messages import (
+    admin_daily_update,
+    goodbye_email,
+    guest_welcome,
+    guests_residents_daily_update,
+)
+from modernomad.core.models import Location, Subscription, Use
 
 logger = logging.getLogger(__name__)
 

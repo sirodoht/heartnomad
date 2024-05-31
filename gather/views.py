@@ -1,29 +1,28 @@
+import datetime
 import json
 import logging
-import datetime
 
-from django.contrib.auth.models import User
-from django.utils import timezone
-from django.contrib.sites.models import Site
-from django.contrib.auth import login, authenticate
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
-from django.contrib import messages
-from django.conf import settings
-from gather.models import Event, EventAdminGroup
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
-from gather.forms import EventForm, EventEmailTemplateForm
 from gather.emails import (
-    new_event_notification,
     event_approved_notification,
     event_published_notification,
     mailgun_send,
+    new_event_notification,
 )
+from gather.forms import EventEmailTemplateForm, EventForm
+from gather.models import Event, EventAdminGroup
 from modernomad.core.forms import UserProfileForm
 from modernomad.core.models import Location
 
@@ -487,7 +486,7 @@ def past_events(request, location_slug=None):
 
 
 def email_preferences(request, username, location_slug=None):
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
 
     u = User.objects.get(username=username)
@@ -631,7 +630,7 @@ def event_cancel(request, event_id, event_slug, location_slug=None):
 
 
 def event_send_mail(request, event_id, event_slug, location_slug=None):
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
 
     location = get_object_or_404(Location, slug=location_slug)
@@ -674,7 +673,7 @@ def event_send_mail(request, event_id, event_slug, location_slug=None):
 @login_required
 def rsvp_event(request, event_id, event_slug, location_slug=None):
     location = get_object_or_404(Location, slug=location_slug)
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
 
     user_id_str = request.POST.get("user_id")
@@ -709,7 +708,7 @@ def rsvp_event(request, event_id, event_slug, location_slug=None):
 @login_required
 def rsvp_cancel(request, event_id, event_slug, location_slug=None):
     location = get_object_or_404(Location, slug=location_slug)
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
 
     user_id_str = request.POST.get("user_id")
@@ -746,7 +745,7 @@ def rsvp_cancel(request, event_id, event_slug, location_slug=None):
 
 def rsvp_new_user(request, event_id, event_slug, location_slug=None):
     location = get_object_or_404(Location, slug=location_slug)
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
 
     logger.debug("in rsvp_new_user")
@@ -812,7 +811,7 @@ def rsvp_new_user(request, event_id, event_slug, location_slug=None):
 
 def endorse(request, event_id, event_slug, location_slug=None):
     location = get_object_or_404(Location, slug=location_slug)
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
 
     event = Event.objects.get(id=event_id)

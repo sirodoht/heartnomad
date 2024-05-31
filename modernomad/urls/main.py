@@ -1,12 +1,12 @@
-from django.urls import include, re_path
-from django.contrib import admin
-from django.conf import settings
-from django.views.generic import RedirectView
-import modernomad.views
-import modernomad.core.urls.location
-import gather.views
 import django.views
+from django.conf import settings
+from django.contrib import admin
+from django.urls import include, re_path
+from django.views.generic import RedirectView
 
+import gather.views
+import modernomad.core.urls.location
+import modernomad.views
 
 admin.autodiscover()
 

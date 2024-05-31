@@ -1,15 +1,11 @@
 import pytz
+from factory.django import DjangoModelFactory
+
+from gather.models import Event, EventAdminGroup, EventNotifications, EventSeries
 
 from . import factory
-from factory.django import DjangoModelFactory
 from .location import LocationFactory
-
-from gather.models import EventAdminGroup
-from gather.models import EventSeries
-from gather.models import Event
-from gather.models import EventNotifications
-
-from .user import UserFactory, SuperUserFactory
+from .user import SuperUserFactory, UserFactory
 
 
 class EventAdminGroupFactory(DjangoModelFactory):

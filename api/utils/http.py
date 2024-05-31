@@ -1,5 +1,5 @@
-from rest_framework.renderers import JSONRenderer
 from django.http import HttpResponse
+from rest_framework.renderers import JSONRenderer
 
 
 class JSONResponse(HttpResponse):

@@ -1,8 +1,10 @@
-from django.test import TestCase
-from modernomad.core.factories import *
-from api.commands import *
-from modernomad.core.models import *
 from datetime import date
+
+from django.test import TestCase
+
+from api.commands import *
+from modernomad.core.factories import *
+from modernomad.core.models import *
 
 
 class ResourceDailyAvailabilitiesBetweenTestCase(TestCase):

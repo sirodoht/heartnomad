@@ -1,5 +1,6 @@
-from storages.backends.s3boto3 import S3Boto3Storage, SpooledTemporaryFile
 import os
+
+from storages.backends.s3boto3 import S3Boto3Storage, SpooledTemporaryFile
 
 # https://github.com/jschneier/django-storages/issues/382
 # https://github.com/matthewwithanm/django-imagekit/issues/391

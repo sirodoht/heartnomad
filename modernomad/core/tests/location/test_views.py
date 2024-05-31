@@ -1,5 +1,6 @@
 from django.shortcuts import reverse
 from django.test import TestCase
+
 from modernomad.core.factory_apps.location import LocationFactory, ResourceFactory
 from modernomad.core.factory_apps.user import UserFactory
 

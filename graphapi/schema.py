@@ -1,10 +1,10 @@
 import graphene
 
-import graphapi.schemas.occupants as occupants
-import graphapi.schemas.locations as locations
-import graphapi.schemas.users as users
-import graphapi.schemas.resources as resources
 import graphapi.schemas.bookings as bookings
+import graphapi.schemas.locations as locations
+import graphapi.schemas.occupants as occupants
+import graphapi.schemas.resources as resources
+import graphapi.schemas.users as users
 
 
 class Query(

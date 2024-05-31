@@ -1,8 +1,9 @@
-from django.test import TestCase
 import unittest
 
-from modernomad.core.factories import *
+from django.test import TestCase
+
 from api.commands.capacities import *
+from modernomad.core.factories import *
 from modernomad.core.models import *
 
 

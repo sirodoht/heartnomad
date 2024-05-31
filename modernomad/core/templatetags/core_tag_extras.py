@@ -1,8 +1,9 @@
-from django import template
-from django.template.defaultfilters import stringfilter
 import itertools
-from django.template import NodeList
+
+from django import template
 from django.contrib.auth.models import Group
+from django.template import NodeList
+from django.template.defaultfilters import stringfilter
 
 register = template.Library()
 

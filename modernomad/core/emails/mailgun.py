@@ -1,7 +1,8 @@
-from django.http import HttpResponse
-from django.conf import settings
 import logging
+
 import httpx
+from django.conf import settings
+from django.http import HttpResponse
 
 logger = logging.getLogger(__name__)
 

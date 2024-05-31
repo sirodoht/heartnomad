@@ -1,5 +1,6 @@
-from modernomad.core.models import Location
 import re
+
+from modernomad.core.models import Location
 
 
 def network_locations(request):

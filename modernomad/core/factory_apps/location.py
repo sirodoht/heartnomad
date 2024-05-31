@@ -1,21 +1,24 @@
 import datetime
+
 from django.contrib.flatpages.models import FlatPage
 from django.utils import timezone
 from factory.django import DjangoModelFactory
 
-from modernomad.core.models import Location
-from modernomad.core.models import Resource
-from modernomad.core.models import LocationFee
-from modernomad.core.models import LocationMenu
-from modernomad.core.models import LocationFlatPage
-from modernomad.core.models import LocationEmailTemplate
-from modernomad.core.models import CapacityChange
-from modernomad.core.models import Fee
-from modernomad.core.models import Backing
+from modernomad.core.models import (
+    Backing,
+    CapacityChange,
+    Fee,
+    Location,
+    LocationEmailTemplate,
+    LocationFee,
+    LocationFlatPage,
+    LocationMenu,
+    Resource,
+)
+
 from . import factory
-from .user import UserFactory, SuperUserFactory
-from .accounts import USDAccountFactory
-from .accounts import DRFTAccountFactory
+from .accounts import DRFTAccountFactory, USDAccountFactory
+from .user import SuperUserFactory, UserFactory
 
 one_year_ago = timezone.now() - datetime.timedelta(days=365)
 yesterday = timezone.now() - datetime.timedelta(days=1)
@@ -106,8 +109,7 @@ class LocationFactory(DjangoModelFactory):
     @factory.post_generation
     def add_stuff(self, create, extracted, **kwargs):
         # avoid recursive import
-        from . import events
-        from . import payment
+        from . import events, payment
 
         LocationFeeFactory(location=self)
 

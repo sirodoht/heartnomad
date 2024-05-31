@@ -1,7 +1,8 @@
-from django.shortcuts import render
-from modernomad.core.models import Location, Resource
-from gather.models import Event
 from django.http import HttpResponse
+from django.shortcuts import render
+
+from gather.models import Event
+from modernomad.core.models import Location, Resource
 
 
 def index(request):

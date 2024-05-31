@@ -1,8 +1,9 @@
-from modernomad.core.views.unsorted import monthly_occupant_report
-from modernomad.core.models import *
+import logging
+
 from django.contrib.auth.models import User
 
-import logging
+from modernomad.core.models import *
+from modernomad.core.views.unsorted import monthly_occupant_report
 
 logger = logging.getLogger(__name__)
 

@@ -1,12 +1,12 @@
+import logging
+from io import StringIO
+
+import requests
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.exceptions import MultipleObjectsReturned
 from django.core.mail.backends.base import BaseEmailBackend
 from django.core.mail.message import sanitize_address
-from django.core.exceptions import MultipleObjectsReturned
-
-from io import StringIO
-import requests
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +31,8 @@ class MailgunBackend(BaseEmailBackend):
         )
 
         try:
-            self._access_key = access_key or getattr(settings, "MAILGUN_API_KEY")
-            self._server_name = server_name or getattr(settings, "LIST_DOMAIN")
+            self._access_key = access_key or settings.MAILGUN_API_KEY
+            self._server_name = server_name or settings.LIST_DOMAIN
         except AttributeError:
             if fail_silently:
                 self._access_key, self._server_name = None, None
@@ -103,7 +103,7 @@ class MailgunBackend(BaseEmailBackend):
 
 # Imported from Nadine
 # https://github.com/nadineproject/nadine
-class EmailOrUsernameModelBackend(object):
+class EmailOrUsernameModelBackend:
     def authenticate(self, username=None, password=None):
         if "@" in username:
             email_username = username.lower()

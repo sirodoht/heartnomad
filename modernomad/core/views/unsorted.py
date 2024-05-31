@@ -1,62 +1,59 @@
+import csv
+import datetime
+import json
+import logging
+import time
+
+import stripe
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
-from django.contrib.auth import login, authenticate
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect
+from django.db.models import Q
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.safestring import mark_safe
+from django.views.decorators.csrf import csrf_exempt
+from stripe.error import CardError
+
+from bank.models import Currency, Entry, Transaction
+from gather.tasks import published_events_today_local
+from modernomad.core import payment_gateway
+from modernomad.core.booking_calendar import GuestCalendar
+from modernomad.core.data_fetchers import (
+    SerializedNullResourceCapacity,
+    SerializedResourceCapacity,
+)
+from modernomad.core.decorators import house_admin_required, resident_or_admin_required
+from modernomad.core.emails.messages import (
+    admin_new_subscription_notify,
+    new_booking_notify,
+    send_booking_receipt,
+    send_from_location_address,
+    send_subscription_receipt,
+    subscription_note_notify,
+    updated_booking_notify,
+)
 from modernomad.core.forms import (
     AdminBookingForm,
-    UserProfileForm,
-    SubscriptionEmailTemplateForm,
-)
-from modernomad.core.forms import (
-    BookingEmailTemplateForm,
-    PaymentForm,
     AdminSubscriptionForm,
-    LocationSettingsForm,
-)
-from modernomad.core.forms import (
+    BookingEmailTemplateForm,
     LocationContentForm,
     LocationPageForm,
     LocationRoomForm,
+    LocationSettingsForm,
+    PaymentForm,
+    SubscriptionEmailTemplateForm,
+    UserProfileForm,
 )
-from django.urls import reverse
-from django.contrib import messages
-from django.conf import settings
-from modernomad.core.decorators import house_admin_required, resident_or_admin_required
-from django.db.models import Q
 from modernomad.core.models import *
 from modernomad.core.tasks import guest_welcome
-from modernomad.core import payment_gateway
-from django.utils import timezone
-from gather.tasks import published_events_today_local
-from django.utils.safestring import mark_safe
-import time
-import json
-import datetime
-import stripe
-from stripe.error import CardError
-from django.http import JsonResponse
-from modernomad.core.booking_calendar import GuestCalendar
-from modernomad.core.emails.messages import (
-    send_booking_receipt,
-    send_subscription_receipt,
-    new_booking_notify,
-)
-from modernomad.core.emails.messages import (
-    updated_booking_notify,
-    send_from_location_address,
-    admin_new_subscription_notify,
-)
-from modernomad.core.emails.messages import subscription_note_notify
-from django.shortcuts import get_object_or_404
-import logging
-from django.views.decorators.csrf import csrf_exempt
-import csv
-from modernomad.core.data_fetchers import SerializedResourceCapacity
-from modernomad.core.data_fetchers import SerializedNullResourceCapacity
+
 from .view_helpers import _get_user_and_perms
-from bank.models import Currency, Transaction, Entry
 
 logger = logging.getLogger(__name__)
 
@@ -994,7 +991,7 @@ def email_available(request):
 
 @login_required
 def UserAvatar(request, username):
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
     user = get_object_or_404(User, username=username)
     try:
@@ -1012,7 +1009,7 @@ def UserAddCard(request, username):
     logger.debug("in user add card")
     # get the user object associated with the booking
     user = get_object_or_404(User, username=username)
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
 
     booking_id = request.POST.get("res-id", False)
@@ -1072,7 +1069,7 @@ def UserAddCard(request, username):
 
 
 def UserDeleteCard(request, username):
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
 
     profile = UserProfile.objects.get(user__username=username)
@@ -1205,7 +1202,7 @@ def LocationEditPages(request, location_slug):
         action = request.POST["action"]
         logger.debug("action=%s" % action)
         logger.debug(request.POST)
-        if "Add Menu" == action:
+        if action == "Add Menu":
             try:
                 menu = request.POST["menu"].strip().title()
                 if (
@@ -1220,7 +1217,7 @@ def LocationEditPages(request, location_slug):
                 messages.add_message(
                     request, messages.ERROR, "Could not create menu: %s" % e
                 )
-        elif "Delete Menu" == action and "menu_id" in request.POST:
+        elif action == "Delete Menu" and "menu_id" in request.POST:
             try:
                 menu = LocationMenu.objects.get(pk=request.POST["menu_id"])
                 menu.delete()
@@ -1228,7 +1225,7 @@ def LocationEditPages(request, location_slug):
                 messages.add_message(
                     request, messages.ERROR, "Could not delete menu: %s" % e
                 )
-        elif "Save Changes" == action and "page_id" in request.POST:
+        elif action == "Save Changes" and "page_id" in request.POST:
             try:
                 page = LocationFlatPage.objects.get(pk=request.POST["page_id"])
                 menu = LocationMenu.objects.get(pk=request.POST["menu"])
@@ -1245,7 +1242,7 @@ def LocationEditPages(request, location_slug):
                 messages.add_message(
                     request, messages.ERROR, "Could not edit page: %s" % e
                 )
-        elif "Delete Page" == action and "page_id" in request.POST:
+        elif action == "Delete Page" and "page_id" in request.POST:
             logger.debug("in Delete Page")
             try:
                 page = LocationFlatPage.objects.get(pk=request.POST["page_id"])
@@ -1255,7 +1252,7 @@ def LocationEditPages(request, location_slug):
                 messages.add_message(
                     request, messages.ERROR, "Could not delete page: %s" % e
                 )
-        elif "Create Page" == action:
+        elif action == "Create Page":
             try:
                 menu = LocationMenu.objects.get(pk=request.POST["menu"])
                 url_slug = request.POST["slug"].strip().lower()
@@ -1725,7 +1722,7 @@ def BookingManagePayWithDrft(request, location_slug, booking_id):
 
 @house_admin_required
 def BookingManageAction(request, location_slug, booking_id):
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
 
     location = get_object_or_404(Location, slug=location_slug)
@@ -1842,7 +1839,7 @@ def BookingManageEdit(request, location_slug, booking_id):
 
 @house_admin_required
 def ManagePayment(request, location_slug, bill_id):
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
     location = get_object_or_404(Location, slug=location_slug)
     bill = get_object_or_404(Bill, id=bill_id)
@@ -1924,7 +1921,7 @@ def ManagePayment(request, location_slug, bill_id):
 
 @house_admin_required
 def BookingSendWelcomeEmail(request, location_slug, booking_id):
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
     location = get_object_or_404(Location, slug=location_slug)
     booking = Booking.objects.get(id=booking_id)
@@ -1944,7 +1941,7 @@ def BookingSendWelcomeEmail(request, location_slug, booking_id):
 
 @house_admin_required
 def SubscriptionSendReceipt(request, location_slug, subscription_id, bill_id):
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
     location = get_object_or_404(Location, slug=location_slug)
     subscription = Subscription.objects.get(id=subscription_id)
@@ -1972,7 +1969,7 @@ def SubscriptionSendReceipt(request, location_slug, subscription_id, bill_id):
 
 @house_admin_required
 def BookingSendReceipt(request, location_slug, booking_id):
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
     location = get_object_or_404(Location, slug=location_slug)
     booking = Booking.objects.get(id=booking_id)
@@ -2004,7 +2001,7 @@ def BookingSendReceipt(request, location_slug, booking_id):
 
 @house_admin_required
 def RecalculateBill(request, location_slug, bill_id):
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
     location = get_object_or_404(Location, slug=location_slug)
     bill = get_object_or_404(Bill, id=bill_id)
@@ -2034,7 +2031,7 @@ def RecalculateBill(request, location_slug, bill_id):
 
 @house_admin_required
 def BookingToggleComp(request, location_slug, booking_id):
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
     location = get_object_or_404(Location, slug=location_slug)
     booking = Booking.objects.get(pk=booking_id)
@@ -2054,7 +2051,7 @@ def BookingToggleComp(request, location_slug, booking_id):
 
 @house_admin_required
 def DeleteBillLineItem(request, location_slug, bill_id):
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
     location = get_object_or_404(Location, slug=location_slug)
     bill = get_object_or_404(Bill, pk=bill_id)
@@ -2101,7 +2098,7 @@ def DeleteBillLineItem(request, location_slug, bill_id):
 
 @house_admin_required
 def BillCharge(request, location_slug, bill_id):
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
     location = get_object_or_404(Location, slug=location_slug)
     bill = get_object_or_404(Bill, pk=bill_id)
@@ -2183,7 +2180,7 @@ def BillCharge(request, location_slug, bill_id):
 def AddBillLineItem(request, location_slug, bill_id):
     # can be used to apply a discount or a one time charge for, for example, a
     # cleaning fee.
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
     location = get_object_or_404(Location, slug=location_slug)
     bill = get_object_or_404(Bill, pk=bill_id)
@@ -2280,7 +2277,7 @@ def _assemble_and_send_email(location_slug, post):
 
 @house_admin_required
 def BookingSendMail(request, location_slug, booking_id):
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
 
     _assemble_and_send_email(location_slug, request.POST)
@@ -2294,7 +2291,7 @@ def BookingSendMail(request, location_slug, booking_id):
 
 @house_admin_required
 def SubscriptionSendMail(request, location_slug, subscription_id):
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
 
     _assemble_and_send_email(location_slug, request.POST)

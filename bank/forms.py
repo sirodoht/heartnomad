@@ -1,6 +1,7 @@
 from django import forms
-from bank.models import Entry, Account, Currency
 from django.db.models import Q
+
+from bank.models import Account, Currency, Entry
 
 
 class EntryForm(forms.ModelForm):

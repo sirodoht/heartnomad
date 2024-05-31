@@ -1,14 +1,13 @@
 from django.http import HttpResponse, HttpResponseNotFound
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 
-from api.utils.http import JSONResponse
 from api.commands.capacities import *
-
+from api.utils.http import JSONResponse
+from modernomad.core.data_fetchers import SerializedResourceCapacity
 from modernomad.core.models import CapacityChange, Resource
 from modernomad.core.serializers import CapacityChangeSerializer
-from modernomad.core.data_fetchers import SerializedResourceCapacity
-from django.utils import timezone
 
 
 @csrf_exempt

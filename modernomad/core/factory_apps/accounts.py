@@ -1,8 +1,9 @@
-from . import factory
 import factory.fuzzy
 from factory.django import DjangoModelFactory
-from bank.models import Currency
-from bank.models import Account
+
+from bank.models import Account, Currency
+
+from . import factory
 from .user import UserFactory
 
 

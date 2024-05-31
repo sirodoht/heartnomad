@@ -1,8 +1,9 @@
 import graphene
 from graphene import ObjectType
-from graphene_django.types import DjangoObjectType
-from gather.models import Event
 from graphene_django.filter.fields import DjangoFilterConnectionField
+from graphene_django.types import DjangoObjectType
+
+from gather.models import Event
 
 
 class EventNode(DjangoObjectType):

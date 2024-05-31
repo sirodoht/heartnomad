@@ -1,8 +1,8 @@
-from datetime import timedelta, date
+from datetime import date, timedelta
 
+from django.contrib.auth.models import User
 from django.test import TestCase
 from django.utils import timezone
-from django.contrib.auth.models import User
 
 from modernomad.core.models import Location, Subscription
 
@@ -142,7 +142,7 @@ class SubscriptionTestCase(TestCase):
             location=self.location, user=self.user1, start_date=period_start
         )
         ps, pe = s.get_period(target_date=period_start)
-        self.assertEquals(pe, period_end)
+        self.assertEqual(pe, period_end)
 
     def test_period_ends(self):
         # Test month bounderies
@@ -189,13 +189,13 @@ class SubscriptionTestCase(TestCase):
         self.assertEqual(ps.day, self.sub1.start_date.day)
 
         # Today is outside the date range for this subscription
-        self.assertEquals((None, None), self.sub3.get_period(target_date=today))
+        self.assertEqual((None, None), self.sub3.get_period(target_date=today))
 
     def test_total_periods(self):
-        self.assertEquals(0, self.sub1.total_periods())
-        self.assertEquals(0, self.sub3.total_periods())
-        self.assertEquals(1, self.sub5.total_periods())
-        self.assertEquals(12, self.sub6.total_periods())
+        self.assertEqual(0, self.sub1.total_periods())
+        self.assertEqual(0, self.sub3.total_periods())
+        self.assertEqual(1, self.sub5.total_periods())
+        self.assertEqual(12, self.sub6.total_periods())
 
     def test_inactive_subscriptions(self):
         inactive_subscriptions = Subscription.objects.inactive_subscriptions()
@@ -226,27 +226,27 @@ class SubscriptionTestCase(TestCase):
         today = timezone.now().date()
 
         # Assume that if we generate a bill we will have a bill
-        self.assertEquals(0, self.sub1.bills.count())
+        self.assertEqual(0, self.sub1.bills.count())
         self.sub1.generate_bill(target_date=today)
-        self.assertEquals(1, self.sub1.bills.count())
+        self.assertEqual(1, self.sub1.bills.count())
 
         bill = self.sub1.bills.first()
-        self.assertEquals(self.sub1.price, bill.amount())
+        self.assertEqual(self.sub1.price, bill.amount())
 
         ps, pe = self.sub1.get_period(target_date=today)
-        self.assertEquals(ps, bill.period_start)
-        self.assertEquals(pe, bill.period_end)
+        self.assertEqual(ps, bill.period_start)
+        self.assertEqual(pe, bill.period_end)
 
     def test_generate_all_bills(self):
-        self.assertEquals(0, self.sub6.bills.count())
+        self.assertEqual(0, self.sub6.bills.count())
         self.sub6.generate_all_bills()
-        self.assertEquals(12, self.sub6.bills.count())
+        self.assertEqual(12, self.sub6.bills.count())
 
     def test_delete_unpaid_bills(self):
         self.sub6.generate_all_bills()
-        self.assertEquals(12, self.sub6.bills.count())
+        self.assertEqual(12, self.sub6.bills.count())
         self.sub6.delete_unpaid_bills()
-        self.assertEquals(0, self.sub6.bills.count())
+        self.assertEqual(0, self.sub6.bills.count())
 
     def test_period_boundary(self):
         self.assertEqual(self.sub3.is_period_boundary(), False)

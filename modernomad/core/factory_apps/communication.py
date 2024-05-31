@@ -1,6 +1,8 @@
-from . import factory
 from factory.django import DjangoModelFactory
+
 from modernomad.core import models
+
+from . import factory
 from .user import UserFactory
 
 

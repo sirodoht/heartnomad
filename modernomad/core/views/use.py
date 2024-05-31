@@ -1,13 +1,13 @@
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
 import datetime
+
 from django.conf import settings
-from django.shortcuts import get_object_or_404
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.sites.models import Site
 from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
 
-from modernomad.core.models import Use, Location
+from modernomad.core.models import Location, Use
 
 
 @login_required

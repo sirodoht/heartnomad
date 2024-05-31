@@ -1,23 +1,25 @@
-from django.contrib.auth.models import User
-from django.urls import reverse
+import json
+import logging
+
 from django.conf import settings
-from django.template.loader import get_template
-from django.template import Template, Context, TemplateDoesNotExist
+from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.http import HttpResponse
-from gather.tasks import published_events_today_local, events_pending
+from django.template import Context, Template, TemplateDoesNotExist
+from django.template.loader import get_template
+from django.urls import reverse
+from django.utils import timezone, translation
 from django.views.decorators.csrf import csrf_exempt
-from django.utils import timezone
+
 from gather.models import Event, EventAdminGroup, EventNotifications
-
-from modernomad.core.models import Subscription, Use
-from modernomad.core.models import get_location, LocationEmailTemplate
+from gather.tasks import events_pending, published_events_today_local
 from modernomad.core.emails.mailgun import mailgun_send
-
-import json
-from django.utils import translation
-
-import logging
+from modernomad.core.models import (
+    LocationEmailTemplate,
+    Subscription,
+    Use,
+    get_location,
+)
 
 logger = logging.getLogger(__name__)
 

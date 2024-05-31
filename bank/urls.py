@@ -1,4 +1,5 @@
 from django.urls import re_path
+
 from bank.views import *
 from bank.views import AccountDetail, AccountList
 

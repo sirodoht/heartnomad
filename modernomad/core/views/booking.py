@@ -1,18 +1,17 @@
 import datetime
-import logging
 import json
+import logging
 from json import JSONEncoder
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.sites.models import Site
 from django.contrib.auth.decorators import login_required
+from django.contrib.sites.models import Site
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.urls import reverse
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404
-from django.shortcuts import render
 from django.views.generic import TemplateView
 
 try:
@@ -20,17 +19,17 @@ try:
 except ImportError:
     from django.template.loader import get_template
 
-from django.utils import timezone
 import dateutil
-from rest_framework import mixins
-from rest_framework import generics
+from django.utils import timezone
+from rest_framework import generics, mixins
+
+from modernomad.core.emails.messages import new_booking_notify, send_booking_receipt
+from modernomad.core.forms import BookingUseForm
+from modernomad.core.models import Booking, Fee, Location, Resource, Use
+from modernomad.core.serializers import FeeSerializer, ResourceSerializer
+from modernomad.core.shortcuts import get_qs_or_404
 
 from .view_helpers import _get_user_and_perms
-from modernomad.core.emails.messages import send_booking_receipt, new_booking_notify
-from modernomad.core.forms import BookingUseForm
-from modernomad.core.models import Booking, Use, Location, Resource, Fee
-from modernomad.core.shortcuts import get_qs_or_404
-from modernomad.core.serializers import ResourceSerializer, FeeSerializer
 
 ensure_csrf = method_decorator(ensure_csrf_cookie)
 logger = logging.getLogger(__name__)
@@ -159,7 +158,7 @@ class StayView(TemplateView):
 
 
 def BookingSubmit(request, location_slug):
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
 
     location = get_object_or_404(Location, slug=location_slug)
@@ -494,7 +493,7 @@ def BookingDelete(request, booking_id, location_slug):
 
 @login_required
 def BookingCancel(request, booking_id, location_slug):
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
 
     location = get_object_or_404(Location, slug=location_slug)

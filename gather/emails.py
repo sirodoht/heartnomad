@@ -1,14 +1,16 @@
-from django.contrib.sites.models import Site
-from django.urls import reverse
-from django.conf import settings
-from django.template.loader import get_template
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse, HttpResponseRedirect
-from gather.models import Event, EventAdminGroup, EventNotifications
-from django.contrib.auth.models import User
-import requests
-import logging
 import json
+import logging
+
+import requests
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
+from django.http import HttpResponse, HttpResponseRedirect
+from django.template.loader import get_template
+from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+
+from gather.models import Event, EventAdminGroup, EventNotifications
 
 logger = logging.getLogger(__name__)
 
@@ -206,7 +208,7 @@ def create_route(route_name, route_pattern, path):
 @csrf_exempt
 def event_message(request, location_slug=None):
     """Message event admins and organizers via an email alias."""
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseRedirect("/404")
 
     recipient = request.POST.get("recipient")

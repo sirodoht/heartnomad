@@ -1,12 +1,13 @@
 from django.urls import include, re_path
-import modernomad.core.views.unsorted
-from modernomad.core.views import location
+
+import gather.urls
 import modernomad.core.emails.messages
 import modernomad.core.urls.bookings
-import modernomad.core.urls.uses
 import modernomad.core.urls.manage
+import modernomad.core.urls.uses
 import modernomad.core.views.redirects
-import gather.urls
+import modernomad.core.views.unsorted
+from modernomad.core.views import location
 
 per_location_patterns = [
     re_path(r"^$", location.LocationDetail.as_view(), name="location_detail"),

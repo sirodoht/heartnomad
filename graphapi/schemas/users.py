@@ -1,9 +1,9 @@
 import graphene
-from graphene import ObjectType, Node
-from graphene_django.types import DjangoObjectType
-from graphene_django.filter.fields import DjangoFilterConnectionField
-
 from django.contrib.auth.models import User
+from graphene import Node, ObjectType
+from graphene_django.filter.fields import DjangoFilterConnectionField
+from graphene_django.types import DjangoObjectType
+
 from modernomad.core.models import UserProfile
 
 

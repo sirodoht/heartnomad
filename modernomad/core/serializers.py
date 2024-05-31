@@ -1,10 +1,10 @@
-from datetime import timedelta
 import datetime as dt
+from datetime import timedelta
 
-from rest_framework import serializers
 import dateutil
+from rest_framework import serializers
 
-from modernomad.core.models import CapacityChange, Location, Resource, Fee
+from modernomad.core.models import CapacityChange, Fee, Location, Resource
 
 
 class CapacityChangeSerializer(serializers.ModelSerializer):

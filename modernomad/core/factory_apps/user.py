@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
+from factory.django import DjangoModelFactory
+
 from modernomad.core.models import UserProfile
 
 from . import factory
-from factory.django import DjangoModelFactory
 
 User = get_user_model()
 

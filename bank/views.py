@@ -1,13 +1,14 @@
-from django.shortcuts import render
-from django.http import HttpResponseRedirect
-from django.views.generic import View
-from bank.models import *
-from bank.forms import *
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
-from django.contrib import messages
-from django.shortcuts import redirect
 import logging
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect
+from django.shortcuts import redirect, render
+from django.utils.decorators import method_decorator
+from django.views.generic import View
+
+from bank.forms import *
+from bank.models import *
 
 logger = logging.getLogger(__name__)
 

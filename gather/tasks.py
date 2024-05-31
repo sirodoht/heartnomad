@@ -1,14 +1,15 @@
 import datetime
-from django.utils import timezone
+import logging
+from itertools import chain
+
 from django.contrib.sites.models import Site
 from django.template.loader import get_template
 from django.urls import reverse
-from itertools import chain
-import logging
+from django.utils import timezone
 
 from gather.models import Event, EventNotifications
-from modernomad.core.models import Location
 from modernomad.core.emails.mailgun import mailgun_send
+from modernomad.core.models import Location
 
 logger = logging.getLogger(__name__)
 
@@ -246,7 +247,7 @@ def events_today_reminder():
             for user in distinct_event_people:
                 if (
                     user.event_notifications.reminders
-                    and user not in reminders_per_person.keys()
+                    and user not in reminders_per_person
                 ):
                     reminders_this_person = reminders_per_person.get(user, [])
                     reminders_this_person.append(event)

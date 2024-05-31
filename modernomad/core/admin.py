@@ -1,11 +1,10 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from django.contrib import messages
 
-from modernomad.core.models import *
 from gather.models import EventAdminGroup
 from modernomad.core.emails.messages import *
+from modernomad.core.models import *
 
 
 class EmailTemplateAdmin(admin.ModelAdmin):

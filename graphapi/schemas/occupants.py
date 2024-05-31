@@ -1,12 +1,13 @@
 import graphene
-from graphene import ObjectType, Node
-from graphene_django.types import DjangoObjectType
-from graphene_django.filter.fields import DjangoFilterConnectionField
-from modernomad.core.models import Use
 from django.utils import timezone
+from graphene import Node, ObjectType
+from graphene_django.filter.fields import DjangoFilterConnectionField
+from graphene_django.types import DjangoObjectType
+
+from gather.models import Event
+from modernomad.core.models import Use
 
 from .events import EventNode
-from gather.models import Event
 
 
 class OccupantNode(DjangoObjectType):

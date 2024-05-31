@@ -1,5 +1,6 @@
-from . import models
 import rules
+
+from . import models
 
 
 @rules.predicate

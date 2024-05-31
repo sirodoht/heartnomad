@@ -1,5 +1,4 @@
 from django.core.management.base import BaseCommand
-
 from faker import Faker
 
 from modernomad.core.factory_apps.communication import EmailtemplateFactory

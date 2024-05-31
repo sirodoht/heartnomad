@@ -1,8 +1,8 @@
 # Django settings for modernomad project.
 
-import os
 import datetime
 import logging
+import os
 import sys
 from pathlib import Path
 from urllib import parse
@@ -249,7 +249,7 @@ LOGGING = {
 logging.getLogger("requests.packages.urllib3.connectionpool").setLevel(logging.ERROR)
 
 
-class DisableMigrations(object):
+class DisableMigrations:
     def __contains__(self, item):
         return True
 

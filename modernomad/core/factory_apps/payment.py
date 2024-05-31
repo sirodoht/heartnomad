@@ -1,13 +1,11 @@
 import pytz
-
-from . import factory
 from factory.django import DjangoModelFactory
+
 from modernomad.core import models
 
+from . import factory
+from .location import FeeFactory, LocationFactory, ResourceFactory
 from .user import UserFactory
-from .location import LocationFactory
-from .location import ResourceFactory
-from .location import FeeFactory
 
 
 class SubscriptionFactory(DjangoModelFactory):

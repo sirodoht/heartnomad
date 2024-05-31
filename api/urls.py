@@ -1,8 +1,8 @@
-from django.urls import include, re_path
-
-from rest_framework import routers
-from api.views.capacities import capacities, capacity_detail
 import rest_framework.urls
+from django.urls import include, re_path
+from rest_framework import routers
+
+from api.views.capacities import capacities, capacity_detail
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()

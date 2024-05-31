@@ -1,6 +1,6 @@
-from django.template import Library
 from django import template
 from django.conf import settings
+from django.template import Library
 
 register = Library()
 
