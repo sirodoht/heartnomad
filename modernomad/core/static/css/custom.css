@@ -7,11 +7,26 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4, h5, h6, #login, .btn, .event .date, .event .date span, .event-date-day, .event-date-separator,.event-date-month, .event-date-time, .event-location  {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+#login,
+.btn,
+.event .date,
+.event .date span,
+.event-date-day,
+.event-date-separator,.event-date-month,
+.event-date-time,
+.event-location  {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   font-family: 'Raleway', sans-serif;
 }
 
@@ -28,8 +43,13 @@ h1, h2, h3 {
     border-radius: 2px;
 }
 
-.table > thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
-    padding: 14px;
+.table > thead > tr > th,
+.table > tbody > tr > th,
+.table > tfoot > tr > th,
+.table > thead > tr > td,
+.table > tbody > tr > td,
+.table > tfoot > tr > td {
+  padding: 14px;
 }
 
 .panel {
@@ -82,31 +102,34 @@ span.highlight {
 
 
 .top-nav {
-   float:left;
-   width:100%;
-   background:#fff;
-   overflow:hidden;
-   position:relative;
-   ul {
-      clear:left;
-      float:left;
-      list-style:none;
-      margin:0;
-      padding:0;
-      position:relative;
-      left:50%;
-      text-align:center;
-   }
-   a {
-     display: block;
-     width: 50px;
-     color: #FFF;
-     text-decoration: none;
-     background: gray;
-   }
-   a:hover {
-     background: green;
-   }
+  float:left;
+  width:100%;
+  background:#fff;
+  overflow:hidden;
+  position:relative;
+}
+
+.top-nav ul {
+  clear:left;
+  float:left;
+  list-style:none;
+  margin:0;
+  padding:0;
+  position:relative;
+  left:50%;
+  text-align:center;
+}
+
+.top-nav a {
+  display: block;
+  width: 50px;
+  color: #FFF;
+  text-decoration: none;
+  background: gray;
+}
+
+.top-nav a:hover {
+  background: green;
 }
 
 /* ====================== Home Page ================= */
@@ -126,21 +149,25 @@ a:hover {
   background-image: url(/static/img/embassysf.jpg);
   background-size: cover;
   color: white;
-  .light {
-    font-family: 'Raleway', sans-serif;
-    font-size: 1em;
-  }
-  .bold {
-    font-family: 'Raleway', sans-serif;
-    font-size: 2em;
-  }
-  .logo {
-    height: 70px;
-  }
-  .btn-brand {
-    margin-top: 30px;
-    margin-bottom: 30px;
-  }
+}
+
+.jumbotron .light {
+  font-family: 'Raleway', sans-serif;
+  font-size: 1em;
+}
+
+.jumbotron .bold {
+  font-family: 'Raleway', sans-serif;
+  font-size: 2em;
+}
+
+.jumbotron .logo {
+  height: 70px;
+}
+
+.jumbotron .btn-brand {
+  margin-top: 30px;
+  margin-bottom: 30px;
 }
 
 .embassy-logo {
@@ -236,8 +263,8 @@ a:hover {
 }
 
 .book-room {
-    background-color: #f5f5f5;
-    padding: 20px 0;
+  background-color: #f5f5f5;
+  padding: 20px 0;
 }
 
 #actions {
@@ -261,7 +288,8 @@ a:hover {
   padding:3px 0 0 3px;
 }
 
-#map-marker-h1-color, #map-marker-h1-dark {
+#map-marker-h1-color,
+#map-marker-h1-dark {
   margin: 0px;
   font-size: 2em;
 }
@@ -293,7 +321,8 @@ a:hover {
 
 }
 
-#rsvp-status-yes, #rsvp-status-no {
+#rsvp-status-yes,
+#rsvp-status-no {
   width: 166px;
 }
 
@@ -314,7 +343,8 @@ a:hover {
 }
 
 
-#reserve .btn, #participate .btn {
+#reserve .btn,
+#participate .btn {
   background: #fff;
   padding: 21px 0;
 }
@@ -609,10 +639,11 @@ div.ui-datepicker{
 .form-help-text {
   color: #666;
   font-size: .8em;
-    margin-left: .2em;
+  margin-left: .2em;
 }
+
 .bg-muted {
-    background-color: #eee;
+  background-color: #eee;
 }
 
 .room-subtle {
@@ -915,19 +946,18 @@ form.res-action {
   opacity: 0.6;
 }
 
-div#spinner
-{
-    display: none;
-    width:100px;
-    height: 100px;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    text-align:center;
-    margin-left: -50px;
-    margin-top: -100px;
-    z-index:2;
-    overflow: auto;
+div#spinner {
+  display: none;
+  width:100px;
+  height: 100px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  text-align:center;
+  margin-left: -50px;
+  margin-top: -100px;
+  z-index:2;
+  overflow: auto;
 }
 
 .paid-bg-img {
@@ -1369,9 +1399,9 @@ table tr.row-even td { background: #eee; }
 @media (min-width: 768px) {
   .featurette-heading {
     font-size: 50px;
-    &.drft-rooms-heading {
-      margin: 50px 0;
-    }
+  }
+  .featurette-heading.drft-rooms-heading {
+    margin: 50px 0;
   }
 }
 
@@ -1573,9 +1603,10 @@ label.light {
 .date-range-row {
   margin-top: 20px;
   margin-bottom: 20px;
-  input {
-    margin-bottom: 4px;
-  }
+}
+
+.date-range-row input {
+  margin-bottom: 4px;
 }
 
 .react-datepicker__input-container {
@@ -1601,19 +1632,19 @@ label.light {
 .room-card {
   margin: auto;
 	max-width: 389px;
-  .edit-room {
-    position: absolute;
-    margin: 24px;
-  }
-  .panel {
-    height: 330px;
-    h3 {
-      height: 26px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-  }
+}
+.room-card .edit-room {
+  position: absolute;
+  margin: 24px;
+}
+.room-card .edit-room .panel {
+  height: 330px;
+}
+.room-card .edit-room .panel h3 {
+  height: 26px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .room-image {
@@ -1629,9 +1660,9 @@ label.light {
   background-color: #f5f5f5;
   min-height: 720px;
   margin-bottom: -30px;
-  .location-heading {
-    margin-bottom: 30px;
-  }
+}
+.room-card-container .location-heading {
+  margin-bottom: 30px;
 }
 
 .availability-table-toggle {
@@ -1676,57 +1707,57 @@ label.light {
 .room-detail {
   margin-bottom: 20px;
   margin-top: 20px;
-  h1 {
-    margin: 30px 0;
-  }
-  .nightly-price {
-    background-color: #333;
-    color: white;
-    margin-top: -20px;
-    margin-right: -10px;
-    margin-left: -10px;
-    h3 {
-      margin-top: 10px;
-    }
+}
+.room-detail h1 {
+  margin: 30px 0;
+}
+.room-detail h1 .nightly-price {
+  background-color: #333;
+  color: white;
+  margin-top: -20px;
+  margin-right: -10px;
+  margin-left: -10px;
+}
+.room-detail h1 .nightly-price h3 {
+  margin-top: 10px;
+}
 
-    h5 {
-      margin-top: 15px;
-    }
-    .drft-info {
-      font-size: 12px;
-      padding-left: 5px;
-    }
-  }
+.room-detail h1 .nightly-price h5 {
+  margin-top: 15px;
+}
+.room-detail h1 .nightly-price .drft-info {
+  font-size: 12px;
+  padding-left: 5px;
+}
 
-  .booking-request-form {
-    margin: 20px 10px;
-    padding-bottom: 5px;
-    .date-row {
-      padding: 20px 25px;
-      margin-right: -10px;
-      margin-left: -10px;
-      background-color: #f5f5f5;
-      input {
-        margin-bottom: 4px;
-        background-color: transparent;
-      }
-    }
-    p {
-      margin: 20px 0 5px 0;
-    }
-    .btn-brand {
-      margin-top: 20px;
-    }
-    a {
-      color: #ea6f56;
-    }
-    .panel.optional-fields {
-      border: none;
-      .panel-body {
-        padding: 0;
-      }
-    }
-  }
+.room-detail .booking-request-form {
+  margin: 20px 10px;
+  padding-bottom: 5px;
+}
+.room-detail .booking-request-form .date-row {
+  padding: 20px 25px;
+  margin-right: -10px;
+  margin-left: -10px;
+  background-color: #f5f5f5;
+}
+.room-detail .booking-request-form .date-row input {
+  margin-bottom: 4px;
+  background-color: transparent;
+}
+.room-detail .booking-request-form p {
+  margin: 20px 0 5px 0;
+}
+.room-detail .booking-request-form .btn-brand {
+  margin-top: 20px;
+}
+.room-detail .booking-request-form a {
+  color: #ea6f56;
+}
+.room-detail .booking-request-form .panel.optional-fields {
+  border: none;
+}
+.room-detail .booking-request-form .panel.optional-fields .panel-body {
+  padding: 0;
 }
 
 #booking-list-table {
