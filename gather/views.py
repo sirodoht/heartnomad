@@ -203,7 +203,7 @@ def view_event(request, event_id, event_slug, location_slug=None):
         past = False
 
     # set up for those without accounts to RSVP
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         current_user = request.user
         new_user_form = None
         login_form = None
@@ -310,7 +310,7 @@ def view_event(request, event_id, event_slug, location_slug=None):
 def upcoming_events_all_locations(request):
     """if a site supports multiple locations this page can be used to show
     events across all locations."""
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         current_user = request.user
     else:
         current_user = None
@@ -347,7 +347,7 @@ def upcoming_events_all_locations(request):
 def upcoming_events(request, location_slug=None):
     """upcoming events limited to a specific location (either the one
     specified or the default single location)."""
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         current_user = request.user
     else:
         current_user = None
@@ -447,7 +447,7 @@ def needs_review(request, location_slug=None):
 
 def past_events(request, location_slug=None):
     location = get_object_or_404(Location, slug=location_slug)
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         current_user = request.user
     else:
         current_user = None

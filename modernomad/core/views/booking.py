@@ -135,7 +135,7 @@ class StayView(TemplateView):
         is_admin = (
             self.location.house_admins.all().filter(pk=self.request.user.pk).exists()
         )
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             user_drft_balance = self.request.user.profile.drft_spending_balance()
         else:
             user_drft_balance = 0
@@ -171,7 +171,7 @@ def BookingSubmit(request, location_slug):
         use.location = location
         booking = Booking(use=use, comments=comments)
         # reset_rate also generates the bill.
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             use.user = request.user
             if use.suggest_drft():
                 use.accounted_by = Use.DRFT

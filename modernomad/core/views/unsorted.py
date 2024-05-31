@@ -2748,7 +2748,7 @@ def register(request):
             logger.debug("profile form contained errors:")
             logger.debug(profile_form.errors)
     else:
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             messages.add_message(
                 request,
                 messages.INFO,
