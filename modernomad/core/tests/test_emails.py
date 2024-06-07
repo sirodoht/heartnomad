@@ -1,10 +1,10 @@
-import unittest
-from unittest import mock
 from datetime import date, datetime, timedelta
+from unittest import mock
 
 from django.contrib.auth.models import User
 from django.test import TestCase
 from freezegun import freeze_time
+
 from modernomad.core.emails.messages import (
     admin_daily_update,
     new_booking_notify,

@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -32,8 +32,8 @@ from modernomad.core.forms import (
     SubscriptionEmailTemplateForm,
 )
 from modernomad.core.models import *
-from modernomad.core.views import occupancy
 from modernomad.core.tasks import guest_welcome
+from modernomad.core.views import occupancy
 
 logger = logging.getLogger(__name__)
 

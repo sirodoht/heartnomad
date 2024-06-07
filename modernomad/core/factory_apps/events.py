@@ -1,5 +1,5 @@
-from zoneinfo import ZoneInfo
 from factory.django import DjangoModelFactory
+from zoneinfo import ZoneInfo
 
 from gather.models import Event, EventAdminGroup, EventNotifications, EventSeries
 

@@ -1,4 +1,3 @@
-from zoneinfo import ZoneInfo
 import datetime
 import logging
 from itertools import chain
@@ -7,6 +6,7 @@ from django.contrib.sites.models import Site
 from django.template.loader import get_template
 from django.urls import reverse
 from django.utils import timezone
+from zoneinfo import ZoneInfo
 
 from gather.models import Event, EventNotifications
 from modernomad.core.emails.mailgun import mailgun_send
