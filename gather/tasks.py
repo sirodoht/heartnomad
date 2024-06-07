@@ -1,3 +1,4 @@
+from zoneinfo import ZoneInfo
 import datetime
 import logging
 from itertools import chain
@@ -190,7 +191,6 @@ def published_events_today_local(location):
     # is offset from the current timezone's hours by a certain amount.
     current_tz = timezone.get_current_timezone()
     today_local = timezone.now().astimezone(current_tz).date()
-    utc_tz = pytz.timezone("UTC")
     today_local_start_time = datetime.datetime(
         today_local.year, today_local.month, today_local.day, 0, 0
     )
@@ -199,8 +199,8 @@ def published_events_today_local(location):
     )
     today_local_start_aware = timezone.make_aware(today_local_start_time, current_tz)
     today_local_end_aware = timezone.make_aware(today_local_end_time, current_tz)
-    today_local_start_utc = utc_tz.normalize(today_local_start_aware.astimezone(utc_tz))
-    today_local_end_utc = utc_tz.normalize(today_local_end_aware.astimezone(utc_tz))
+    today_local_start_utc = today_local_start_aware.astimezone(ZoneInfo("UTC"))
+    today_local_end_utc = today_local_end_aware.astimezone(ZoneInfo("UTC"))
 
     # get events happening today that are live
     starts_today_local = (

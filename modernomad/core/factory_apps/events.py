@@ -1,4 +1,4 @@
-import pytz
+from zoneinfo import ZoneInfo
 from factory.django import DjangoModelFactory
 
 from gather.models import Event, EventAdminGroup, EventNotifications, EventSeries
@@ -40,10 +40,10 @@ class EventFactory(DjangoModelFactory):
     class Meta:
         model = Event
 
-    created = factory.Faker("past_datetime", tzinfo=pytz.UTC)
-    updated = factory.Faker("past_datetime", tzinfo=pytz.UTC)
-    start = factory.Faker("future_datetime", tzinfo=pytz.UTC)
-    end = factory.Faker("future_datetime", tzinfo=pytz.UTC)
+    created = factory.Faker("past_datetime", tzinfo=ZoneInfo("UTC"))
+    updated = factory.Faker("past_datetime", tzinfo=ZoneInfo("UTC"))
+    start = factory.Faker("future_datetime", tzinfo=ZoneInfo("UTC"))
+    end = factory.Faker("future_datetime", tzinfo=ZoneInfo("UTC"))
 
     title = factory.Faker("word")
     slug = factory.Faker("word")

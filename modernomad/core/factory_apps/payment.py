@@ -1,4 +1,4 @@
-import pytz
+from zoneinfo import ZoneInfo
 from factory.django import DjangoModelFactory
 
 from modernomad.core import models
@@ -12,8 +12,8 @@ class SubscriptionFactory(DjangoModelFactory):
     class Meta:
         model = models.Subscription
 
-    created = factory.Faker("past_datetime", tzinfo=pytz.UTC)
-    updated = factory.Faker("past_datetime", tzinfo=pytz.UTC)
+    created = factory.Faker("past_datetime", tzinfo=ZoneInfo("UTC"))
+    updated = factory.Faker("past_datetime", tzinfo=ZoneInfo("UTC"))
 
     created_by = factory.SubFactory(UserFactory)
     location = factory.SubFactory(LocationFactory)
@@ -22,8 +22,8 @@ class SubscriptionFactory(DjangoModelFactory):
     price = factory.Faker("pydecimal", left_digits=3, positive=True)
     description = factory.Faker("words")
 
-    start_date = factory.Faker("future_date", tzinfo=pytz.UTC)
-    end_date = factory.Faker("future_date", tzinfo=pytz.UTC)
+    start_date = factory.Faker("future_date", tzinfo=ZoneInfo("UTC"))
+    end_date = factory.Faker("future_date", tzinfo=ZoneInfo("UTC"))
 
 
 class BillFactory(DjangoModelFactory):
@@ -32,7 +32,7 @@ class BillFactory(DjangoModelFactory):
     class Meta:
         model = models.Bill
 
-    generated_on = factory.Faker("past_datetime", tzinfo=pytz.UTC)
+    generated_on = factory.Faker("past_datetime", tzinfo=ZoneInfo("UTC"))
     comment = factory.Faker("paragraph")
 
 
@@ -40,11 +40,11 @@ class SubscriptionBillFactory(DjangoModelFactory):
     class Meta:
         model = models.SubscriptionBill
 
-    generated_on = factory.Faker("past_datetime", tzinfo=pytz.UTC)
+    generated_on = factory.Faker("past_datetime", tzinfo=ZoneInfo("UTC"))
     comment = factory.Faker("paragraph")
 
-    period_start = factory.Faker("future_date", tzinfo=pytz.UTC)
-    period_end = factory.Faker("future_date", tzinfo=pytz.UTC)
+    period_start = factory.Faker("future_date", tzinfo=ZoneInfo("UTC"))
+    period_end = factory.Faker("future_date", tzinfo=ZoneInfo("UTC"))
     subscription = factory.SubFactory(SubscriptionFactory)
 
 
@@ -73,19 +73,19 @@ class UseFactory(DjangoModelFactory):
     class Meta:
         model = models.Use
 
-    created = factory.Faker("past_datetime", tzinfo=pytz.UTC)
-    updated = factory.Faker("past_datetime", tzinfo=pytz.UTC)
+    created = factory.Faker("past_datetime", tzinfo=ZoneInfo("UTC"))
+    updated = factory.Faker("past_datetime", tzinfo=ZoneInfo("UTC"))
 
     location = factory.SubFactory(LocationFactory)
     user = factory.SubFactory(UserFactory)
     resource = factory.SubFactory(ResourceFactory)
 
     status = models.Use.PENDING
-    arrive = factory.Faker("future_date", tzinfo=pytz.UTC)
-    depart = factory.Faker("future_date", tzinfo=pytz.UTC)
+    arrive = factory.Faker("future_date", tzinfo=ZoneInfo("UTC"))
+    depart = factory.Faker("future_date", tzinfo=ZoneInfo("UTC"))
     arrival_time = factory.Faker("words")
     purpose = factory.Faker("paragraph")
-    last_msg = factory.Faker("past_datetime", tzinfo=pytz.UTC)
+    last_msg = factory.Faker("past_datetime", tzinfo=ZoneInfo("UTC"))
     accounted_by = models.Use.FIAT
 
 
@@ -94,8 +94,8 @@ class BookingFactory(DjangoModelFactory):
     class Meta:
         model = models.Booking
 
-    created = factory.Faker("past_datetime", tzinfo=pytz.UTC)
-    updated = factory.Faker("past_datetime", tzinfo=pytz.UTC)
+    created = factory.Faker("past_datetime", tzinfo=ZoneInfo("UTC"))
+    updated = factory.Faker("past_datetime", tzinfo=ZoneInfo("UTC"))
 
     comments = factory.Faker("paragraph")
     rate = factory.Faker("pydecimal", left_digits=3, positive=True)
@@ -122,7 +122,7 @@ class PaymentFactory(DjangoModelFactory):
 
     bill = factory.SubFactory(BillFactory)
     user = factory.SubFactory(UserFactory)
-    payment_date = factory.Faker("past_datetime", tzinfo=pytz.UTC)
+    payment_date = factory.Faker("past_datetime", tzinfo=ZoneInfo("UTC"))
 
     # payment_service and payment_method may be empty so ignoring those
     paid_amount = factory.Faker("pydecimal", left_digits=3, positive=True)
