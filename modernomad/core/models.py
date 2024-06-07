@@ -1445,7 +1445,7 @@ class Booking(models.Model):
     )
 
     def get_absolute_url(self):
-        return ("booking_detail", [str(self.use.location.slug), str(self.id)])
+        return reverse("booking_detail", args=(self.use.location.slug, self.id))
 
     def generate_bill(self, delete_old_items=True, save=True, reset_suppressed=False):
         # during the booking process, we simulate a booking to generate
