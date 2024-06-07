@@ -1,0 +1,13 @@
+{
+	email {{ email }}
+}
+
+{{ domain_name }} {
+	route {
+		file_server /static/* {
+			root /var/www/modernomad
+		}
+		reverse_proxy 127.0.0.1:5000
+	}
+	encode zstd gzip
+}

@@ -1,0 +1,37 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Load SSH key
+      run: |
+        mkdir -p ~/.ssh/
+        echo "$SSH_KEY" > ~/.ssh/server.key
+        chmod 600 ~/.ssh/server.key
+      env:
+        SSH_KEY: ${{ secrets.SSH_KEY }}
+
+    - name: Install ansible
+      run: pip install ansible==10.0.1
+
+    - name: Run ansible
+      run: cd ansible/ && ansible-playbook playbook.yaml --start-at-task="clone"
+      env:
+        ANSIBLE_HOST_KEY_CHECKING: False
+        ANSIBLE_PRIVATE_KEY_FILE: "~/.ssh/server.key"
+        ANSIBLE_HOST: ${{ vars.ANSIBLE_HOST }}
+        ANSIBLE_USER: ${{ vars.ANSIBLE_USER }}
+        DEBUG: ${{ vars.DEBUG }}
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
