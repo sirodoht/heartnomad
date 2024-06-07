@@ -354,7 +354,7 @@ def BookingEdit(request, booking_id, location_slug):
     original_arrive = booking.use.arrive
     original_depart = booking.use.depart
     original_room = booking.use.resource
-    if request.user.is_authenticated() and request.user == booking.use.user:
+    if request.user.is_authenticated and request.user == booking.use.user:
         logger.debug("BookingEdit: Authenticated and same user")
         if request.user in booking.use.location.house_admins.all():
             is_house_admin = True
@@ -421,7 +421,7 @@ def BookingEdit(request, booking_id, location_slug):
 def BookingConfirm(request, booking_id, location_slug):
     booking = Booking.objects.get(id=booking_id)
     if not (
-        request.user.is_authenticated()
+        request.user.is_authenticated
         and request.user == booking.use.user
         and request.method == "POST"
         and booking.is_approved()
@@ -469,7 +469,7 @@ def BookingConfirm(request, booking_id, location_slug):
 def BookingDelete(request, booking_id, location_slug):
     booking = Booking.objects.get(id=booking_id)
     if (
-        request.user.is_authenticated()
+        request.user.is_authenticated
         and request.user == booking.use.user
         and request.method == "POST"
     ):
@@ -494,7 +494,7 @@ def BookingCancel(request, booking_id, location_slug):
     location = get_object_or_404(Location, slug=location_slug)
     booking = Booking.objects.get(id=booking_id)
     if (
-        not (request.user.is_authenticated() and request.user == booking.use.user)
+        not (request.user.is_authenticated and request.user == booking.use.user)
         and request.user not in location.house_admins.all()
     ):
         return HttpResponseRedirect("/404")
