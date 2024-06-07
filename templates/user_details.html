@@ -41,19 +41,21 @@
             {% endif %}
             <a class="btn btn-dark btn-small" href="{% url 'user_edit' user.username%}">Edit Profile</a>
             {% if user.profile.customer_id %}
-                <form class="userprofile-card-form" method="post" action="{% url 'user_delete_card' user.username %}">{% csrf_token %}
-                    <input type="submit" class="btn btn-danger btn-small" value="Delete saved card {%if user.profile.last4 %}(**{{user.profile.last4}}){% endif %}">
+                <form class="userprofile-card-form" method="post" action="{% url 'user_delete_card' user.username %}">
+                    {% csrf_token %}
+                    <input type="submit" class="btn btn-danger btn-small" value="Delete Card">
                 </form>
             {% else %}
                 <div>
-                    <form class="userprofile-card-form" action="{% url 'user_add_card' user.username %}" method="POST" id="payform">
+                    <form class="userprofile-card-form" action="{% url 'create_checkout_session' user.username %}" method="POST">
                         {% csrf_token %}
-                        <input type="submit" id="pay-button" class="btn btn-success res-status-btn"
-                            value="Add Credit Card" >
+                        <input type="submit" id="pay-button" class="btn btn-success res-status-btn" value="Add Credit Card">
                         <div>
-                            <p><em><small>We use <a href="http://stripe.com">Stripe's</a>
-                                secure credit card processing with SSL encryption. Your card card
-                            information is never stored on our servers.</small></em></p>
+                            <p>
+                                <em><small>We use <a href="http://stripe.com">Stripe's</a>
+                                secure credit card processing with SSL encryption. Your card
+                                information is never stored on our servers.</small></em>
+                            </p>
                         </div>
                     </form>
                 </div>
@@ -79,49 +81,11 @@
             {% include "snippets/user_edit_nav.html" %}
         {% endif %}
     </div>
-
-
-
 </div>
 
 <div class="col-md-9">
     {% block user_content_area %}
     {% endblock %}
 </div>
-
-{% endblock %}
-
-{% block extrajs %}
-<script src="https://checkout.stripe.com/v2/checkout.js"></script>
-
-<script>
-    $(document).ready(function() {
-        $customer_id = "{{ booking.user.profile.customer_id }}";
-        $('#pay-button').click(function(event){
-            event.preventDefault();
-            // if the user has a saved card, go straight to the
-            // payment processing page. (note: this shouldn't happen for new
-            // bookings but might for legacy bookings)
-            $customer_id = "{{ booking.user.profile.customer_id }}";
-
-            if ($customer_id == "None" || $customer_id == "") {
-                var token = function(res){
-                    var $input = $('<input type=hidden name=stripeToken />').val(res.id);
-                    $('#payform').append($input).submit();
-                };
-
-                StripeCheckout.open({
-                    key: "{{ stripe_publishable_key }}",
-                    name: "The Embassy Network",
-                    panelLabel:"Save Card",
-                    image: "{% static 'img/embassy-front-1-128x128.jpg' %}",
-                    token: token
-                });
-            } else {
-                $('#payform').submit();
-            }
-        });
-    });
-</script>
 
 {% endblock %}

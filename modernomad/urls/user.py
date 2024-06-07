@@ -4,8 +4,9 @@ from django.urls import re_path
 import gather.views
 from modernomad.core.views.billing import (
     PeopleDaterangeQuery,
-    UserAddCard,
-    UserDeleteCard,
+    checkout_success,
+    create_checkout_session,
+    user_delete_card,
 )
 from modernomad.core.views.booking import UserBookings
 from modernomad.core.views.redirects import old_user_bookings_redirect
@@ -46,11 +47,18 @@ urlpatterns = [
     re_path(r"^(?P<username>[\w\d\-\.@+_]+)/avatar/$", UserAvatar, name="user_avatar"),
     re_path(r"^(?P<username>[\w\d\-\.@+_]+)/edit/$", UserEdit, name="user_edit"),
     re_path(
-        r"^(?P<username>[\w\d\-\.@+_]+)/addcard/$", UserAddCard, name="user_add_card"
+        r"^(?P<username>[\w\d\-\.@+_]+)/create-checkout-session/$",
+        create_checkout_session,
+        name="create_checkout_session",
+    ),
+    re_path(
+        r"^(?P<username>[\w\d\-\.@+_]+)/checkout-success/$",
+        checkout_success,
+        name="checkout_success",
     ),
     re_path(
         r"^(?P<username>[\w\d\-\.@+_]+)/deletecard/$",
-        UserDeleteCard,
+        user_delete_card,
         name="user_delete_card",
     ),
     re_path(
