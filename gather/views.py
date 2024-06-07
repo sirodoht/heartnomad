@@ -119,7 +119,7 @@ def edit_event(request, event_id, event_slug, location_slug=None):
     user_list = [u.username for u in other_users]
     event = Event.objects.get(id=event_id)
     if not (
-        request.user.is_authenticated()
+        request.user.is_authenticated
         and (
             request.user in event.organizers.all()
             or request.user in event.location.house_admins.all()
@@ -416,7 +416,7 @@ def needs_review(request, location_slug=None):
     location = get_object_or_404(Location, slug=location_slug)
     # if user is not an event admin at this location, redirect
     location_admin_group = EventAdminGroup.objects.get(location=location)
-    if not request.user.is_authenticated() or (
+    if not request.user.is_authenticated or (
         request.user not in location_admin_group.users.all()
     ):
         return HttpResponseRedirect("/")
@@ -530,7 +530,7 @@ def event_approve(request, event_id, event_slug, location_slug=None):
         return HttpResponseRedirect("/404")
     event = Event.objects.get(id=event_id)
     if not (
-        request.user.is_authenticated()
+        request.user.is_authenticated
         and (
             request.user in event.organizers.all()
             or request.user in event.location.house_admins.all()
@@ -603,7 +603,7 @@ def event_cancel(request, event_id, event_slug, location_slug=None):
         return HttpResponseRedirect("/404")
     event = Event.objects.get(id=event_id)
     if not (
-        request.user.is_authenticated()
+        request.user.is_authenticated
         and (
             request.user in event.organizers.all()
             or request.user in event.location.house_admins.all()
