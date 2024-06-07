@@ -64,8 +64,7 @@ def create_checkout_session(request, username):
             customer = stripe.Customer.retrieve(user.profile.customer_id)
         else:
             customer = stripe.Customer.create(
-                email=user.email,
-                name=f"{user.first_name} {user.last_name}"
+                email=user.email, name=f"{user.first_name} {user.last_name}"
             )
             user.profile.customer_id = customer.id
             user.profile.save()
@@ -82,8 +81,8 @@ def create_checkout_session(request, username):
             request,
             (
                 '<span class="text-danger">Drat, '
-                f'there was a problem with our payment processor: <em>{e}</em></span>'
-            )
+                f"there was a problem with our payment processor: <em>{e}</em></span>"
+            ),
         )
         return redirect("user_detail", user.username)
 
@@ -149,8 +148,8 @@ def user_delete_card(request, username):
             request,
             (
                 '<span class="text-danger">Drat, '
-                f'there was a problem with our payment processor: <em>{e}</em></span>'
-            )
+                f"there was a problem with our payment processor: <em>{e}</em></span>"
+            ),
         )
         return redirect("user_detail", user.username)
 
@@ -698,7 +697,9 @@ def payments(request, location_slug, year, month):
     t0 = time.time()
     logger.debug("payments: timing begun:")
     location = get_object_or_404(Location, slug=location_slug)
-    start, end, next_month, prev_month, month, year = occupancy.get_calendar_dates(month, year)
+    start, end, next_month, prev_month, month, year = occupancy.get_calendar_dates(
+        month, year
+    )
 
     summary_totals = {
         "gross_rent": 0,
