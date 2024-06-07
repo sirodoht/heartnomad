@@ -10,9 +10,10 @@ from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 from stripe.error import CardError
 
 from modernomad.core import payment_gateway
@@ -31,93 +32,133 @@ from modernomad.core.forms import (
     SubscriptionEmailTemplateForm,
 )
 from modernomad.core.models import *
+from modernomad.core.views import occupancy
 from modernomad.core.tasks import guest_welcome
 
 logger = logging.getLogger(__name__)
 
 
+@require_POST
 @login_required
-def UserAddCard(request, username):
-    """Adds a card from either the booking page or the user profile page.
-    Displays success or error message and returns user to originating page."""
-
-    logger.debug("in user add card")
-    # get the user object associated with the booking
+def create_checkout_session(request, username):
+    # check permissions
     user = get_object_or_404(User, username=username)
-    if request.method != "POST":
+    if (
+        request.user != user
+        and request.user not in booking.use.location.house_admins.all()
+    ):
+        messages.info(
+            request,
+            (
+                "You are not authorized to add a credit card to this page. "
+                "Please log in or use the 3rd party."
+            ),
+        )
         return HttpResponseRedirect("/404")
 
-    booking_id = request.POST.get("res-id", False)
-    if booking_id:
-        booking = Booking.objects.get(id=booking_id)
-        # double checks that the authenticated user (the one trying to add the
-        # card) is the user associated with this booking, or an admin
-        if (
-            request.user != user
-            and request.user not in booking.use.location.house_admins.all()
-        ):
-            messages.add_message(
-                request,
-                messages.INFO,
-                (
-                    "You are not authorized to add a credit card to this page. "
-                    "Please log in or use the 3rd party."
-                ),
-            )
-            return HttpResponseRedirect("/404")
-
-    token = request.POST.get("stripeToken")
-    if not token:
-        messages.add_message(
-            request, messages.INFO, "No credit card information was given."
-        )
-        if booking_id:
-            return HttpResponseRedirect(
-                reverse("booking_detail", args=(booking.use.location.slug, booking.id))
-            )
-        return HttpResponseRedirect("/people/%s" % username)
-
-    stripe.api_key = settings.STRIPE_SECRET_KEY
-
     try:
-        customer = stripe.Customer.create(card=token, description=user.email)
-        logger.debug("customer %s", customer)
-        profile = user.profile
-        profile.customer_id = customer.id
-        logger.debug(customer.sources.data)
-        # assumes the user has only one card stored with their profile.
-        profile.last4 = customer.sources.data[0].last4
-        profile.save()
-        if booking_id and booking.use.status == Use.APPROVED:
-            updated_booking_notify(booking)
-        messages.add_message(
-            request, messages.INFO, "Thanks! Your card has been saved."
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+
+        # check if user exists on stripe
+        if user.profile.customer_id:
+            customer = stripe.Customer.retrieve(user.profile.customer_id)
+        else:
+            customer = stripe.Customer.create(
+                email=user.email,
+                name=f"{user.first_name} {user.last_name}"
+            )
+            user.profile.customer_id = customer.id
+            user.profile.save()
+
+        checkout_session = stripe.checkout.Session.create(
+            mode="setup",
+            currency="usd",
+            customer=customer.id,
+            success_url=f"{settings.CANONICAL_URL}/people/{user.username}/checkout-success/",
+            cancel_url=f"{settings.CANONICAL_URL}/people/{user.username}/",
         )
     except Exception as e:
-        messages.add_message(
+        messages.info(
             request,
-            messages.INFO,
-            '<span class="text-danger">Drat, there was a problem with your card: <em>%s</em></span>'
-            % e,
+            (
+                '<span class="text-danger">Drat, '
+                f'there was a problem with our payment processor: <em>{e}</em></span>'
+            )
         )
+        return redirect("user_detail", user.username)
+
+    # response
+    response = HttpResponseRedirect(checkout_session.url)
+    response.status_code = 303
+    return response
+
+
+@login_required
+def checkout_success(request, username):
+    # check permissions
+    user = get_object_or_404(User, username=username)
+    if (
+        request.user != user
+        and request.user not in booking.use.location.house_admins.all()
+    ):
+        messages.info(
+            request,
+            (
+                "You are not authorized to add a credit card to this page. "
+                "Please log in or use the 3rd party."
+            ),
+        )
+        return HttpResponseRedirect("/404")
+
+    # if booking
+    booking_id = request.POST.get("res-id")
     if booking_id:
+        booking = Booking.objects.get(id=booking_id)
+
+    messages.info(request, "Thanks! Your card has been saved.")
+
+    # booking continued
+    if booking_id and booking.use.status == Use.APPROVED:
+        updated_booking_notify(booking)
         return HttpResponseRedirect(
             reverse("booking_detail", args=(booking.use.location.slug, booking.id))
         )
-    return HttpResponseRedirect("/people/%s" % username)
+
+    return HttpResponseRedirect("/people/%s" % user.username)
 
 
-def UserDeleteCard(request, username):
-    if request.method != "POST":
+@login_required
+def user_delete_card(request, username):
+    # check permissions
+    user = get_object_or_404(User, username=username)
+    if (
+        request.user != user
+        and request.user not in booking.use.location.house_admins.all()
+    ):
+        messages.info(
+            request,
+            "You are not authorized to change this. Please log in or use the 3rd party.",
+        )
         return HttpResponseRedirect("/404")
 
-    profile = UserProfile.objects.get(user__username=username)
-    profile.customer_id = None
-    profile.last4 = None
-    profile.save()
+    try:
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        stripe.Customer.delete(user.profile.customer_id)
+    except Exception as e:
+        messages.info(
+            request,
+            (
+                '<span class="text-danger">Drat, '
+                f'there was a problem with our payment processor: <em>{e}</em></span>'
+            )
+        )
+        return redirect("user_detail", user.username)
 
-    messages.add_message(request, messages.INFO, "Card deleted.")
-    return HttpResponseRedirect("/people/%s" % profile.user.username)
+    user.profile.customer_id = None
+    user.profile.save()
+
+    messages.info(request, "Card deleted.")
+    return HttpResponseRedirect("/people/%s" % user.username)
 
 
 @house_admin_required
@@ -657,7 +698,7 @@ def payments(request, location_slug, year, month):
     t0 = time.time()
     logger.debug("payments: timing begun:")
     location = get_object_or_404(Location, slug=location_slug)
-    start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
+    start, end, next_month, prev_month, month, year = occupancy.get_calendar_dates(month, year)
 
     summary_totals = {
         "gross_rent": 0,
