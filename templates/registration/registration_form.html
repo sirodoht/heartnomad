@@ -182,12 +182,9 @@
 
 {% block extrajs %}
     <!-- client side form validation -->
-    <script src="{% static 'js/waypoints.js' %}"></script>
     <script src="{% static 'js/jquery.validate.min.js' %}"></script>
-    <script src="{% static 'js/waypoints-sticky.js' %}"></script>
     <script src="{% static 'js/jquery.sticky-kit.min.js' %}"></script>
 
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places"></script>
     <script>
     $(function() {
         var availableUsers = [
@@ -197,16 +194,6 @@
         ];
         $( "#id_referral" ).autocomplete({
             source: availableUsers
-        });
-    });
-
-    $("#booking-amount-summary-box").waypoint('sticky');
-
-    $("#id_city").keyup(function() {
-        autocomplete = new google.maps.places.Autocomplete(this);
-        google.maps.event.addListener(autocomplete, 'place_changed', function() {
-            var place = autocomplete.getPlace();
-
         });
     });
 
