@@ -24,6 +24,7 @@ from modernomad.core.forms import (
 )
 from modernomad.core.models import *
 from modernomad.core.tasks import guest_welcome
+from modernomad.core.views import occupancy
 
 logger = logging.getLogger(__name__)
 
@@ -199,7 +200,7 @@ def BookingManage(request, location_slug, booking_id):
 
     capacity = location.capacity(booking.use.arrive, booking.use.depart)
     free = location.rooms_free(booking.use.arrive, booking.use.depart)
-    date_list = date_range_to_list(booking.use.arrive, booking.use.depart)
+    date_list = occupancy.date_range_to_list(booking.use.arrive, booking.use.depart)
     if booking.use.resource in free:
         room_has_capacity = True
     else:

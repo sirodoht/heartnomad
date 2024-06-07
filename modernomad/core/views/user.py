@@ -277,7 +277,7 @@ def register(request):
 def UserEdit(request, username):
     profile = UserProfile.objects.get(user__username=username)
     user = User.objects.get(username=username)
-    if not (request.user.is_authenticated() and request.user.id == user.id):
+    if not (request.user.is_authenticated and request.user.id == user.id):
         messages.add_message(request, messages.INFO, "You cannot edit this profile")
         return HttpResponseRedirect("/404")
 
