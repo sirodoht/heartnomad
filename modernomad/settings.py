@@ -16,14 +16,20 @@ ALLOWED_HOSTS = [
 
 DEBUG = True
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "xxx")
+LOCALDEV = True
 
-STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY", "")
-STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
+SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-OLGfXpLCkPPddMOXVlPXcz7Gmp")
+
+CANONICAL_URL = "http://localhost:8000"
+if LOCALDEV:
+    CANONICAL_URL = "http://localhost:8000"
+
+STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY")
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-database_url = os.environ.get("DATABASE_URL", "")
+database_url = os.environ.get("DATABASE_URL")
 database_url = parse.urlparse(database_url)
 # e.g. postgres://mataroa:password@127.0.0.1:5432/mataroa
 database_name = database_url.path[1:]  # url.path is '/mataroa'
@@ -102,7 +108,7 @@ AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
 )
 
-MAILGUN_API_KEY = os.environ.get("MAILGUN_API_KEY", "")
+MAILGUN_API_KEY = os.environ.get("MAILGUN_API_KEY")
 if MAILGUN_API_KEY:
     EMAIL_BACKEND = "modernomad.backends.MailgunBackend"
     # This should only ever be true in the production environment. Defaults to False.
@@ -206,7 +212,7 @@ INSTALLED_APPS = [
     "graphapi",
 ]
 
-COMPRESS_PRECOMPILERS = (("text/less", "lessc {infile} {outfile}"),)
+# COMPRESS_PRECOMPILERS = (("text/less", "lessc {infile} {outfile}"),)
 
 AUTH_PROFILE_MODULE = "modernomad.core.UserProfile"
 ACCOUNT_ACTIVATION_DAYS = 7  # One week account activation window.
@@ -265,7 +271,7 @@ if "test" in sys.argv[1:]:
 os.environ["DJANGO_LIVE_TEST_SERVER_ADDRESS"] = "localhost:8000-8010,8080,9200-9300"
 
 # Setting unique=True on a ForeignKey has the same effect as using a OneToOneField.
-SILENCED_SYSTEM_CHECKS = ["fields.W342"]
+# SILENCED_SYSTEM_CHECKS = ["fields.W342"]
 
 # Enable Slack daily arrival/departure messages
 # TODO: this would be better if the hook URLs were configured in the database as part of each location
