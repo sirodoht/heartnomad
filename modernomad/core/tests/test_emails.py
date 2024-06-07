@@ -1,10 +1,10 @@
 import unittest
+from unittest import mock
 from datetime import date, datetime, timedelta
 
 from django.contrib.auth.models import User
 from django.test import TestCase
 from freezegun import freeze_time
-
 from modernomad.core.emails.messages import (
     admin_daily_update,
     new_booking_notify,
@@ -69,7 +69,7 @@ class EmailsTestCase(TestCase):
         class MockResponse:
             status_code = 200
 
-        self.mock_mailgun_send = unittest.mock.patch(
+        self.mock_mailgun_send = mock.patch(
             "modernomad.core.emails.messages.mailgun_send", return_value=MockResponse()
         )
         self.mock_mailgun_send.start()
