@@ -6,31 +6,39 @@ If you're on Linux, you might have to install Docker Compose separately. [Follow
 
 Next, run:
 
-    $ docker-compose up --build
+```sh
+docker compose up --build
+```
 
 This will boot up everything that Modernomad needs to run, and stay running in the terminal.
 
 In another console, run these commands to set up the database and set up a user:
 
-    $ docker-compose run web ./manage.py migrate
+```sh
+docker compose run web ./manage.py migrate
+```
 
 Your docker image is now running with your local development code. Browse to `http://localhost:8000/` to access your running image. You can run any of the other `manage.py` commands in the same way. E.g., to run the test suite:
 
-    $ docker-compose run web ./manage.py test
+```sh
+docker compose run web ./manage.py test
+```
 
 The first time you get this going, you will want to generate some test data:
 
-    $ docker-compose run web ./manage.py generate_test_data
+```sh
+docker compose run web ./manage.py generate_test_data
+```
 
 This will create a superuser with the credentials `admin` and `password`. 
 
-You only need to run these commands once. Wen you want to work on the development environment in the future, just run `docker-compose up --build`. (Note: `--build` is optional, but means that the Python and Node dependencies will always remain up-to-date.)
+You only need to run these commands once. Wen you want to work on the development environment in the future, just run `docker compose up --build`. (Note: `--build` is optional, but means that the Python and Node dependencies will always remain up-to-date.)
 
 ## Configuration
 
 You can configure the development environment using environment variables in a file called `.env`. It looks something like this:
 
-```
+```sh
 STRIPE_SECRET_KEY=...
 STRIPE_PUBLISHABLE_KEY=...
 MAILGUN_API_KEY=...

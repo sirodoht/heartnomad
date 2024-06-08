@@ -10,8 +10,9 @@ from urllib import parse
 BASE_DIR = Path.cwd()
 
 ALLOWED_HOSTS = [
-    "localhost",
+    "0.0.0.0",
     "127.0.0.1",
+    "localhost",
 ]
 
 DEBUG = True

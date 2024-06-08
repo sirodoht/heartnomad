@@ -64,7 +64,7 @@ Thumbnails are generated with django-imagekit when a model is saved. If you chan
 
 The Docker Compose file `docker-compose.production.yml` approximates a production setup so you can check the compilation of static files. Run it with:
 
-    $ docker-compose -f docker-compose.production.yml up --build
+    $ docker compose -f docker-compose.production.yml up --build
 
 It won't auto-reload, so you'll need to Ctrl-C and start it again if you change any code.
 
