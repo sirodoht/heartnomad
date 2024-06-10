@@ -1,8 +1,9 @@
-from modernomad.core.views.unsorted import monthly_occupant_report
-from modernomad.core.models import *
+import logging
+
 from django.contrib.auth.models import User
 
-import logging
+from modernomad.core.models import *
+from modernomad.core.views.occupancy import monthly_occupant_report
 
 logger = logging.getLogger(__name__)
 
@@ -10,16 +11,40 @@ logger = logging.getLogger(__name__)
 def monthly_occupant_report_console(location_slug, year, month):
     (occupants, messages) = monthly_occupant_report(location_slug, year, month)
     logger.debug("occupancy report for %s %s" % (month, year))
-    logger.debug("name, email, total_nights, total_value, total_comped, owing, reference_ids")
+    logger.debug(
+        "name, email, total_nights, total_value, total_comped, owing, reference_ids"
+    )
     logger.debug("Residents")
-    for v in occupants['residents'].values():
-        logger.debug("%s, %s, %d" % (v['name'], v['email'], v['total_nights']))
+    for v in occupants["residents"].values():
+        logger.debug("%s, %s, %d" % (v["name"], v["email"], v["total_nights"]))
     logger.debug("Guests")
-    for v in occupants['guests'].values():
-        logger.debug("%s, %s, %d, %d, %d, %s, %s" % (v['name'], v['email'], v['total_nights'], v['total_value'], v['total_comped'], ' '.join(map(str, v['owing'])), ' '.join(map(str, v['ids']))))
+    for v in occupants["guests"].values():
+        logger.debug(
+            "%s, %s, %d, %d, %d, %s, %s"
+            % (
+                v["name"],
+                v["email"],
+                v["total_nights"],
+                v["total_value"],
+                v["total_comped"],
+                " ".join(map(str, v["owing"])),
+                " ".join(map(str, v["ids"])),
+            )
+        )
     logger.debug("Subscriptions")
-    for v in occupants['members'].values():
-        logger.debug("%s, %s, %d, %d, %d, %s, %s" % (v['name'], v['email'], v['total_nights'], v['total_value'], v['total_comped'], ' '.join(map(str, v['owing'])), ' '.join(map(str, v['ids']))))
+    for v in occupants["members"].values():
+        logger.debug(
+            "%s, %s, %d, %d, %d, %s, %s"
+            % (
+                v["name"],
+                v["email"],
+                v["total_nights"],
+                v["total_value"],
+                v["total_comped"],
+                " ".join(map(str, v["owing"])),
+                " ".join(map(str, v["ids"])),
+            )
+        )
 
     for message in messages:
         logger.debug(message)
@@ -42,10 +67,10 @@ def repeat_guests(num_stays, location=None):
     all_users = User.objects.all()
     for u in all_users:
         if location:
-            at_loc = u.bookings.filter(location = location).filter(status='confirmed')
+            at_loc = u.bookings.filter(location=location).filter(status="confirmed")
             if len(at_loc) >= num_stays:
                 users.append(u)
         else:
-            if u.bookings.filter(status='confirmed').count() >= num_stays:
+            if u.bookings.filter(status="confirmed").count() >= num_stays:
                 users.append(u)
     return users

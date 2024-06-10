@@ -1,12 +1,13 @@
-from django.template import Library
 from django import template
 from django.conf import settings
+from django.template import Library
 
 register = Library()
 
+
 @register.tag
 def ifappexists(parser, token):
-    """ Conditional Django template tag to check if one or more apps exist.
+    """Conditional Django template tag to check if one or more apps exist.
 
     From: https://gist.github.com/xtranophilist/6637377
 
@@ -19,13 +20,15 @@ def ifappexists(parser, token):
         apps = []
         apps += tokens[1:]
     except ValueError:
-        raise template.TemplateSyntaxError("Tag 'ifappexists' requires at least 1 argument.")
+        raise template.TemplateSyntaxError(
+            "Tag 'ifappexists' requires at least 1 argument."
+        )
 
-    nodelist_true = parser.parse(('else', 'endifappexists'))
+    nodelist_true = parser.parse(("else", "endifappexists"))
     token = parser.next_token()
 
-    if token.contents == 'else':
-        nodelist_false = parser.parse(('endifappexists',))
+    if token.contents == "else":
+        nodelist_false = parser.parse(("endifappexists",))
         parser.delete_first_token()
     else:
         nodelist_false = template.NodeList()
@@ -42,7 +45,6 @@ class AppCheckNode(template.Node):
     def render(self, context):
         allowed = False
         for app in self.apps:
-
             if app.startswith('"') and app.endswith('"'):
                 app = app[1:-1]
 

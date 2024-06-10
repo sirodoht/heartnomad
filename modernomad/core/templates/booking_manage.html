@@ -282,7 +282,7 @@ $(document).ready(function() {
     {% for f in email_forms %}
         $email_templates[{{forloop.counter}}] = '<div id="form{{forloop.counter}}">' +
             '<form id="res-action-email-user" method=POST action="{% url 'booking_send_mail' location.slug r.id %}" >' +
-            "{% csrf_token %}" +
+            '{% csrf_token %}' +
             '<div class="form-group">' +
             '<span class="email-form-label">To: </span> {{f.recipient}} <br>' +
             '<span class="email-form-label">From: </span> {{f.sender}} <br>' +

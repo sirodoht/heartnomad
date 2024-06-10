@@ -99,7 +99,3 @@ user has created an account, go to the admin page for users
 (`/admin/auth/user`) and visit their individual user page. Check the `staff
 status` box, and select one or both of the `house_admin` and `residents`
 groups, then save the user. C'est tout!
-
-
-
-

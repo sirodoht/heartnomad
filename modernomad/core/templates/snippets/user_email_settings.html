@@ -10,7 +10,7 @@
             <div>Receive notifications when new events are published:
 
                 {% for location in network_locations %}
-                {% if location.visibility = 'public' or user in location.house_admins.all or user in location.residents.all or user in location.event_admins.all %}
+                {% if location.visibility == 'public' or user in location.house_admins.all or user in location.residents.all or user in location.event_admins.all %}
                 <div class="checkbox">
                     <label>
                         <input
@@ -18,7 +18,7 @@
                         name="publish_{{ location.slug }}"
                         id="publish_{{ location.slug }}"
                         {% if location in u.event_notifications.location_publish.all %} checked {% endif %}
-                        > {{ location.name }} {% if not location.visibility = 'public' %} <em>(location is private)</em> {% endif %}
+                        > {{ location.name }} {% if not location.visibility == 'public' %} <em>(location is private)</em> {% endif %}
                     </label>
                 </div>
                 {% endif %}
@@ -28,7 +28,7 @@
                     Receive weekly emails about upcoming events:
 
                     {% for location in network_locations %}
-                    {% if location.visibility = 'public' or user in location.house_admins.all or user in location.residents.all or user in location.event_admins.all %}
+                    {% if location.visibility == 'public' or user in location.house_admins.all or user in location.residents.all or user in location.event_admins.all %}
                     <div class="checkbox">
                         <label>
                             <input
@@ -36,7 +36,7 @@
                             name="weekly_{{ location.slug }}"
                             id="weekly_{{ location.slug }}"
                             {% if location in u.event_notifications.location_weekly.all %} checked {% endif %}
-                            > {{ location.name }} {% if not location.visibility = 'public' %} <em>(location is private)</em> {% endif %}
+                            > {{ location.name }} {% if not location.visibility == 'public' %} <em>(location is private)</em> {% endif %}
                         </label>
                     </div>
                     {% endif %}

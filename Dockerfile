@@ -1,18 +1,19 @@
-FROM python:3.6.8-slim
+FROM python:3.11
 
 RUN apt-get update -qq && apt-get install -yq \
     build-essential \
-    curl \
-    netcat
+    curl
 
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash
-RUN apt-get update -qq && apt-get install -yq nodejs npm
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x -o nodesource_setup.sh && \
+    bash nodesource_setup.sh && \
+    apt-get install -y nodejs && \
+    node -v
 
 # https://bitbucket.org/site/master/issues/16334/pipelines-failing-with-could-not-get-uid
 # https://github.com/npm/npm/issues/20861
-RUN npm config set unsafe-perm true
+# RUN npm config set unsafe-perm true
 
-RUN npm install -g less
+# RUN npm install -g less
 
 # Only copy requirements so cache isn't busted by changes in the app
 RUN mkdir -p /app
@@ -23,7 +24,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Same, but for client
 RUN mkdir -p /app/client
 COPY client/package.json client/package-lock.json /app/client/
-RUN cd client && npm install && npm cache clean --force
+RUN cd client && npm install
 
 # Build client before copying everything so changes in Django don't trigger a
 # re-build
@@ -33,7 +34,7 @@ RUN cd client && node_modules/.bin/webpack --config webpack.prod.config.js
 ENV PYTHONUNBUFFERED 1
 # Set configuration last so we can change this without rebuilding the whole
 # image
-ENV DJANGO_SETTINGS_MODULE modernomad.settings.production
+ENV DJANGO_SETTINGS_MODULE modernomad.settings
 # Number of gunicorn workers
 ENV WEB_CONCURRENCY 3
 ENV PORT 8000
@@ -44,4 +45,4 @@ CMD ["gunicorn", "modernomad.wsgi"]
 COPY . /app/
 
 RUN SECRET_KEY=unset ./manage.py collectstatic --noinput
-RUN SECRET_KEY=unset ./manage.py compress
+# RUN SECRET_KEY=unset ./manage.py compress

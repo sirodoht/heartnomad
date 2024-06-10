@@ -1,5 +1,4 @@
 from modernomad.core.serializers import *
-from django import forms
 
 
 class CommandResult:
@@ -11,11 +10,11 @@ class CommandResult:
     def serialize(self):
         result = {}
         if self.data:
-            result['data'] = self.data
+            result["data"] = self.data
         if self.errors:
-            result['errors'] = self.errors
+            result["errors"] = self.errors
         if self.warnings:
-            result['warnings'] = self.warnings
+            result["warnings"] = self.warnings
 
         return result
 
@@ -75,11 +74,11 @@ class Command:
         self.warnings.setdefault(field, []).append(message)
 
     def unauthorized(self):
-        self.add_error('auth', 'does not have permission to do this')
+        self.add_error("auth", "does not have permission to do this")
         return False
 
     def is_authorized(self):
-        bool(self.errors.get('auth', []))
+        bool(self.errors.get("auth", []))
 
     def has_errors(self):
         return bool(self.errors)
@@ -88,7 +87,9 @@ class Command:
         pass
 
     def _get_result(self):
-        assert self.executed, "You must execute this command before asking for the result"
+        assert (
+            self.executed
+        ), "You must execute this command before asking for the result"
 
         if self.is_valid():
             return self._get_success_result()
@@ -111,6 +112,7 @@ class Command:
 
     def _execute_on_valid(self):
         raise Exception("override _execute_on_valid to make your command work")
+
 
 class FormCommand(Command):
     def _setup(self):

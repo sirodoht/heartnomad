@@ -1,13 +1,10 @@
 import graphene
-from graphene import AbstractType, Field, Node, relay
-from graphene_django.types import DjangoObjectType
-from graphene.types import String
-from graphene_django.filter import DjangoFilterConnectionField
+from graphene import Node
 from graphene.types.datetime import *
+from graphene_django.types import DjangoObjectType
 
 from api.commands.bookings import RequestBooking
-from graphapi.schemas.resources import ResourceNode
-from modernomad.core.models import Resource, Booking
+from modernomad.core.models import Booking
 
 
 def commandErrorsToGraphQL(errors):
@@ -21,7 +18,7 @@ def commandErrorsToGraphQL(errors):
 class BookingNode(DjangoObjectType):
     class Meta:
         model = Booking
-        interfaces = (Node, )
+        interfaces = (Node,)
 
 
 class RequestBookingMutation(graphene.Mutation):
@@ -41,6 +38,10 @@ class RequestBookingMutation(graphene.Mutation):
     def mutate(cls, root, data, context, info):
         command = RequestBooking(context.user, **data)
         if command.execute():
-            return RequestBookingMutation(ok=True, booking=command.result().data.get('booking'))
+            return RequestBookingMutation(
+                ok=True, booking=command.result().data.get("booking")
+            )
         else:
-            return RequestBookingMutation(ok=False, errors=commandErrorsToGraphQL(command.result().errors))
+            return RequestBookingMutation(
+                ok=False, errors=commandErrorsToGraphQL(command.result().errors)
+            )

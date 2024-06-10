@@ -1,8 +1,10 @@
 import factory
+from factory.django import DjangoModelFactory
+
 from modernomad.core.models import *
 
 
-class LocationFactory(factory.DjangoModelFactory):
+class LocationFactory(DjangoModelFactory):
     class Meta:
         model = Location
 
@@ -10,10 +12,10 @@ class LocationFactory(factory.DjangoModelFactory):
     slug = "someloc"
     latitude = 1.0
     longitude = 2.0
-    welcome_email_days_ahead=2
+    welcome_email_days_ahead = 2
 
 
-class ResourceFactory(factory.DjangoModelFactory):
+class ResourceFactory(DjangoModelFactory):
     class Meta:
         model = Resource
 
@@ -22,7 +24,7 @@ class ResourceFactory(factory.DjangoModelFactory):
     location = factory.SubFactory(LocationFactory)
 
 
-class UserFactory(factory.DjangoModelFactory):
+class UserFactory(DjangoModelFactory):
     class Meta:
         model = User
 

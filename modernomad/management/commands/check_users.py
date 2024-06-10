@@ -1,23 +1,18 @@
-import os
-import time
-import urllib
-import sys
-import datetime
 import logging
 
-from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.models import User
+from django.core.management.base import BaseCommand
 
 logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    #help = "Set all users to given email, password and customer ID"
-    #args = "[email_address] [password] [customer_id]"
+    # help = "Set all users to given email, password and customer ID"
+    # args = "[email_address] [password] [customer_id]"
     requires_system_checks = True
 
     def handle(self, *labels, **options):
-        #if not labels or len(labels) < 1: raise CommandError('Args: <email_address> <password> <customer_id>')
+        # if not labels or len(labels) < 1: raise CommandError('Args: <email_address> <password> <customer_id>')
 
         logger.debug("Checking %d users..." % User.objects.all().count())
 
@@ -25,7 +20,6 @@ class Command(BaseCommand):
         dup_emails = []
         cap_emails = []
         for u in User.objects.filter(is_active=True):
-
             if not u.username.replace("_", "").isalnum():
                 nonalpha.append(u)
                 logger.debug("%s: not alphanumeric" % u.username)
