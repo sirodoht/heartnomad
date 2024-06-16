@@ -614,7 +614,7 @@ def current(request, location_slug):
     # fail gracefully if location does not exist
     try:
         location = get_location(location_slug)
-    except:
+    except Exception:
         # XXX TODO reject and bounce back to sender?
         logger.error("location not found")
         return HttpResponse(status=200)
@@ -732,7 +732,7 @@ def unsubscribe(request, location_slug):
     # fail gracefully if location does not exist
     try:
         location = get_location(location_slug)
-    except:
+    except Exception:
         # XXX TODO reject and bounce back to sender?
         return HttpResponse(status=200)
     logger.debug("unsubscribe@ for location: %s" % location)
@@ -747,7 +747,7 @@ def test80085(request, location_slug):
     # fail gracefully if location does not exist
     try:
         location = get_location(location_slug)
-    except:
+    except Exception:
         # XXX TODO reject and bounce back to sender?
         return HttpResponse(status=200)
     logger.debug("test80085@ for location: %s" % location)
@@ -860,7 +860,7 @@ def stay(request, location_slug):
     # fail gracefully if location does not exist
     try:
         location = get_location(location_slug)
-    except:
+    except Exception:
         # XXX TODO reject and bounce back to sender?
         return HttpResponse(status=200)
     logger.debug("stay@ for location: %s" % location)
@@ -967,7 +967,7 @@ def residents(request, location_slug):
     # fail gracefully if location does not exist
     try:
         location = get_location(location_slug)
-    except:
+    except Exception:
         # XXX TODO reject and bounce back to sender?
         logger.error("location not found")
         return HttpResponse(status=200)
@@ -1077,7 +1077,7 @@ def announce(request, location_slug):
     # fail gracefully if location does not exist
     try:
         location = get_location(location_slug)
-    except:
+    except Exception:
         # XXX TODO reject and bounce back to sender?
         logger.error("location not found")
         return HttpResponse(status=200)

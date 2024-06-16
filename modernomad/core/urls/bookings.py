@@ -1,7 +1,15 @@
 from django.urls import re_path
 
 from modernomad.core.views.billing import submit_payment
-from modernomad.core.views.booking import *
+from modernomad.core.views.booking import (
+    BookingCancel,
+    BookingConfirm,
+    BookingDelete,
+    BookingDetail,
+    BookingEdit,
+    BookingReceipt,
+    BookingSubmit,
+)
 
 # urls starting in /booking get sent here.
 urlpatterns = [

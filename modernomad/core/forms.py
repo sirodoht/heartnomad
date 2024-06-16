@@ -136,7 +136,7 @@ class UserProfileForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        super(UserProfileForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # self.instance will always be an instance of UserProfile. if this
         # is an existing object, then populate the initial values.
@@ -248,7 +248,7 @@ class UserProfileForm(forms.ModelForm):
 
     def save(self, commit=True):
         # save the UserProfile (if editing an existing instance, it will be updated)
-        profile = super(UserProfileForm, self).save(commit=False)
+        profile = super().save(commit=False)
         # then update the User model with the values provided
         try:
             # Editing
@@ -263,7 +263,7 @@ class UserProfileForm(forms.ModelForm):
                 # set_password hashes the selected password
                 user.set_password(self.cleaned_data["password2"])
             user.save()
-        except:
+        except Exception:
             # Adding
             user = self.create_user()
             profile.user = user
@@ -384,7 +384,7 @@ class LocationContentForm(forms.ModelForm):
 
 class BootstrapModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(BootstrapModelForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
             field.widget.attrs["class"] = "form-control"
 
@@ -401,7 +401,7 @@ class LocationMenuForm(BootstrapModelForm):
 class LocationPageForm(forms.Form):
     def __init__(self, *args, **kwargs):
         location = kwargs.pop("location", None)
-        super(LocationPageForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if location:
             self.fields["menu"].queryset = LocationMenu.objects.filter(
                 location=location
@@ -442,7 +442,7 @@ class LocationRoomForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        super(LocationRoomForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
             field.widget.attrs["class"] = "form-control"
             if field_name == "change_backers":
@@ -485,7 +485,7 @@ class BookingUseForm(forms.ModelForm):
         labels = {"resource": "Room"}
 
     def __init__(self, location, *args, **kwargs):
-        super(BookingUseForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if not location:
             raise Exception("No location given!")
         if self.instance.pk:
@@ -501,7 +501,7 @@ class BookingUseForm(forms.ModelForm):
         ].choices = self.location.rooms_with_future_capacity_choices()
 
     def clean(self):
-        cleaned_data = super(BookingUseForm, self).clean()
+        cleaned_data = super().clean()
         arrive = cleaned_data.get("arrive")
         depart = cleaned_data.get("depart")
         if (depart - arrive).days > self.location.max_booking_days:
@@ -559,9 +559,9 @@ class PaymentForm(forms.Form):
 
         try:
             default_amount = kwargs.pop("default_amount")
-        except:
+        except Exception:
             default_amount = None
-        super(PaymentForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if default_amount:
             self.fields["amount"].initial = default_amount
 
@@ -599,7 +599,7 @@ class BookingEmailTemplateForm(EmailTemplateForm):
 
         domain = Site.objects.get_current().domain
         # calling super will initialize the form fields
-        super(BookingEmailTemplateForm, self).__init__()
+        super().__init__()
 
         # add in the extra fields
         self.fields["sender"].initial = location.from_email()
@@ -662,7 +662,7 @@ class SubscriptionEmailTemplateForm(EmailTemplateForm):
 
         domain = Site.objects.get_current().domain
         # calling super will initialize the form fields
-        super(SubscriptionEmailTemplateForm, self).__init__()
+        super().__init__()
 
         # add in the extra fields
         self.fields["sender"].initial = location.from_email()

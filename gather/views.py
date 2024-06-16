@@ -175,7 +175,7 @@ def view_event(request, event_id, event_slug, location_slug=None):
     # that that will be reflected in the URL path.
     try:
         event = Event.objects.get(id=event_id)
-    except:
+    except Exception:
         logger.debug("event not found")
         return HttpResponseRedirect("/404")
 

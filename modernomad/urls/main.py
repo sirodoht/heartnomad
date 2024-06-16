@@ -40,22 +40,12 @@ urlpatterns = [
     re_path(r"^", include("graphapi.urls")),
 ]
 
-# media url hackery.
+# set media url
 media_url = settings.MEDIA_URL.lstrip("/").rstrip("/")
 urlpatterns += [
     re_path(
-        r"^%s/(?P<path>.*)$" % media_url,
+        r"^%s/(?P<path>.*)$" % media_url,  # noqa: UP031
         django.views.static.serve,
         {"document_root": settings.MEDIA_ROOT, "show_indexes": True},
     ),
 ]
-
-# if settings.DEBUG:
-#     import debug_toolbar
-
-#     urlpatterns = [
-#         # For Django >= 2.0
-#         # path('__debug__/', include(debug_toolbar.urls)),
-#         # For django versions before 2.0:
-#         re_path(r"^__debug__/", include(debug_toolbar.urls)),
-#     ] + urlpatterns

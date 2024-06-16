@@ -361,7 +361,7 @@ def get_location(location_slug):
     if location_slug:
         try:
             location = Location.objects.filter(slug=location_slug).first()
-        except:
+        except Exception:
             raise LocationDoesNotExistException(
                 "The requested location does not exist: %s" % location_slug
             )
@@ -672,7 +672,7 @@ class UseManager(models.Manager):
     def on_date(self, the_day, status, location):
         # return the bookings that intersect this day, of any status
         all_on_date = (
-            super(UseManager, self)
+            super()
             .get_queryset()
             .filter(location=location)
             .filter(arrive__lte=the_day)
@@ -706,7 +706,7 @@ class UseManager(models.Manager):
 
     def confirmed_but_unpaid(self, location):
         confirmed_this_location = (
-            super(UseManager, self)
+            super()
             .get_queryset()
             .filter(location=location, status="confirmed")
             .order_by("-arrive")
@@ -725,7 +725,7 @@ class UseManager(models.Manager):
                 # XXX FIXME. this is a horrible hack.
                 if not use.booking.bill.is_paid():
                     unpaid_this_location.append(use.booking)
-            except:
+            except Exception:
                 pass
         return unpaid_this_location
 
@@ -1187,7 +1187,7 @@ class Subscription(models.Model):
                 (paid_until_start, paid_until_end) = self.get_period(
                     target_date=b.period_end
                 )
-            except:
+            except Exception:
                 logger.debug("didn't like date")
                 logger.debug(b.period_end)
             if b.is_paid() or (include_partial and b.total_paid() > 0):
@@ -1361,7 +1361,7 @@ class Use(models.Model):
                 self.resource.drftable_between(self.arrive, self.depart)
                 and self.user.profile.drft_spending_balance() >= self.total_nights()
             )
-        except:
+        except Exception:
             return False
 
 

@@ -1,5 +1,6 @@
 import datetime
 import logging
+from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -22,7 +23,7 @@ from modernomad.core.forms import (
     AdminBookingForm,
     BookingEmailTemplateForm,
 )
-from modernomad.core.models import *
+from modernomad.core.models import Booking, Location, Resource, Use, UseNote, UserNote
 from modernomad.core.tasks import guest_welcome
 from modernomad.core.views import occupancy
 
@@ -117,7 +118,7 @@ def BookingManageCreate(request, location_slug):
         try:
             username = request.POST.get("username")
             the_user = User.objects.get(username=username)
-        except:
+        except Exception:
             messages.add_message(
                 request,
                 messages.INFO,
@@ -306,7 +307,7 @@ def BookingManagePayWithDrft(request, location_slug, booking_id):
             if days_until_arrival <= location.welcome_email_days_ahead:
                 try:
                     guest_welcome(booking.use)
-                except:
+                except Exception:
                     messages.add_message(
                         request,
                         messages.INFO,
@@ -381,7 +382,7 @@ def BookingManageEdit(request, location_slug, booking_id):
             booking.use.user = new_user
             booking.use.save()
             messages.add_message(request, messages.INFO, "User changed.")
-        except:
+        except Exception:
             messages.add_message(request, messages.INFO, "Invalid user given!")
     elif "arrive" in request.POST:
         try:
@@ -399,7 +400,7 @@ def BookingManageEdit(request, location_slug, booking_id):
                 booking.use.save()
                 booking.generate_bill()
                 messages.add_message(request, messages.INFO, "Dates changed.")
-        except:
+        except Exception:
             messages.add_message(request, messages.INFO, "Invalid dates given!")
 
     elif "status" in request.POST:
@@ -415,7 +416,7 @@ def BookingManageEdit(request, location_slug, booking_id):
                 )
             else:
                 messages.add_message(request, messages.INFO, "Status changed.")
-        except:
+        except Exception:
             messages.add_message(request, messages.INFO, "Invalid room given!")
     elif "room_id" in request.POST:
         try:
@@ -424,7 +425,7 @@ def BookingManageEdit(request, location_slug, booking_id):
             booking.use.save()
             booking.reset_rate()
             messages.add_message(request, messages.INFO, "Room changed.")
-        except:
+        except Exception:
             messages.add_message(request, messages.INFO, "Invalid room given!")
     elif "rate" in request.POST:
         rate = request.POST.get("rate")

@@ -1,6 +1,3 @@
-from modernomad.core.serializers import *
-
-
 class CommandResult:
     def __init__(self, data=None, errors={}, warnings={}):
         self.data = data

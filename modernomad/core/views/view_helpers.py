@@ -2,13 +2,13 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 
-from modernomad.core.models import *
+from modernomad.core.models import Location
 
 
 def _get_user_and_perms(request, username):
     try:
         user = User.objects.get(username=username)
-    except:
+    except Exception:
         messages.add_message(
             request, messages.INFO, "There is no user with that username."
         )

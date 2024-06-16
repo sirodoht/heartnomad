@@ -3,7 +3,7 @@ from datetime import timedelta
 
 import graphene
 from graphene import Node, ObjectType
-from graphene.types.datetime import *
+from graphene.types.datetime import DateTime
 from graphene_django.filter.fields import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
 

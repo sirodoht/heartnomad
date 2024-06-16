@@ -4,6 +4,7 @@ import logging
 from json import JSONEncoder
 
 import dateutil
+import stripe
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -383,7 +384,7 @@ def BookingEdit(request, booking_id, location_slug):
                     # notify house_admins by email
                     try:
                         updated_booking_notify(booking)
-                    except:
+                    except Exception:
                         logger.debug(
                             "Booking %d was updated but admin notification failed to send"
                             % booking.id

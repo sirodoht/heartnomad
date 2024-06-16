@@ -23,7 +23,7 @@ def create_transaction(reason, amount, from_account, to_account):
     try:
         assert t.valid
         return True
-    except:
+    except Exception:
         logger.error(
             "transaction was invalid. please check transaction ids %d and %d"
             % (e1.id, e2.id)
@@ -44,7 +44,7 @@ class AccountDetail(View):
                 or request.user in account.admins.all()
             )
             return render(request, self.template_name, {"account": account})
-        except:
+        except Exception:
             messages.add_message(
                 request,
                 messages.INFO,
@@ -85,7 +85,7 @@ class AccountList(View):
                     request.user in from_account.owners.all()
                     or request.user in from_account.admins.all()
                 )
-            except:
+            except Exception:
                 messages.add_message(
                     request,
                     messages.INFO,
@@ -108,7 +108,7 @@ class AccountList(View):
             # ensure not to and from same account
             try:
                 assert to_account != from_account
-            except:
+            except Exception:
                 messages.add_message(
                     request, messages.INFO, "You must select two different accounts"
                 )

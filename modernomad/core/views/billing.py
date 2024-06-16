@@ -1,6 +1,7 @@
 import datetime
 import logging
 import time
+from decimal import Decimal
 
 import stripe
 from django.conf import settings
@@ -31,7 +32,17 @@ from modernomad.core.forms import (
     PaymentForm,
     SubscriptionEmailTemplateForm,
 )
-from modernomad.core.models import *
+from modernomad.core.models import (
+    Bill,
+    BillLineItem,
+    EmailTemplate,
+    Location,
+    Payment,
+    Subscription,
+    SubscriptionNote,
+    Use,
+    UserNote,
+)
 from modernomad.core.tasks import guest_welcome
 from modernomad.core.views import occupancy
 
@@ -608,7 +619,7 @@ def submit_payment(request, booking_uuid, location_slug):
             pay_user = None
             try:
                 pay_user = User.objects.filter(email=pay_email).first()
-            except:
+            except Exception:
                 pass
 
             # create the charge on Stripe's servers - this will charge the user's card
@@ -880,7 +891,7 @@ def SubscriptionManageCreate(request, location_slug):
         try:
             username = request.POST.get("username")
             subscription_user = User.objects.get(username=username)
-        except:
+        except Exception:
             messages.add_message(
                 request,
                 messages.INFO,

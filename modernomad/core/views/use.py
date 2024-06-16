@@ -7,7 +7,7 @@ from django.contrib.sites.models import Site
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 
-from modernomad.core.models import Location, Use
+from modernomad.core.models import Account, Currency, Location, Use
 
 
 @login_required
@@ -30,11 +30,7 @@ def UseDetail(request, use_id, location_slug):
         or (request.user in location.readonly_admins.all())
         or (request.user in location.residents.all())
     ):
-        if use.arrive >= datetime.date.today():
-            past = False
-        else:
-            past = True
-
+        past = use.arrive < datetime.date.today()
         domain = Site.objects.get_current().domain
 
         # users that intersect this stay
@@ -63,7 +59,7 @@ def UseDetail(request, use_id, location_slug):
 
             if use.resource.drftable_between(use.arrive, use.depart):
                 has_future_drft_capacity = True
-        except:
+        except Exception:
             # continues silently if no DRFT and room backing have not been
             # setup.
             pass

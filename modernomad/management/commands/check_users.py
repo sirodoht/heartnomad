@@ -14,7 +14,7 @@ class Command(BaseCommand):
     def handle(self, *labels, **options):
         # if not labels or len(labels) < 1: raise CommandError('Args: <email_address> <password> <customer_id>')
 
-        logger.debug("Checking %d users..." % User.objects.all().count())
+        logger.debug("Checking {User.objects.all().count()} users...")
 
         nonalpha = []
         dup_emails = []
@@ -22,24 +22,24 @@ class Command(BaseCommand):
         for u in User.objects.filter(is_active=True):
             if not u.username.replace("_", "").isalnum():
                 nonalpha.append(u)
-                logger.debug("%s: not alphanumeric" % u.username)
-                logger.debug("    UserID: %d" % u.id)
-                logger.debug("    Last Login: %s" % u.last_login)
+                logger.debug(f"{u.username}: not alphanumeric")
+                logger.debug(f"    UserID: {u.id}")
+                logger.debug(f"    Last Login: {u.last_login}")
 
             if u.email not in dup_emails:
                 others_with_email = User.objects.filter(email=u.email, is_active=True)
                 if others_with_email.count() > 1:
                     dup_emails.append(u.email)
-                    logger.debug("%s: Duplicate email" % u.email)
+                    logger.debug(f"{u.email}: Duplicate email")
                     for o in others_with_email:
-                        logger.debug("    %s/%d: %s" % (o.username, o.id, o.last_login))
+                        logger.debug(f"    {o.username}/{o.id}: {o.last_login}")
 
             if u.email != u.email.lower():
                 cap_emails.append(u)
-                logger.debug("%s: capitolized email" % u.username)
-                logger.debug("    UserID: %d" % u.id)
-                logger.debug("    Last Login: %s" % u.last_login)
+                logger.debug(f"{u.username}: capitolized email")
+                logger.debug(f"    UserID: {u.id}")
+                logger.debug(f"    Last Login: {u.last_login}")
 
-        logger.debug("%d alphanumeric problems" % len(nonalpha))
-        logger.debug("%d duplicate email problems" % len(dup_emails))
-        logger.debug("%d capitolized emails" % len(cap_emails))
+        logger.debug(f"{len(nonalpha)} alphanumeric problems")
+        logger.debug(f"{len(dup_emails)} duplicate email problems")
+        logger.debug(f"{len(cap_emails)} capitolized emails")
