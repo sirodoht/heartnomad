@@ -4,6 +4,7 @@ import logging
 from json import JSONEncoder
 
 import dateutil
+import stripe
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -18,7 +19,13 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import TemplateView
 from rest_framework import generics, mixins
 
-from modernomad.core.emails.messages import new_booking_notify, send_booking_receipt
+from modernomad.core import payment_gateway
+from modernomad.core.emails.messages import (
+    guest_welcome,
+    new_booking_notify,
+    send_booking_receipt,
+    updated_booking_notify,
+)
 from modernomad.core.forms import BookingUseForm
 from modernomad.core.models import Booking, Fee, Location, Resource, Use
 from modernomad.core.serializers import FeeSerializer, ResourceSerializer
@@ -383,7 +390,7 @@ def BookingEdit(request, booking_id, location_slug):
                     # notify house_admins by email
                     try:
                         updated_booking_notify(booking)
-                    except:
+                    except Exception:
                         logger.debug(
                             "Booking %d was updated but admin notification failed to send"
                             % booking.id
@@ -428,7 +435,7 @@ def BookingConfirm(request, booking_id, location_slug):
     ):
         return HttpResponseRedirect("/")
 
-    if not booking.use.user.profile.customer_id:
+    if not booking.use.user.profile.stripe_customer_id:
         messages.add_message(
             request,
             messages.INFO,
@@ -482,7 +489,7 @@ def BookingDelete(request, booking_id, location_slug):
     else:
         return HttpResponseRedirect("/")
 
-    html += "</div>"
+    html = "</div>"
     return HttpResponse(html)
 
 

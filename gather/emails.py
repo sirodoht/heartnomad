@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 
 import requests
 from django.conf import settings
@@ -142,7 +143,7 @@ def event_published_notification(event, location):
         logger.debug(event.visibility)
         try:
             u = User.objects.get(email=subscriber)
-        except:
+        except Exception:
             logger.error(
                 "There was an error retrieving the user associated with email address %s, likely because the email is not unique. Skipping this notification."
                 % subscriber
@@ -228,7 +229,7 @@ def event_message(request, location_slug=None):
         event_id = int(alias[5:])
         logger.debug("event_message: event_id=%s" % event_id)
         event = Event.objects.get(id=event_id)
-    except:
+    except Exception:
         pass
     if not event:
         logger.warn("Event (%s) not found.  Exiting quietly." % alias)

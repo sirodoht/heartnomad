@@ -40,7 +40,7 @@
                 </h4>
             {% endif %}
             <a class="btn btn-dark btn-small" href="{% url 'user_edit' user.username%}">Edit Profile</a>
-            {% if user.profile.customer_id %}
+            {% if user.profile.stripe_customer_id %}
                 <form class="userprofile-card-form" method="post" action="{% url 'user_delete_card' user.username %}">
                     {% csrf_token %}
                     <input type="submit" class="btn btn-danger btn-small" value="Delete Card">

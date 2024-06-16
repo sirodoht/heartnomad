@@ -23,7 +23,14 @@ from modernomad.core.forms import (
     LocationRoomForm,
     UserProfileForm,
 )
-from modernomad.core.models import *
+from modernomad.core.models import (
+    Booking,
+    Location,
+    Resource,
+    Subscription,
+    Use,
+    UserProfile,
+)
 
 from .view_helpers import _get_user_and_perms
 
@@ -93,11 +100,7 @@ def user_edit_room(request, username, room_id):
     if room not in Resource.objects.backed_by(user):
         return HttpResponseRedirect("/404")
 
-    if room.image:
-        has_image = True
-    else:
-        has_image = False
-
+    has_image = bool(room.image)
     resource_capacity = SerializedResourceCapacity(
         room, timezone.localtime(timezone.now())
     )
@@ -242,10 +245,7 @@ def user_login(request, username=None):
 
 
 def register(request):
-    if request.session.get("booking"):
-        booking = request.session.get("booking")
-    else:
-        booking = None
+    booking = request.session.get("booking")
     if request.method == "POST":
         profile_form = UserProfileForm(request.POST, request.FILES)
         if profile_form.is_valid():
@@ -278,26 +278,21 @@ def UserEdit(request, username):
     profile = UserProfile.objects.get(user__username=username)
     user = User.objects.get(username=username)
     if not (request.user.is_authenticated and request.user.id == user.id):
-        messages.add_message(request, messages.INFO, "You cannot edit this profile")
+        messages.info(request, "You cannot edit this profile")
         return HttpResponseRedirect("/404")
 
     if request.method == "POST":
         profile_form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if profile_form.is_valid():
             user = profile_form.save()
-            messages.add_message(
-                request, messages.INFO, "Your profile has been updated."
-            )
-            return HttpResponseRedirect("/people/%s" % user.username)
+            messages.info(request, "Your profile has been updated.")
+            return HttpResponseRedirect(f"/people/{user.username}")
         else:
             logger.debug("profile form contained errors:")
             logger.debug(profile_form.errors)
     else:
         profile_form = UserProfileForm(instance=profile)
-    if profile.image:
-        has_image = True
-    else:
-        has_image = False
+    has_image = bool(profile.image)
     return render(
         request,
         "registration/registration_form.html",
@@ -309,15 +304,15 @@ def UserEdit(request, username):
 def username_available(request):
     """AJAX request to check for existing user with the submitted username"""
     logger.debug("in username_available")
-    if not request.is_ajax():
+    if request.headers.get("x-requested-with") != "XMLHttpRequest":
         return HttpResponseRedirect("/404")
     username = request.POST.get("username")
     users_with_username = len(User.objects.filter(username=username))
     if users_with_username:
-        logger.debug("username %s is already in use" % username)
+        logger.debug(f"username {username} is already in use")
         is_available = "false"
     else:
-        logger.debug("username %s is available" % username)
+        logger.debug(f"username {username} is available")
         is_available = "true"
     return HttpResponse(is_available)
 
@@ -326,15 +321,15 @@ def username_available(request):
 def email_available(request):
     """AJAX request to check for existing user with the submitted email"""
     logger.debug("in email_available")
-    if not request.is_ajax():
+    if request.headers.get("x-requested-with") != "XMLHttpRequest":
         return HttpResponseRedirect("/404")
     email = request.POST.get("email").lower()
     users_with_email = len(User.objects.filter(email=email))
     if users_with_email:
-        logger.debug("email address %s is already in use" % email)
+        logger.debug(f"email address {email} is already in use")
         is_available = "false"
     else:
-        logger.debug("email address %s is available" % email)
+        logger.debug(f"email address {email} is available")
         is_available = "true"
     return HttpResponse(is_available)
 
@@ -346,6 +341,6 @@ def UserAvatar(request, username):
     user = get_object_or_404(User, username=username)
     try:
         url = user.profile.image.url
-    except:
+    except Exception:
         url = "/static/img/default.jpg"
     return HttpResponse(url)

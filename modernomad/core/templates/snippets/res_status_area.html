@@ -12,7 +12,7 @@
     {% if not r.is_canceled %}
         {% if r.use.accounted_by == 'drft' %}
             <p class="text-success"><i class="icon-ok"i></i> This user has a DRFT balance of Ɖ{{user_drft_balance}}.</p>
-        {% elif r.use.user.profile.customer_id %}
+        {% elif r.use.user.profile.stripe_customer_id %}
             <p class="text-success"><i class="icon-ok"i></i> This user has valid payment credentials.</p>
         {% else %}
             <p class="text-error"><i class="icon-warning-sign"i></i> This user does not have valid payment credentials.</p>
@@ -30,7 +30,7 @@
                 {% else %}
                     <div>This was requested as a DRFT booking but either the user's balance is insufficient or the availability is not longer there.</div>
                 {% endif %}
-            {% elif r.use.user.profile.customer_id %}
+            {% elif r.use.user.profile.stripe_customer_id %}
                 <a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
                 Charge the user's card ${{r.bill.total_owed}} and notify them via email
                 </a> to confirm this booking. (A receipt will be sent automatically. The welcome email will be sent 
@@ -47,7 +47,7 @@
                 {% else %}
                     <div>This was requested as a DRFT booking but either the user's balance is insufficient or the availability is not longer there.</div>
                 {% endif %}
-            {% elif r.use.user.profile.customer_id %}
+            {% elif r.use.user.profile.stripe_customer_id %}
                 The booking is approved and the user has valid payment details. 
                 <a href="#" id="res-charge-card" class="res-manage-action res-manage-btn"> Charge the user's card </a> to confirm this booking.  (A receipt will always be sent automatically. The welcome email will be sent immediately if this booking is less than {{days_before_welcome_email}} days away) They will have the
                 opportunity to cancel if desired. 
@@ -60,7 +60,7 @@
         {% elif r.is_confirmed %}
             {% if r.use.accounted_by == 'drft' %}
                 <p>The booking has been paid with DRFT.</p>
-            {% elif r.use.user.profile.customer_id %}
+            {% elif r.use.user.profile.stripe_customer_id %}
                 {% if r.is_paid %}
                     <p>This booking is confirmed and paid. No action needed.</p>  
                 {% else %}

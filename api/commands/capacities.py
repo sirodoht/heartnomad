@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from api.command import *
+from api.command import Command
 from modernomad.core.models import CapacityChange, Resource
 
 

@@ -314,10 +314,9 @@ def updated_booking_notify(booking):
             booking.id,
         ),
     )
-    text_content = (
-        """Howdy,\n\nA booking has been updated and requires your review.\n\nManage this booking at %s%s."""
-        % (domain, admin_path)
-    )
+    text_content = "Howdy,\n\nA booking has been updated and requires your review."
+    text_content += "\n\nManage this booking at {domain}{admin_path}."
+
     recipients = []
     for admin in booking.use.location.house_admins.all():
         if admin.email not in recipients:
@@ -614,7 +613,7 @@ def current(request, location_slug):
     # fail gracefully if location does not exist
     try:
         location = get_location(location_slug)
-    except:
+    except Exception:
         # XXX TODO reject and bounce back to sender?
         logger.error("location not found")
         return HttpResponse(status=200)
@@ -732,7 +731,7 @@ def unsubscribe(request, location_slug):
     # fail gracefully if location does not exist
     try:
         location = get_location(location_slug)
-    except:
+    except Exception:
         # XXX TODO reject and bounce back to sender?
         return HttpResponse(status=200)
     logger.debug("unsubscribe@ for location: %s" % location)
@@ -747,7 +746,7 @@ def test80085(request, location_slug):
     # fail gracefully if location does not exist
     try:
         location = get_location(location_slug)
-    except:
+    except Exception:
         # XXX TODO reject and bounce back to sender?
         return HttpResponse(status=200)
     logger.debug("test80085@ for location: %s" % location)
@@ -860,7 +859,7 @@ def stay(request, location_slug):
     # fail gracefully if location does not exist
     try:
         location = get_location(location_slug)
-    except:
+    except Exception:
         # XXX TODO reject and bounce back to sender?
         return HttpResponse(status=200)
     logger.debug("stay@ for location: %s" % location)
@@ -967,7 +966,7 @@ def residents(request, location_slug):
     # fail gracefully if location does not exist
     try:
         location = get_location(location_slug)
-    except:
+    except Exception:
         # XXX TODO reject and bounce back to sender?
         logger.error("location not found")
         return HttpResponse(status=200)
@@ -1077,7 +1076,7 @@ def announce(request, location_slug):
     # fail gracefully if location does not exist
     try:
         location = get_location(location_slug)
-    except:
+    except Exception:
         # XXX TODO reject and bounce back to sender?
         logger.error("location not found")
         return HttpResponse(status=200)

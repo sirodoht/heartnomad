@@ -72,7 +72,7 @@ class MailgunBackend(BaseEmailBackend):
                     "message": StringIO(email_message.message().as_string()),
                 },
             )
-        except:
+        except Exception:
             if not self.fail_silently:
                 raise
             return False

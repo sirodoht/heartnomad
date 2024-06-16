@@ -47,10 +47,10 @@
                     <span class="fa fa-exclamation-circle"></span>
                     This booking is awaiting confirmation. You have a balance of Ɖ{{ drft_balance }}, and this room accepts DRFT. This booking will be paid with DRFT unless otherwise requested.
                     </div>
-                  {% elif booking.use.user.profile.customer_id %}
+                  {% elif booking.use.user.profile.stripe_customer_id %}
                     <div>
                       <span class="fa fa-exclamation-circle"></span>
-                      This booking is awaiting confirmation and you will receive an email when your card {%if user.profile.last4 %}(**{{user.profile.last4}}){% endif %} has been charged.
+                      This booking is awaiting confirmation and you will receive an email when your card has been charged.
                     </div>
                   {% else %}
 
@@ -265,7 +265,7 @@ var stripeResponseHandler = function(status, response) {
         $form.find('.payment-errors').text(response.error.message);
         $form.find('button').prop('disabled', false);
     } else {
-        // token contains id, last4, and card type
+        // token contains id and card type
         var token = response.id;
         // Insert the token into the form so it gets submitted to the server
         $form.append($('<input type="hidden" name="stripeToken" />').val(token));

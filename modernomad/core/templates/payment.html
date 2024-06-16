@@ -180,7 +180,7 @@
                 $(".submit-button").removeAttr("disabled");
             } else {
                 var form$ = $("#payment-form");
-                // token contains id, last4, and card type
+                // token contains id and card type
                 var token = response['id'];
                 // insert the token into the form so it gets submitted to the server
                 form$.append("<input type='hidden' name='stripeToken' value='" + token + "'/>");

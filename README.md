@@ -35,4 +35,4 @@ any modified versions that are running publicly (among other things). The
 [intent](http://www.gnu.org/licenses/why-affero-gpl.html) is for anyone
 improving the software makes those improvements available to others.
 
-<img src="static/img/agplv3-88x31.png" />
+<img src="modernomad/core/static/img/agplv3-88x31.png">

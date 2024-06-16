@@ -1,5 +1,6 @@
 import datetime
 import logging
+from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -11,7 +12,7 @@ from django.urls import reverse
 from django.utils import timezone
 from stripe.error import CardError
 
-from bank.models import Currency, Entry, Transaction
+from bank.models import Entry, Transaction
 from modernomad.core import payment_gateway
 from modernomad.core.decorators import house_admin_required
 from modernomad.core.emails.messages import (
@@ -22,9 +23,19 @@ from modernomad.core.forms import (
     AdminBookingForm,
     BookingEmailTemplateForm,
 )
-from modernomad.core.models import *
+from modernomad.core.models import (
+    Booking,
+    EmailTemplate,
+    Location,
+    Resource,
+    Use,
+    UseNote,
+    UserNote,
+    UseTransaction,
+)
 from modernomad.core.tasks import guest_welcome
 from modernomad.core.views import occupancy
+from modernomad.core.views.billing import _assemble_and_send_email
 
 logger = logging.getLogger(__name__)
 
@@ -117,11 +128,10 @@ def BookingManageCreate(request, location_slug):
         try:
             username = request.POST.get("username")
             the_user = User.objects.get(username=username)
-        except:
-            messages.add_message(
+        except Exception:
+            messages.info(
                 request,
-                messages.INFO,
-                "There is no user with the username %s" % username,
+                f"There is no user with the username {username}",
             )
             return HttpResponseRedirect(
                 reverse("booking_manage_create", args=(location.slug,))
@@ -143,11 +153,9 @@ def BookingManageCreate(request, location_slug):
             if notify:
                 new_booking_notify(booking)
 
-            messages.add_message(
+            messages.info(
                 request,
-                messages.INFO,
-                "The booking for %s %s was created."
-                % (use.user.first_name, use.user.last_name),
+                f"The booking for {use.user.first_name} {use.user.last_name} was created.",
             )
             return HttpResponseRedirect(
                 reverse("booking_manage", args=(location.slug, booking.id))
@@ -201,10 +209,7 @@ def BookingManage(request, location_slug, booking_id):
     capacity = location.capacity(booking.use.arrive, booking.use.depart)
     free = location.rooms_free(booking.use.arrive, booking.use.depart)
     date_list = occupancy.date_range_to_list(booking.use.arrive, booking.use.depart)
-    if booking.use.resource in free:
-        room_has_capacity = True
-    else:
-        room_has_capacity = False
+    room_has_capacity = booking.use.resource in free
 
     # Pull all the booking notes for this person
     if "note" in request.POST:
@@ -267,7 +272,6 @@ def BookingManagePayWithDrft(request, location_slug, booking_id):
         messages.add_message(request, messages.INFO, "Request not allowed")
         return HttpResponseRedirect("/404")
 
-    drft = Currency.objects.get(name="DRFT")
     user_drft_account = use.user.profile.primary_drft_account()
     user_drft_balance = use.user.profile.drft_spending_balance()
     room_drft_account = booking.use.resource.backing.drft_account
@@ -306,7 +310,7 @@ def BookingManagePayWithDrft(request, location_slug, booking_id):
             if days_until_arrival <= location.welcome_email_days_ahead:
                 try:
                     guest_welcome(booking.use)
-                except:
+                except Exception:
                     messages.add_message(
                         request,
                         messages.INFO,
@@ -372,7 +376,6 @@ def BookingManageAction(request, location_slug, booking_id):
 @house_admin_required
 def BookingManageEdit(request, location_slug, booking_id):
     logger.debug("BookingManageEdit")
-    location = get_object_or_404(Location, slug=location_slug)
     booking = Booking.objects.get(id=booking_id)
     logger.debug(request.POST)
     if "username" in request.POST:
@@ -381,7 +384,7 @@ def BookingManageEdit(request, location_slug, booking_id):
             booking.use.user = new_user
             booking.use.save()
             messages.add_message(request, messages.INFO, "User changed.")
-        except:
+        except Exception:
             messages.add_message(request, messages.INFO, "Invalid user given!")
     elif "arrive" in request.POST:
         try:
@@ -399,7 +402,7 @@ def BookingManageEdit(request, location_slug, booking_id):
                 booking.use.save()
                 booking.generate_bill()
                 messages.add_message(request, messages.INFO, "Dates changed.")
-        except:
+        except Exception:
             messages.add_message(request, messages.INFO, "Invalid dates given!")
 
     elif "status" in request.POST:
@@ -415,7 +418,7 @@ def BookingManageEdit(request, location_slug, booking_id):
                 )
             else:
                 messages.add_message(request, messages.INFO, "Status changed.")
-        except:
+        except Exception:
             messages.add_message(request, messages.INFO, "Invalid room given!")
     elif "room_id" in request.POST:
         try:
@@ -424,7 +427,7 @@ def BookingManageEdit(request, location_slug, booking_id):
             booking.use.save()
             booking.reset_rate()
             messages.add_message(request, messages.INFO, "Room changed.")
-        except:
+        except Exception:
             messages.add_message(request, messages.INFO, "Invalid room given!")
     elif "rate" in request.POST:
         rate = request.POST.get("rate")

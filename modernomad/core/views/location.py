@@ -22,8 +22,13 @@ from modernomad.core.forms import (
     LocationRoomForm,
     LocationSettingsForm,
 )
-from modernomad.core.models import *
-from modernomad.core.models import Location
+from modernomad.core.models import (
+    FlatPage,
+    Location,
+    LocationFlatPage,
+    LocationMenu,
+    Resource,
+)
 
 logger = logging.getLogger(__name__)
 

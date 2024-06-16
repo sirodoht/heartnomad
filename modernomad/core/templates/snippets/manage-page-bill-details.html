@@ -64,7 +64,6 @@
                     Refund: 
                 {% endif %}
                 {{ payment.payment_date }} 
-                {% if payment.last4 %}(***{{payment.last4}}){% elif payment.payment_method %}({{payment.payment_method}}){% endif %}
             </td>
             <td></td>
             <td class="money">-${{ payment.paid_amount|floatformat:2 }}</td> 
@@ -76,7 +75,4 @@
             <td></td>
             <td><strong><span id="booking-total" class="{{total_owed_color}} pull-right">${{bill.total_owed}} </span></strong></td>
         </tr>
-
     </table>
-
-

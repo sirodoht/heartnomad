@@ -11,7 +11,7 @@
             {% endif %} 
         
         <tr><td>
-        {% if s.user.profile.customer_id %}
+        {% if s.user.profile.stripe_customer_id %}
             The user has a card on file.
         {% else %}
             The user has no card on file. Send them an email to request it. 

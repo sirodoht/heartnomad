@@ -22,7 +22,7 @@ class Currency(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        super(Currency, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
         if not hasattr(self, "systemaccounts"):
             credit_account = Account.objects.create(
                 currency=self, name="%s SYSTEM CREDIT" % self.name, type=Account.CREDIT
@@ -155,7 +155,7 @@ class Transaction(models.Model):
             # loop of save()'s calling each other.
             Entry.objects.filter(transaction=self).update(valid=True)
 
-        super(Transaction, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def magnitude(self):
         # the magnitude value of a transaction is the total amount it sums to
@@ -188,7 +188,7 @@ class Entry(models.Model):
     def save(self, *args, **kwargs):
         # save the entry first so that we can validate any changes (since we're
         # pulling them from the DB)
-        super(Entry, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
         # if self.transaction:
         entries = self.transaction.entries.all()
         balance = sum([e.amount for e in entries])

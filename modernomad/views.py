@@ -39,9 +39,9 @@ def ErrorView(request):
 
 def robots(request):
     content = "User-agent: *\n"
-    for l in Location.objects.all():
-        content += "Disallow: /locations/%s/team/\n" % l.slug
-        content += "Disallow: /locations/%s/community/\n" % l.slug
-        content += "Disallow: /locations/%s/booking/create/\n" % l.slug
-        content += "Disallow: /locations/%s/events/create/\n" % l.slug
+    for loc in Location.objects.all():
+        content += f"Disallow: /locations/{loc.slug}/team/\n"
+        content += f"Disallow: /locations/{loc.slug}/community/\n"
+        content += f"Disallow: /locations/{loc.slug}/booking/create/\n"
+        content += f"Disallow: /locations/{loc.slug}/events/create/\n"
     return HttpResponse(content, content_type="text/plain")

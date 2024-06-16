@@ -15,15 +15,15 @@ class Command(BaseCommand):
         if not labels or len(labels) < 1:
             raise CommandError("Args: <email_address> <password> <customer_id>")
         new_email_address = labels[0]
-        logger.debug("Setting all emails:'%s' " % new_email_address)
+        logger.debug(f"Setting all emails:'{new_email_address}' ")
         new_password = None
         if len(labels) >= 2:
             new_password = labels[1]
-            logger.debug("Setting all passwords:'%s' " % new_password)
+            logger.debug(f"Setting all passwords:'{new_password}' ")
         new_customer_id = None
         if len(labels) >= 3:
             new_customer_id = labels[2]
-            logger.debug("Setting all customer ids:'%s' " % new_customer_id)
+            logger.debug(f"Setting all customer ids:'{new_customer_id}' ")
 
         changes = 0
         for u in User.objects.all():
@@ -31,7 +31,7 @@ class Command(BaseCommand):
             if new_password:
                 u.set_password(new_password)
             if new_customer_id:
-                u.profile.customer_id = new_customer_id
+                u.profile.stripe_customer_id = new_customer_id
             u.save()
             changes = changes + 1
-        logger.debug("Changed %s users." % changes)
+        logger.debug(f"Changed {changes} users.")
