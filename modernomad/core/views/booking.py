@@ -19,7 +19,13 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import TemplateView
 from rest_framework import generics, mixins
 
-from modernomad.core.emails.messages import new_booking_notify, send_booking_receipt
+from modernomad.core import payment_gateway
+from modernomad.core.emails.messages import (
+    guest_welcome,
+    new_booking_notify,
+    send_booking_receipt,
+    updated_booking_notify,
+)
 from modernomad.core.forms import BookingUseForm
 from modernomad.core.models import Booking, Fee, Location, Resource, Use
 from modernomad.core.serializers import FeeSerializer, ResourceSerializer
@@ -483,7 +489,7 @@ def BookingDelete(request, booking_id, location_slug):
     else:
         return HttpResponseRedirect("/")
 
-    html += "</div>"
+    html = "</div>"
     return HttpResponse(html)
 
 

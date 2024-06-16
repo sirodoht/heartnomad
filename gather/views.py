@@ -330,7 +330,7 @@ def upcoming_events_all_locations(request):
         events = paged_upcoming.page(1)
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
-        events = paged_upcoming.page(paginator.num_pages)
+        events = paged_upcoming.page(paged_upcoming.num_pages)
 
     return render(
         request,
@@ -471,7 +471,7 @@ def past_events(request, location_slug=None):
         events = paged_past.page(1)
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
-        events = paged_past.page(paginator.num_pages)
+        events = paged_past.page(paged_past.num_pages)
 
     return render(
         request,

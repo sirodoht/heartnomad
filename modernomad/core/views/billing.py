@@ -35,8 +35,10 @@ from modernomad.core.forms import (
 from modernomad.core.models import (
     Bill,
     BillLineItem,
+    Booking,
     EmailTemplate,
     Location,
+    LocationFee,
     Payment,
     Subscription,
     SubscriptionNote,
@@ -54,10 +56,7 @@ logger = logging.getLogger(__name__)
 def create_checkout_session(request, username):
     # check permissions
     user = get_object_or_404(User, username=username)
-    if (
-        request.user != user
-        and request.user not in booking.use.location.house_admins.all()
-    ):
+    if request.user != user:
         messages.info(
             request,
             (
@@ -107,6 +106,11 @@ def create_checkout_session(request, username):
 def checkout_success(request, username):
     # check permissions
     user = get_object_or_404(User, username=username)
+
+    booking_id = request.POST.get("res-id", False)
+    if booking_id:
+        booking = Booking.objects.get(id=booking_id)
+
     if (
         request.user != user
         and request.user not in booking.use.location.house_admins.all()
@@ -141,10 +145,7 @@ def checkout_success(request, username):
 def user_delete_card(request, username):
     # check permissions
     user = get_object_or_404(User, username=username)
-    if (
-        request.user != user
-        and request.user not in booking.use.location.house_admins.all()
-    ):
+    if request.user != user:
         messages.info(
             request,
             "You are not authorized to change this. Please log in or use the 3rd party.",
