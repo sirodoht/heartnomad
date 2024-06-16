@@ -97,8 +97,7 @@ class UserProfileForm(forms.ModelForm):
             "user",
             "status",
             "image_thumb",
-            "customer_id",
-            "last4",
+            "stripe_customer_id",
             "primary_accounts",
         ]
         # fields = ['first_name', 'last_name', 'email', 'username', 'password1', 'password2', 'image', 'bio', 'links']

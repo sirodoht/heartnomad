@@ -1747,7 +1747,6 @@ class Payment(models.Model):
     )
     paid_amount = models.DecimalField(max_digits=7, decimal_places=2, default=0)
     transaction_id = models.CharField(max_length=200, null=True, blank=True)
-    last4 = models.IntegerField(null=True, blank=True)
 
     objects = PaymentManager()
 
@@ -1905,15 +1904,10 @@ class UserProfile(models.Model):
         verbose_name="City",
         help_text="In what city are you primarily based?",
     )
-    # currently used to store the stripe customer id but could be used for
-    # other payment platforms in the future
-    customer_id = models.CharField(max_length=200, blank=True, null=True)
-    # JKS TODO between last4 and the customer_id, payment methods should really be their own model.
-    last4 = models.IntegerField(
-        null=True,
-        blank=True,
-        help_text="Last 4 digits of the user's card on file, if any",
-    )
+
+    stripe_customer_id = models.CharField(max_length=200, blank=True, null=True)
+    stripe_payment_method_id = models.CharField(max_length=200, blank=True, null=True)
+
     primary_accounts = models.ManyToManyField(
         Account,
         help_text="one for each currency",

@@ -25,7 +25,6 @@ from modernomad.core.emails.messages import (
     send_from_location_address,
     send_subscription_receipt,
     subscription_note_notify,
-    updated_booking_notify,
 )
 from modernomad.core.forms import (
     AdminSubscriptionForm,
@@ -42,7 +41,6 @@ from modernomad.core.models import (
     Payment,
     Subscription,
     SubscriptionNote,
-    Use,
     UserNote,
 )
 from modernomad.core.tasks import guest_welcome
@@ -70,20 +68,24 @@ def create_checkout_session(request, username):
         stripe.api_key = settings.STRIPE_SECRET_KEY
 
         # check if user exists on stripe
-        if user.profile.customer_id:
-            customer = stripe.Customer.retrieve(user.profile.customer_id)
+        if user.profile.stripe_customer_id:
+            customer = stripe.Customer.retrieve(user.profile.stripe_customer_id)
         else:
             customer = stripe.Customer.create(
                 email=user.email, name=f"{user.first_name} {user.last_name}"
             )
-            user.profile.customer_id = customer.id
+            user.profile.stripe_customer_id = customer.id
             user.profile.save()
 
+        success_url = (
+            f"{settings.CANONICAL_URL}/people/{user.username}/checkout-success/"
+            "?session_id={CHECKOUT_SESSION_ID}"  # this {CHECKOUT_SESSION_ID} is for stripe
+        )
         checkout_session = stripe.checkout.Session.create(
             mode="setup",
             currency="usd",
             customer=customer.id,
-            success_url=f"{settings.CANONICAL_URL}/people/{user.username}/checkout-success/",
+            success_url=success_url,
             cancel_url=f"{settings.CANONICAL_URL}/people/{user.username}/",
         )
     except Exception as e:
@@ -106,15 +108,7 @@ def create_checkout_session(request, username):
 def checkout_success(request, username):
     # check permissions
     user = get_object_or_404(User, username=username)
-
-    booking_id = request.POST.get("res-id", False)
-    if booking_id:
-        booking = Booking.objects.get(id=booking_id)
-
-    if (
-        request.user != user
-        and request.user not in booking.use.location.house_admins.all()
-    ):
+    if request.user != user:
         messages.info(
             request,
             (
@@ -124,21 +118,30 @@ def checkout_success(request, username):
         )
         return HttpResponseRedirect("/404")
 
-    # if booking
-    booking_id = request.POST.get("res-id")
-    if booking_id:
-        booking = Booking.objects.get(id=booking_id)
+    stripe_session_id = request.GET.get("session_id")
+    if not stripe_session_id:
+        message = "Could not get Stripe Session ID"
+        messages.error(request, message)
+        raise Exception(message)
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    stripe_session = stripe.checkout.Session.retrieve(
+        stripe_session_id, expand=["setup_intent"]
+    )
+
+    # save payment method on user
+    stripe_payment_method_id = stripe_session.setup_intent.payment_method
+    user.profile.stripe_payment_method_id = stripe_payment_method_id
+    user.profile.save()
+
+    # set default payment source to customer in stripe
+    stripe.Customer.modify(
+        user.profile.stripe_customer_id,
+        invoice_settings={"default_payment_method": stripe_payment_method_id},
+    )
 
     messages.info(request, "Thanks! Your card has been saved.")
-
-    # booking continued
-    if booking_id and booking.use.status == Use.APPROVED:
-        updated_booking_notify(booking)
-        return HttpResponseRedirect(
-            reverse("booking_detail", args=(booking.use.location.slug, booking.id))
-        )
-
-    return HttpResponseRedirect("/people/%s" % user.username)
+    return HttpResponseRedirect(f"/people/{user.username}")
 
 
 @login_required
@@ -154,7 +157,7 @@ def user_delete_card(request, username):
 
     try:
         stripe.api_key = settings.STRIPE_SECRET_KEY
-        stripe.Customer.delete(user.profile.customer_id)
+        stripe.Customer.delete(user.profile.stripe_customer_id)
     except Exception as e:
         messages.info(
             request,
@@ -165,7 +168,7 @@ def user_delete_card(request, username):
         )
         return redirect("user_detail", user.username)
 
-    user.profile.customer_id = None
+    user.profile.stripe_customer_id = None
     user.profile.save()
 
     messages.info(request, "Card deleted.")
@@ -640,7 +643,6 @@ def submit_payment(request, booking_uuid, location_slug):
                     payment_method=charge.source.brand,
                     paid_amount=(charge.amount / 100.00),
                     transaction_id=charge.id,
-                    last4=charge.source.last4,
                 )
 
                 if booking.bill.total_owed() <= 0.0:

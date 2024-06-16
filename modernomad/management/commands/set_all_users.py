@@ -31,7 +31,7 @@ class Command(BaseCommand):
             if new_password:
                 u.set_password(new_password)
             if new_customer_id:
-                u.profile.customer_id = new_customer_id
+                u.profile.stripe_customer_id = new_customer_id
             u.save()
             changes = changes + 1
         logger.debug(f"Changed {changes} users.")

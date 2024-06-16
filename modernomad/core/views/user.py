@@ -304,7 +304,7 @@ def UserEdit(request, username):
 def username_available(request):
     """AJAX request to check for existing user with the submitted username"""
     logger.debug("in username_available")
-    if not request.is_ajax():
+    if request.headers.get("x-requested-with") != "XMLHttpRequest":
         return HttpResponseRedirect("/404")
     username = request.POST.get("username")
     users_with_username = len(User.objects.filter(username=username))
@@ -321,7 +321,7 @@ def username_available(request):
 def email_available(request):
     """AJAX request to check for existing user with the submitted email"""
     logger.debug("in email_available")
-    if not request.is_ajax():
+    if request.headers.get("x-requested-with") != "XMLHttpRequest":
         return HttpResponseRedirect("/404")
     email = request.POST.get("email").lower()
     users_with_email = len(User.objects.filter(email=email))

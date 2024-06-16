@@ -127,7 +127,6 @@ class PaymentFactory(DjangoModelFactory):
     # payment_service and payment_method may be empty so ignoring those
     paid_amount = factory.Faker("pydecimal", left_digits=3, positive=True)
     transaction_id = factory.Faker("uuid4")
-    last4 = factory.Faker("pyint")
 
 
 class UseNoteFactory(DjangoModelFactory):

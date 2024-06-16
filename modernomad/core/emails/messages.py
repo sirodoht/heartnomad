@@ -314,10 +314,9 @@ def updated_booking_notify(booking):
             booking.id,
         ),
     )
-    text_content = (
-        """Howdy,\n\nA booking has been updated and requires your review.\n\nManage this booking at %s%s."""
-        % (domain, admin_path)
-    )
+    text_content = "Howdy,\n\nA booking has been updated and requires your review."
+    text_content += "\n\nManage this booking at {domain}{admin_path}."
+
     recipients = []
     for admin in booking.use.location.house_admins.all():
         if admin.email not in recipients:

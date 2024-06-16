@@ -32,8 +32,8 @@ STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 database_url = os.environ.get("DATABASE_URL")
 database_url = parse.urlparse(database_url)
-# e.g. postgres://mataroa:password@127.0.0.1:5432/mataroa
-database_name = database_url.path[1:]  # url.path is '/mataroa'
+# e.g. postgres://modernomad:password@127.0.0.1:5432/modernomad
+database_name = database_url.path[1:]  # url.path is '/modernomad'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",

@@ -435,7 +435,7 @@ def BookingConfirm(request, booking_id, location_slug):
     ):
         return HttpResponseRedirect("/")
 
-    if not booking.use.user.profile.customer_id:
+    if not booking.use.user.profile.stripe_customer_id:
         messages.add_message(
             request,
             messages.INFO,
