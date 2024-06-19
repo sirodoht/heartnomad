@@ -16,7 +16,34 @@
           - python3.11
           - python3.11-venv
           - python3.11-dev
+          - postgresql
+          - libpq-dev
+          - gcc
+          - python3-psycopg2
         state: present
+
+    # postgresql setup
+    - name: pg user
+      community.general.postgresql_user:
+        name: modernomad
+        password: "{{ postgres_password }}"
+        expires: infinity
+        state: present
+      become_user: postgres
+    - name: pg database
+      community.general.postgresql_db:
+        name: modernomad
+        owner: modernomad
+        state: present
+      become_user: postgres
+    - name: pg permissions
+      community.postgresql.postgresql_privs:
+        db: modernomad
+        privs: ALL
+        objs: ALL_IN_SCHEMA
+        role: modernomad
+        grant_option: true
+      become_user: postgres
 
     # caddy
     - name: add caddy key
@@ -111,6 +138,7 @@
       ansible.builtin.shell:
         cmd: |
           source .venv/bin/activate
+          export DATABASE_URL=postgres://modernomad:{{ postgres_password }}@localhost:5432/modernomad
           python3 manage.py migrate --no-input
         chdir: /var/www/modernomad
       args:
