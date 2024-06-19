@@ -1,5 +1,14 @@
 /// <reference types="Cypress" />
-const randomstring = require("randomstring");
+
+function generateRandomString(length) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    result += characters[randomIndex];
+  }
+  return result;
+}
 
 describe("Booking a room", function() {
   it("works for the full happy path: existing logged in user, adding card, approved by admin, refunded", function() {
@@ -165,7 +174,7 @@ describe("Booking a room", function() {
     cy.get("[name=last_name]").type("McBotface");
     cy.get("[name=referral]").type("Pixel");
     cy.get("[name=city]").type("Chapek 9");
-    cy.get("[name=email]").type(`${randomstring.generate(10)}@example.com`);
+    cy.get("[name=email]").type(`${generateRandomString(10)}@example.com`);
     cy.get("[name=password1]").type("password");
     cy.get("[name=password2]").type("password");
 
