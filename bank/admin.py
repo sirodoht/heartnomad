@@ -35,14 +35,10 @@ class AccountAdmin(admin.ModelAdmin):
         return obj.get_balance()
 
     def account_owners(self, obj):
-        return ", ".join(
-            [f"{a.first_name} {a.last_name}" for a in obj.owners.all()]
-        )
+        return ", ".join([f"{a.first_name} {a.last_name}" for a in obj.owners.all()])
 
     def account_admins(self, obj):
-        return ", ".join(
-            [f"{a.first_name} {a.last_name}" for a in obj.admins.all()]
-        )
+        return ", ".join([f"{a.first_name} {a.last_name}" for a in obj.admins.all()])
 
 
 class TransactionAdmin(admin.ModelAdmin):

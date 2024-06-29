@@ -172,8 +172,8 @@ class BookingAdmin(admin.ModelAdmin):
         if len(success_list) > 0:
             msg += "Receipts sent for booking(s) {}. ".format(",".join(success_list))
         if len(failure_list) > 0:
-            msg += (
-                "Receipt sending failed for booking(s) {}. (Make sure all payment information has been entered in the booking details and that the status of the booking is either unpaid or paid.)".format(",".join(failure_list))
+            msg += "Receipt sending failed for booking(s) {}. (Make sure all payment information has been entered in the booking details and that the status of the booking is either unpaid or paid.)".format(
+                ",".join(failure_list)
             )
         self.message_user(request, msg)
 

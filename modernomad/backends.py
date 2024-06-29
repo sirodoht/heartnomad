@@ -26,9 +26,7 @@ class MailgunBackend(BaseEmailBackend):
             kwargs.pop("server_name", None),
         )
 
-        super().__init__(
-            fail_silently=fail_silently, *args, **kwargs
-        )
+        super().__init__(fail_silently=fail_silently, *args, **kwargs)
 
         try:
             self._access_key = access_key or settings.MAILGUN_API_KEY

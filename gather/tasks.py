@@ -27,9 +27,7 @@ weekday_number_to_name = {
 
 def send_events_list(user, event_list, location):
     profile_url = reverse("user_detail", args=(user.username,))
-    footer = (
-        f"You are receiving this email because your preferences for event reminders are on. To turn them off, visit {profile_url}"
-    )
+    footer = f"You are receiving this email because your preferences for event reminders are on. To turn them off, visit {profile_url}"
     sender = location.from_email()
     subject = (
         "[" + location.email_subject_prefix + "]" + " Reminder of your events today"
@@ -65,9 +63,7 @@ def weekly_reminder_email(user, event_list, location):
     today_local = timezone.now().astimezone(current_tz).date()
     tomorrow_local = today_local + datetime.timedelta(days=1)
     week_name = tomorrow_local.strftime("%B %d, %Y")
-    footer = (
-        f"You are receiving this email because you requested weekly updates of upcoming events from {location_name}. To turn them off, visit {profile_url}"
-    )
+    footer = f"You are receiving this email because you requested weekly updates of upcoming events from {location_name}. To turn them off, visit {profile_url}"
     sender = location.from_email()
     subject = (
         "["

@@ -38,9 +38,7 @@ class GuestCalendar(HTMLCalendar):
                         body.append('<a href="../manage/booking/%d">' % use.booking.id)
                         # body.append('<a href="#booking%d">' % use.booking.id)
                     body.append(
-                        esc(
-                            f"{use.user.first_name.title()} ({use.resource.name})"
-                        )
+                        esc(f"{use.user.first_name.title()} ({use.resource.name})")
                     )
                     body.append("</a>")
                     if use.arrive.day == day:

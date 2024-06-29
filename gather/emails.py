@@ -281,9 +281,7 @@ def event_message(request, location_slug=None):
     event_url = request.build_absolute_uri(
         reverse("gather_view_event", args=(event.location.slug, event.id, event.slug))
     )
-    footer_msg = (
-        f"You are receving this email because you are one of the organizers or an event admin at this location. Visit this event online at {event_url}"
-    )
+    footer_msg = f"You are receving this email because you are one of the organizers or an event admin at this location. Visit this event online at {event_url}"
     body_plain = (
         body_plain + "\n\n-------------------------------------------\n" + footer_msg
     )

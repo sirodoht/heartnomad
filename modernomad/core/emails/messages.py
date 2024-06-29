@@ -223,9 +223,7 @@ def subscription_note_notify(subscription):
             subscription.id,
         ),
     )
-    text_content = (
-        f"""Howdy,\n\nA new note has been added to a subscription for {subscription.user.first_name} {subscription.user.last_name}. \n\nManage this subscription at {domain}{admin_path}."""
-    )
+    text_content = f"""Howdy,\n\nA new note has been added to a subscription for {subscription.user.first_name} {subscription.user.last_name}. \n\nManage this subscription at {domain}{admin_path}."""
     recipients = []
     for admin in subscription.location.house_admins.all():
         if admin.email not in recipients:
@@ -648,14 +646,10 @@ def current(request, location_slug):
     logger.debug(f"subject: {subject}")
 
     # add in footer
-    text_footer = (
-        f"""\n\n-------------------------------------------\nYou are receiving this email because you are a current guest or resident at {location.name}. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond."""
-    )
+    text_footer = f"""\n\n-------------------------------------------\nYou are receiving this email because you are a current guest or resident at {location.name}. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond."""
     body_plain = body_plain + text_footer
     if body_html:
-        html_footer = (
-            f"""<br><br>-------------------------------------------<br>You are receiving this email because you are a current guest or resident at {location.name}. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond."""
-        )
+        html_footer = f"""<br><br>-------------------------------------------<br>You are receiving this email because you are a current guest or resident at {location.name}. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond."""
         body_html = body_html + html_footer
 
     # send the message
@@ -878,14 +872,10 @@ def stay(request, location_slug):
     logger.debug(f"subject: {subject}")
 
     # add in footer
-    text_footer = (
-        f"""\n\n-------------------------------------------\nYou are receiving email to {recipient} because you are a location admin at {location.name}. Send mail to this list to reach other admins."""
-    )
+    text_footer = f"""\n\n-------------------------------------------\nYou are receiving email to {recipient} because you are a location admin at {location.name}. Send mail to this list to reach other admins."""
     body_plain = body_plain + text_footer
     if body_html:
-        html_footer = (
-            f"""<br><br>-------------------------------------------<br>You are receiving email to {recipient} because you are a location admin at {location.name}. Send mail to this list to reach other admins."""
-        )
+        html_footer = f"""<br><br>-------------------------------------------<br>You are receiving email to {recipient} because you are a location admin at {location.name}. Send mail to this list to reach other admins."""
         body_html = body_html + html_footer
 
     # send the message
@@ -987,15 +977,11 @@ def residents(request, location_slug):
     logger.debug(f"subject: {subject}")
 
     # add in footer
-    text_footer = (
-        f"""\n\n-------------------------------------------\n*~*~*~* {location.name} residents email list *~*~*~* """
-    )
+    text_footer = f"""\n\n-------------------------------------------\n*~*~*~* {location.name} residents email list *~*~*~* """
     body_plain = body_plain + text_footer
 
     if body_html:
-        html_footer = (
-            f"""<br><br>-------------------------------------------<br>*~*~*~* {location.name} residents email list *~*~*~* """
-        )
+        html_footer = f"""<br><br>-------------------------------------------<br>*~*~*~* {location.name} residents email list *~*~*~* """
         body_html = body_html + html_footer
 
     # send the message
@@ -1083,15 +1069,11 @@ def send_announce(request, user, location):
     logger.debug(f"subject: {subject}")
 
     # add in footer
-    text_footer = (
-        f"""\n\n-------------------------------------------\n*~*~*~* {location.name} Announce *~*~*~* """
-    )
+    text_footer = f"""\n\n-------------------------------------------\n*~*~*~* {location.name} Announce *~*~*~* """
     body_plain = body_plain + text_footer
 
     if body_html:
-        html_footer = (
-            f"""<br><br>-------------------------------------------<br>*~*~*~* {location.name} Announce *~*~*~* """
-        )
+        html_footer = f"""<br><br>-------------------------------------------<br>*~*~*~* {location.name} Announce *~*~*~* """
         body_html = body_html + html_footer
 
     # send the message

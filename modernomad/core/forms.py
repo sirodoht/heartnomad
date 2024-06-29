@@ -600,13 +600,15 @@ class BookingEmailTemplateForm(EmailTemplateForm):
 
         # add in the extra fields
         self.fields["sender"].initial = location.from_email()
-        self.fields["recipient"].initial = f"{booking.use.user.email}, {location.from_email()}"
+        self.fields[
+            "recipient"
+        ].initial = f"{booking.use.user.email}, {location.from_email()}"
         self.fields["footer"].initial = forms.CharField(
             widget=forms.Textarea(attrs={"readonly": "readonly"})
         )
-        self.fields["footer"].initial = (
-            f"""--------------------------------\nYour booking is from {booking.use.arrive} to {booking.use.depart}.\nManage your booking at https://{domain}{booking.get_absolute_url()}."""
-        )
+        self.fields[
+            "footer"
+        ].initial = f"""--------------------------------\nYour booking is from {booking.use.arrive} to {booking.use.depart}.\nManage your booking at https://{domain}{booking.get_absolute_url()}."""
 
         # both the subject and body fields expect to have access to all fields
         # associated with a booking, so all booking model fields are
@@ -654,7 +656,9 @@ class SubscriptionEmailTemplateForm(EmailTemplateForm):
 
         # add in the extra fields
         self.fields["sender"].initial = location.from_email()
-        self.fields["recipient"].initial = f"{subscription.user.email}, {location.from_email()}"
+        self.fields[
+            "recipient"
+        ].initial = f"{subscription.user.email}, {location.from_email()}"
         self.fields["footer"].initial = forms.CharField(
             widget=forms.Textarea(attrs={"readonly": "readonly"})
         )

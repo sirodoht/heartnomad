@@ -23,7 +23,5 @@ def get_qs_or_404(klass, *args, **kwargs):
             f"or QuerySet, not '{klass__name}'."
         )
     if not qs.exists():
-        raise Http404(
-            f"No {queryset.model._meta.object_name} matches the given query."
-        )
+        raise Http404(f"No {queryset.model._meta.object_name} matches the given query.")
     return qs

@@ -251,9 +251,7 @@ def view_event(request, event_id, event_slug, location_slug=None):
             )
         )
         formatted_location = event.where.replace(" ", "+")
-        event_google_cal_link = (
-            f"""https://www.google.com/calendar/render?action=TEMPLATE&text={formatted_title}&dates={formatted_dates}&details=For+details%3a+{detail_url}&location={formatted_location}&sf=true&output=xml"""
-        )
+        event_google_cal_link = f"""https://www.google.com/calendar/render?action=TEMPLATE&text={formatted_title}&dates={formatted_dates}&details=For+details%3a+{detail_url}&location={formatted_location}&sf=true&output=xml"""
         if user_is_event_admin or user_is_organizer:
             email_form = EventEmailTemplateForm(event, location)
         else:

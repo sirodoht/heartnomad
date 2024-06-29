@@ -35,5 +35,7 @@ def mailgun_send(mailgun_data, files_dict=None):
         return HttpResponse(status=resp.status_code)
 
     except httpx.ConnectionError:
-        logger.error('Connection error. Email "{}" aborted.'.format(mailgun_data["subject"]))
+        logger.error(
+            'Connection error. Email "{}" aborted.'.format(mailgun_data["subject"])
+        )
         return HttpResponse(status=500)

@@ -353,7 +353,9 @@ def DeleteBillLineItem(request, location_slug, bill_id):
         messages.add_message(
             request,
             messages.INFO,
-            "The line item was deleted from the bill for {}.".format(bill.subscriptionbill.period_start.strftime("%B %Y")),
+            "The line item was deleted from the bill for {}.".format(
+                bill.subscriptionbill.period_start.strftime("%B %Y")
+            ),
         )
         return HttpResponseRedirect(
             reverse("subscription_manage_detail", args=(location.slug, subscription.id))
@@ -401,9 +403,7 @@ def BillCharge(request, location_slug, bill_id):
         raise Exception("Unknown bill type. Cannot determine user.")
 
     try:
-        payment_gateway.charge_user(
-            user, bill, charge_amount_dollars, reference
-        )
+        payment_gateway.charge_user(user, bill, charge_amount_dollars, reference)
     except CardError as e:
         messages.add_message(
             request, messages.INFO, f"Charge failed with the following error: {e}"
@@ -431,7 +431,9 @@ def BillCharge(request, location_slug, bill_id):
         messages.add_message(
             request,
             messages.INFO,
-            "The card was charged. You must manually send the user their receipt. Please do so from the {} bill detail page.".format(bill.subscriptionbill.period_start.strftime("%B %d, %Y")),
+            "The card was charged. You must manually send the user their receipt. Please do so from the {} bill detail page.".format(
+                bill.subscriptionbill.period_start.strftime("%B %d, %Y")
+            ),
         )
         return HttpResponseRedirect(
             reverse(
@@ -506,9 +508,7 @@ def AddBillLineItem(request, location_slug, bill_id):
     if bill.is_booking_bill():
         booking = bill.bookingbill.booking
         booking.generate_bill()
-        messages.add_message(
-            request, messages.INFO, f"The {line_item_type} was added."
-        )
+        messages.add_message(request, messages.INFO, f"The {line_item_type} was added.")
         return HttpResponseRedirect(
             reverse("booking_manage", args=(location.slug, booking.id))
         )
@@ -518,7 +518,9 @@ def AddBillLineItem(request, location_slug, bill_id):
         messages.add_message(
             request,
             messages.INFO,
-            "The {} was added to the bill for {}.".format(line_item_type, bill.subscriptionbill.period_start.strftime("%B %Y")),
+            "The {} was added to the bill for {}.".format(
+                line_item_type, bill.subscriptionbill.period_start.strftime("%B %Y")
+            ),
         )
         return HttpResponseRedirect(
             reverse("subscription_manage_detail", args=(location.slug, subscription.id))
@@ -1030,7 +1032,9 @@ def SubscriptionManageUpdateEndDate(request, location_slug, subscription_id):
             messages.add_message(
                 request,
                 messages.INFO,
-                "Error! This subscription already has payments past the requested end date. Please choose an end date after {}.".format(most_recent_paid.strftime("%B %d, %Y")),
+                "Error! This subscription already has payments past the requested end date. Please choose an end date after {}.".format(
+                    most_recent_paid.strftime("%B %d, %Y")
+                ),
             )
             return HttpResponseRedirect(
                 reverse(

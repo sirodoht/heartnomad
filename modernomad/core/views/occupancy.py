@@ -120,7 +120,6 @@ def room_occupancy_month(room, month, year):
     internal_fees = Decimal(0.0)
     # occupancy for room this month
     for u in uses:
-
         # in case this Booking crossed a month boundary, first calculate
         # nights of this Booking that took place this month
         if u.arrive >= start and u.depart <= end:

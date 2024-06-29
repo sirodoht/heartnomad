@@ -62,7 +62,9 @@ class EventForm(forms.ModelForm):
                 except ObjectDoesNotExist:
                     raise forms.ValidationError(
                         _(
-                            "'{}' is not a recognized user, please remove them to save your event. Only users with existing accounts can be listed as co-organizers (but you can always add them later!)".format(username)
+                            "'{}' is not a recognized user, please remove them to save your event. Only users with existing accounts can be listed as co-organizers (but you can always add them later!)".format(
+                                username
+                            )
                         ),
                     )
         return co_organizers
@@ -115,9 +117,9 @@ class EventEmailTemplateForm(EmailTemplateForm):
             widget=forms.Textarea(attrs={"readonly": "readonly"})
         )
         path = reverse("gather_view_event", args=(location.slug, event.id, event.slug))
-        self.fields["footer"].initial = (
-            f"""--------------------------------\nThis message was sent to attendees of the event '{event.title}' at {location.name}. You can view event details and update your RSVP status on the event page https://{domain}/{path}."""
-        )
+        self.fields[
+            "footer"
+        ].initial = f"""--------------------------------\nThis message was sent to attendees of the event '{event.title}' at {location.name}. You can view event details and update your RSVP status on the event page https://{domain}/{path}."""
 
         # the recipients will be *all* the event attendees
         self.fields["recipient"].initial = ", ".join(
