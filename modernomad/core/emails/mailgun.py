@@ -8,8 +8,8 @@ logger = logging.getLogger(__name__)
 
 
 def mailgun_send(mailgun_data, files_dict=None):
-    logger.debug("Mailgun send: %s" % mailgun_data)
-    logger.debug("Mailgun files: %s" % files_dict)
+    logger.debug(f"Mailgun send: {mailgun_data}")
+    logger.debug(f"Mailgun files: {files_dict}")
 
     if not settings.MAILGUN_API_KEY:
         logger.error("Mailgun API key is not defined.")
@@ -20,11 +20,11 @@ def mailgun_send(mailgun_data, files_dict=None):
         # actually be delivered. This gets added at the end so it can't be
         # overwritten by other functions.
         mailgun_data["o:testmode"] = "yes"
-        logger.debug("mailgun_send: o:testmode=%s" % mailgun_data["o:testmode"])
+        logger.debug("mailgun_send: o:testmode={}".format(mailgun_data["o:testmode"]))
 
     try:
         resp = httpx.post(
-            "https://api.mailgun.net/v2/%s/messages" % settings.LIST_DOMAIN,
+            f"https://api.mailgun.net/v2/{settings.LIST_DOMAIN}/messages",
             auth=("api", settings.MAILGUN_API_KEY),
             data=mailgun_data,
             files=files_dict,
@@ -35,5 +35,5 @@ def mailgun_send(mailgun_data, files_dict=None):
         return HttpResponse(status=resp.status_code)
 
     except httpx.ConnectionError:
-        logger.error('Connection error. Email "%s" aborted.' % mailgun_data["subject"])
+        logger.error('Connection error. Email "{}" aborted.'.format(mailgun_data["subject"]))
         return HttpResponse(status=500)

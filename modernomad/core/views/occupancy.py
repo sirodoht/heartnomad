@@ -28,14 +28,8 @@ logger = logging.getLogger(__name__)
 
 
 def get_calendar_dates(month, year):
-    if month:
-        month = int(month)
-    else:
-        month = datetime.date.today().month
-    if year:
-        year = int(year)
-    else:
-        year = datetime.date.today().year
+    month = int(month) if month else datetime.date.today().month
+    year = int(year) if year else datetime.date.today().year
 
     # start date is first day of the month
     start = datetime.date(year, month, 1)
@@ -44,10 +38,7 @@ def get_calendar_dates(month, year):
     next_month = (month + 1) % 12
     if next_month == 0:
         next_month = 12
-    if next_month < month:
-        next_months_year = year + 1
-    else:
-        next_months_year = year
+    next_months_year = year + 1 if next_month < month else year
 
     end = datetime.date(next_months_year, next_month, 1)
     next_month = end  # for clarity
@@ -57,10 +48,7 @@ def get_calendar_dates(month, year):
     if prev_month == 0:
         prev_month = 12
 
-    if prev_month > month:
-        prev_months_year = year - 1
-    else:
-        prev_months_year = year
+    prev_months_year = year - 1 if prev_month > month else year
     prev_month = datetime.date(prev_months_year, prev_month, 1)
 
     # returns datetime objects (start, end, next_month, prev_month) and ints (month, year)
@@ -96,7 +84,7 @@ def room_occupancy_month(room, month, year):
     start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 
     # note the day parameter is meaningless
-    report_date = datetime.date(year, month, 1)
+    datetime.date(year, month, 1)
     uses = (
         Use.objects.filter(resource=room)
         .filter(status="confirmed")
@@ -125,15 +113,13 @@ def room_occupancy_month(room, month, year):
     # payments this month for previous months
     # payments for this month FROM past months (except inasmuch as its captured in the payments_accrual)
 
-    total_owed = Decimal(0.0)
+    Decimal(0.0)
     total_user_value = Decimal(0.0)
     net_to_house = Decimal(0.0)
     externalized_fees = Decimal(0.0)
     internal_fees = Decimal(0.0)
     # occupancy for room this month
     for u in uses:
-        comp = False
-        partial_payment = False
 
         # in case this Booking crossed a month boundary, first calculate
         # nights of this Booking that took place this month
@@ -156,8 +142,6 @@ def room_occupancy_month(room, month, year):
         if u.booking.is_comped():
             total_comped_nights += nights_this_month
             total_comped_value += nights_this_month * u.booking.default_rate()
-            comp = True
-            unpaid = False
         else:
             total_user_value += (
                 u.booking.bill.amount() / u.total_nights()
@@ -206,7 +190,7 @@ def room_occupancy(request, location_slug, room_id, year):
     year = int(year)
     response = HttpResponse(content_type="text/csv")
     output_filename = "%s Occupancy Report %d.csv" % (room.name, year)
-    response["Content-Disposition"] = "attachment; filename=%s" % output_filename
+    response["Content-Disposition"] = f"attachment; filename={output_filename}"
     writer = csv.writer(response)
     if room.location.slug != location_slug:
         writer.writerow(["invalid room"])
@@ -244,7 +228,7 @@ def room_occupancy(request, location_slug, room_id, year):
 
 def monthly_occupant_report(location_slug, year, month):
     location = get_object_or_404(Location, slug=location_slug)
-    today = datetime.date.today()
+    datetime.date.today()
     start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 
     occupants = {}
@@ -255,7 +239,7 @@ def monthly_occupant_report(location_slug, year, month):
 
     # calculate datas for people this month (as relevant), including: name, email, total_nights, total_value, total_comped, owing, and reference ids
     for user in location.residents():
-        if user in occupants["residents"].keys():
+        if user in occupants["residents"]:
             messages.append(
                 "user %d (%s %s) showed up in residents list twice. this shouldn't happen. the second instance was skipped."
                 % (user.id, user.first_name, user.last_name)
@@ -286,7 +270,7 @@ def monthly_occupant_report(location_slug, year, month):
             owing.append(use.booking.id)
 
         # now assemble it all
-        if u not in occupants["guests"].keys():
+        if u not in occupants["guests"]:
             occupants["guests"][u] = {
                 "name": u.get_full_name(),
                 "email": u.email,
@@ -336,15 +320,14 @@ def monthly_occupant_report(location_slug, year, month):
             # since that's the way an admin would view it from the website, so
             # check for duplicates since there could be multiple unpaid but we
             # still are pointing people to the same subscription.
-            if b.total_owed() > 0:
-                if not owing:
-                    owing = b.subscription.id
+            if b.total_owed() > 0 and not owing:
+                owing = b.subscription.id
 
             if b.amount() == 0:
                 comped_days_this_month += b.days_between(start, end)
 
         # ok now asssemble the dicts!
-        if u not in occupants["members"].keys():
+        if u not in occupants["members"]:
             occupants["members"][u] = {
                 "name": u.get_full_name(),
                 "email": u.email,
@@ -372,7 +355,7 @@ def monthly_occupant_report(location_slug, year, month):
 @resident_or_admin_required
 def occupancy(request, location_slug):
     location = get_object_or_404(Location, slug=location_slug)
-    today = datetime.date.today()
+    datetime.date.today()
     month = request.GET.get("month")
     year = request.GET.get("year")
 
@@ -405,7 +388,6 @@ def occupancy(request, location_slug):
     payment_discrepancies = []
     paid_amount_missing = []
     room_income_occupancy = {}
-    total_available_person_nights = 0
     overall_occupancy = 0
 
     # JKS note: this section breaks down income by whether it is income for this
@@ -544,7 +526,6 @@ def occupancy(request, location_slug):
         )
         total_occupied_person_nights += nights_this_month
 
-    rooms_with_capacity_this_month = []
     location_rooms = location.resources.all()
     total_reservable_days = 0
     reservable_days_per_room = {}
@@ -652,7 +633,7 @@ def manage_today(request, location_slug):
 @login_required
 def calendar(request, location_slug):
     location = get_object_or_404(Location, slug=location_slug)
-    today = timezone.localtime(timezone.now())
+    timezone.localtime(timezone.now())
     month = request.GET.get("month")
     year = request.GET.get("year")
 
@@ -677,10 +658,7 @@ def calendar(request, location_slug):
     for room in rooms:
         num_rows_in_chart += room.max_daily_capacities_between(start, end)
 
-    if len(uses) == 0:
-        any_uses = False
-    else:
-        any_uses = True
+    any_uses = len(uses) != 0
 
     for room in rooms:
         uses_this_room = []
@@ -693,14 +671,8 @@ def calendar(request, location_slug):
 
         else:
             for u in uses_list_this_room:
-                if u.arrive < start:
-                    display_start = start
-                else:
-                    display_start = u.arrive
-                if u.depart > end:
-                    display_end = end
-                else:
-                    display_end = u.depart
+                display_start = start if u.arrive < start else u.arrive
+                display_end = end if u.depart > end else u.depart
                 uses_this_room.append(
                     {
                         "use": u,

@@ -50,7 +50,7 @@ class ResourceNode(DjangoObjectType):
         start_date = arrive.date()
         end_date = depart.date() - timedelta(days=1)
 
-        logger.debug("%s drftable between? " % self.name)
+        logger.debug(f"{self.name} drftable between? ")
         logger.debug(self.drftable_between(start_date, end_date))
         return self.drftable_between(start_date, end_date)
 

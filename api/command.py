@@ -1,5 +1,9 @@
 class CommandResult:
-    def __init__(self, data=None, errors={}, warnings={}):
+    def __init__(self, data=None, errors=None, warnings=None):
+        if warnings is None:
+            warnings = {}
+        if errors is None:
+            errors = {}
         self.data = data
         self.errors = errors
         self.warnings = warnings

@@ -152,7 +152,7 @@ class StayView(TemplateView):
         resource_data = (
             self.room if self.room else self.location.rooms_with_future_capacity()
         )
-        use_many = False if self.room else True
+        use_many = not self.room
         react_data = self.populate_room(react_data, resource_data, use_many)
 
         context["react_data"] = json.dumps(react_data, cls=DateEncoder)
@@ -187,8 +187,7 @@ def BookingSubmit(request, location_slug):
             messages.add_message(
                 request,
                 messages.INFO,
-                'Thanks! Your booking was submitted. You will receive an email when it has been reviewed. You may wish to <a href="/people/%s/edit/">update your profile</a> if your projects or ideas have changed since your last visit.'
-                % booking.use.user.username,
+                f'Thanks! Your booking was submitted. You will receive an email when it has been reviewed. You may wish to <a href="/people/{booking.use.user.username}/edit/">update your profile</a> if your projects or ideas have changed since your last visit.',
             )
             return HttpResponseRedirect(
                 reverse("booking_detail", args=(location_slug, booking.id))
@@ -270,14 +269,8 @@ def BookingDetail(request, booking_id, location_slug):
         or (request.user in location.readonly_admins.all())
         or (request.user in location.residents.all())
     ):
-        if use.arrive >= datetime.date.today():
-            past = False
-        else:
-            past = True
-        if booking.is_paid():
-            paid = True
-        else:
-            paid = False
+        past = not use.arrive >= datetime.date.today()
+        paid = bool(booking.is_paid())
 
         domain = Site.objects.get_current().domain
 
@@ -455,16 +448,14 @@ def BookingConfirm(request, booking_id, location_slug):
             messages.add_message(
                 request,
                 messages.INFO,
-                "Thank you! Your payment has been received and a receipt emailed to you at %s"
-                % booking.use.user.email,
+                f"Thank you! Your payment has been received and a receipt emailed to you at {booking.use.user.email}",
             )
-        except stripe.CardError as e:
+        except stripe.CardError:
             messages.add_message(
                 request,
                 messages.WARNING,
                 "Drat, it looks like there was a problem with your card: %s. Please add a different card on your "
-                + '<a href="/people/%s/edit/">profile</a>.'
-                % (booking.use.user.username, e),
+                + f'<a href="/people/{booking.use.user.username}/edit/">profile</a>.',
             )
 
     return HttpResponseRedirect(
@@ -484,7 +475,7 @@ def BookingDelete(request, booking_id, location_slug):
 
         messages.add_message(request, messages.INFO, "Your booking has been cancelled.")
         username = booking.use.user.username
-        return HttpResponseRedirect("/people/%s" % username)
+        return HttpResponseRedirect(f"/people/{username}")
 
     else:
         return HttpResponseRedirect("/")
@@ -510,5 +501,4 @@ def BookingCancel(request, booking_id, location_slug):
 
     booking.cancel()
     messages.add_message(request, messages.INFO, "The booking has been cancelled.")
-    username = booking.use.user.username
     return HttpResponseRedirect(redirect)

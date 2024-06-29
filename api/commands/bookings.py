@@ -31,8 +31,7 @@ class RequestBooking(FormCommand):
                         self.add_error(
                             "depart",
                             [
-                                "Sorry! We only accept booking requests greater than %s in special circumstances. Please limit your request to %s or shorter, and add a comment if you would like to be consdered for a longer stay."
-                                % (location.max_booking_days, location.max_booking_days)
+                                f"Sorry! We only accept booking requests greater than {location.max_booking_days} in special circumstances. Please limit your request to {location.max_booking_days} or shorter, and add a comment if you would like to be consdered for a longer stay."
                             ],
                         )
                 else:

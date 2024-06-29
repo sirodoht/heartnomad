@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 def location_img_upload_to(instance, filename):
     ext = filename.split(".")[-1]
     # rename file to random string
-    filename = "%s.%s" % (uuid.uuid4(), ext.lower())
+    filename = f"{uuid.uuid4()}.{ext.lower()}"
 
     upload_path = "locations/"
     upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
@@ -163,7 +163,7 @@ class Location(models.Model):
 
     def from_email(self):
         """return a location-specific email in the standard format we use."""
-        return "stay@%s.mail.embassynetwork.com" % self.slug
+        return f"stay@{self.slug}.mail.embassynetwork.com"
 
     def get_rooms(self):
         return list(Resource.objects.filter(location=self))
@@ -363,7 +363,7 @@ def get_location(location_slug):
             location = Location.objects.filter(slug=location_slug).first()
         except Exception:
             raise LocationDoesNotExistException(
-                "The requested location does not exist: %s" % location_slug
+                f"The requested location does not exist: {location_slug}"
             )
     else:
         if Location.objects.count() == 1:
@@ -378,7 +378,7 @@ def get_location(location_slug):
 def resource_img_upload_to(instance, filename):
     ext = filename.split(".")[-1]
     # rename file to random string
-    filename = "%s.%s" % (uuid.uuid4(), ext.lower())
+    filename = f"{uuid.uuid4()}.{ext.lower()}"
 
     upload_path = "rooms/"
     upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
@@ -452,10 +452,7 @@ class Resource(models.Model):
                 return True
             # we only ever want to go one capacity into the past.
             elif a.start_date < today:
-                if a.quantity > 0:
-                    return True
-                else:
-                    return False
+                return a.quantity > 0
 
     def capacity_on(self, this_day):
         # returns quantity (an integer).
@@ -474,26 +471,17 @@ class Resource(models.Model):
         uses_on_this_day = Use.objects.confirmed_approved_on_date(
             this_day, self.location, resource=self
         )
-        if len(uses_on_this_day) < capacities:
-            return True
-        else:
-            return False
+        return len(uses_on_this_day) < capacities
 
     def drftable_between(self, start, end):
         # note this just checks if the resource has drftable capacity, not
         # whether it has _availability_. (ie, it migt be drftable but booked).
-        for day in dates_within(start, end):
-            if not self.drftable_on(day):
-                return False
-        return True
+        return all(self.drftable_on(day) for day in dates_within(start, end))
 
     def available_between(self, start, end):
         # note this just checks if the resource has drftable capacity, not
         # whether it has _availability_. (ie, it migt be drftable but booked).
-        for day in dates_within(start, end):
-            if not self.available_on(day):
-                return False
-        return True
+        return all(self.available_on(day) for day in dates_within(start, end))
 
     def daily_capacities_within(self, start, end):
         """
@@ -599,7 +587,7 @@ class Resource(models.Model):
             return []
 
     def current_backers_for_display(self):
-        return ["%s %s" % (u.first_name, u.last_name) for u in self.current_backers()]
+        return [f"{u.first_name} {u.last_name}" for u in self.current_backers()]
 
     def scheduled_future_backings(self):
         today = timezone.localtime(timezone.now()).date()
@@ -930,7 +918,7 @@ class Subscription(models.Model):
             period_start = date(year, month, self.start_date.day)
 
         logger.debug("")
-        logger.debug("in get_period(). period_start=%s" % period_start)
+        logger.debug(f"in get_period(). period_start={period_start}")
         logger.debug("")
         period_end = period_start + relativedelta(months=1)
         if period_end.day == period_start.day:
@@ -1050,8 +1038,7 @@ class Subscription(models.Model):
             return None
         logger.debug(" ")
         logger.debug(
-            "in generate_bill for target_date = %s and get_period = (%s, %s)"
-            % (target_date, period_start, period_end)
+            f"in generate_bill for target_date = {target_date} and get_period = ({period_start}, {period_end})"
         )
 
         # a subscription's last cycle could be a pro rated one. check to see if
@@ -1100,7 +1087,7 @@ class Subscription(models.Model):
 
         line_items = []
         # First line item is the subscription itself.
-        desc = "%s (%s to %s)" % (self.description, period_start, period_end)
+        desc = f"{self.description} ({period_start} to {period_end})"
         if prorated:
             period_days = Decimal((period_end - period_start).days)
             original_period_days = (original_period_end - period_start).days
@@ -1161,10 +1148,7 @@ class Subscription(models.Model):
         if not target_date:
             target_date = self.start_date
 
-        if self.end_date and self.end_date < today:
-            end_date = self.end_date
-        else:
-            end_date = today
+        end_date = self.end_date if self.end_date and self.end_date < today else today
 
         period_start = target_date
         while period_start and (period_start < today) and (period_start < end_date):
@@ -1200,10 +1184,7 @@ class Subscription(models.Model):
                 bill.delete()
 
     def has_unpaid_bills(self):
-        for bill in self.bills.all():
-            if not bill.is_paid():
-                return True
-        return False
+        return any(not bill.is_paid() for bill in self.bills.all())
 
     def update_for_end_date(self, new_end_date):
         """deletes and regenerates bills after a change in end date"""
@@ -1751,11 +1732,7 @@ class Payment(models.Model):
     objects = PaymentManager()
 
     def __str__(self):
-        return "%s: %s - $%s" % (
-            str(self.payment_date)[:16],
-            self.user,
-            self.paid_amount,
-        )
+        return f"{str(self.payment_date)[:16]}: {self.user} - ${self.paid_amount}"
 
     def to_house(self):
         return self.paid_amount - self.non_house_fees() - self.house_fees()
@@ -1847,9 +1824,9 @@ class Payment(models.Model):
 def profile_img_upload_to(instance, filename):
     ext = filename.split(".")[-1]
     # rename file to random string
-    filename = "%s.%s" % (uuid.uuid4(), ext.lower())
+    filename = f"{uuid.uuid4()}.{ext.lower()}"
 
-    upload_path = "avatars/%s/" % instance.user.username
+    upload_path = f"avatars/{instance.user.username}/"
     upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
     if not os.path.exists(upload_abs_path):
         os.makedirs(upload_abs_path)
@@ -1929,7 +1906,7 @@ class UserProfile(models.Model):
         if not primary:
             primary = Account(
                 currency=currency,
-                name="%s %s Account (primary)" % (self.user.first_name, currency.name),
+                name=f"{self.user.first_name} {currency.name} Account (primary)",
             )
             primary.save()
             primary.owners.add(self.user)
@@ -2064,7 +2041,7 @@ class LocationFee(models.Model):
     fee = models.ForeignKey(Fee, on_delete=models.CASCADE)
 
     def __str__(self):
-        return "%s: %s" % (self.location, self.fee)
+        return f"{self.location}: {self.fee}"
 
 
 class BillLineItem(models.Model):
@@ -2140,7 +2117,7 @@ class UserNote(models.Model):
     note = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return "%s - %s: %s" % (self.created.date(), self.user.username, self.note)
+        return f"{self.created.date()} - {self.user.username}: {self.note}"
 
 
 class UseNote(models.Model):
@@ -2350,7 +2327,7 @@ class Backing(models.Model):
         usd, _ = Currency.objects.get_or_create(name="USD", defaults={"symbol": "$"})
         ma = Account.objects.create(
             currency=usd,
-            name="%s Backing USD Account" % self.resource,
+            name=f"{self.resource} Backing USD Account",
             type=Account.CREDIT,
         )
         ma.owners.add(*backers)
@@ -2359,7 +2336,7 @@ class Backing(models.Model):
         drft, _ = Currency.objects.get_or_create(name="DRFT", defaults={"symbol": "Ɖ"})
         da = Account.objects.create(
             currency=drft,
-            name="%s Backing DRFT Account" % self.resource,
+            name=f"{self.resource} Backing DRFT Account",
             type=Account.CREDIT,
         )
         da.owners.add(*backers)

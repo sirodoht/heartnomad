@@ -1,3 +1,4 @@
+import contextlib
 import datetime
 import logging
 import time
@@ -172,14 +173,14 @@ def user_delete_card(request, username):
     user.profile.save()
 
     messages.info(request, "Card deleted.")
-    return HttpResponseRedirect("/people/%s" % user.username)
+    return HttpResponseRedirect(f"/people/{user.username}")
 
 
 @house_admin_required
 def ManagePayment(request, location_slug, bill_id):
     if request.method != "POST":
         return HttpResponseRedirect("/404")
-    location = get_object_or_404(Location, slug=location_slug)
+    get_object_or_404(Location, slug=location_slug)
     bill = get_object_or_404(Bill, id=bill_id)
 
     logger.debug(request.POST)
@@ -221,7 +222,7 @@ def ManagePayment(request, location_slug, bill_id):
         # JKS we store user = None for cash payments since we don't know for
         # certain *who* it was that made the payment. in the future, we could
         # allow admins to enter who made the payment, if desired.
-        pmt = Payment.objects.create(
+        Payment.objects.create(
             payment_method=payment_method,
             paid_amount=paid_amount,
             bill=bill,
@@ -261,7 +262,7 @@ def ManagePayment(request, location_slug, bill_id):
 def SubscriptionSendReceipt(request, location_slug, subscription_id, bill_id):
     if request.method != "POST":
         return HttpResponseRedirect("/404")
-    location = get_object_or_404(Location, slug=location_slug)
+    get_object_or_404(Location, slug=location_slug)
     subscription = Subscription.objects.get(id=subscription_id)
     bill = Bill.objects.get(id=bill_id)
     if bill.is_paid():
@@ -352,8 +353,7 @@ def DeleteBillLineItem(request, location_slug, bill_id):
         messages.add_message(
             request,
             messages.INFO,
-            "The line item was deleted from the bill for %s."
-            % (bill.subscriptionbill.period_start.strftime("%B %Y")),
+            "The line item was deleted from the bill for {}.".format(bill.subscriptionbill.period_start.strftime("%B %Y")),
         )
         return HttpResponseRedirect(
             reverse("subscription_manage_detail", args=(location.slug, subscription.id))
@@ -401,12 +401,12 @@ def BillCharge(request, location_slug, bill_id):
         raise Exception("Unknown bill type. Cannot determine user.")
 
     try:
-        payment = payment_gateway.charge_user(
+        payment_gateway.charge_user(
             user, bill, charge_amount_dollars, reference
         )
     except CardError as e:
         messages.add_message(
-            request, messages.INFO, "Charge failed with the following error: %s" % e
+            request, messages.INFO, f"Charge failed with the following error: {e}"
         )
         if bill.is_booking_bill():
             return HttpResponseRedirect(
@@ -431,8 +431,7 @@ def BillCharge(request, location_slug, bill_id):
         messages.add_message(
             request,
             messages.INFO,
-            "The card was charged. You must manually send the user their receipt. Please do so from the %s bill detail page."
-            % bill.subscriptionbill.period_start.strftime("%B %d, %Y"),
+            "The card was charged. You must manually send the user their receipt. Please do so from the {} bill detail page.".format(bill.subscriptionbill.period_start.strftime("%B %d, %Y")),
         )
         return HttpResponseRedirect(
             reverse(
@@ -453,17 +452,14 @@ def AddBillLineItem(request, location_slug, bill_id):
 
     reason = request.POST.get("reason")
     calculation_type = request.POST.get("calculation_type")
-    if request.POST.get("discount"):
-        line_item_type = "discount"
-    else:
-        line_item_type = "fee"
+    line_item_type = "discount" if request.POST.get("discount") else "fee"
     if line_item_type == "discount":
         if calculation_type == "absolute":
             reason = "Discount: " + reason
             amount = -Decimal(request.POST.get("discount"))
         elif calculation_type == "percent":
             percent = Decimal(request.POST.get("discount")) / 100
-            reason = "Discount (%s%%): %s" % (percent * Decimal(100.0), reason)
+            reason = f"Discount ({percent * Decimal(100.0)}%): {reason}"
             if percent < 0.0 or percent > 100.0:
                 messages.add_message(
                     request, messages.INFO, "Invalid percent value given."
@@ -484,7 +480,7 @@ def AddBillLineItem(request, location_slug, bill_id):
             amount = float(request.POST.get("extra_fee"))
         elif calculation_type == "percent":
             percent = Decimal(request.POST.get("extra_fee")) / 100
-            reason = "Fee (%s%%): %s" % (percent * Decimal(100.0), reason)
+            reason = f"Fee ({percent * Decimal(100.0)}%): {reason}"
             if percent < 0.0 or percent > 100.0:
                 messages.add_message(
                     request, messages.INFO, "Invalid percent value given."
@@ -511,7 +507,7 @@ def AddBillLineItem(request, location_slug, bill_id):
         booking = bill.bookingbill.booking
         booking.generate_bill()
         messages.add_message(
-            request, messages.INFO, "The %s was added." % line_item_type
+            request, messages.INFO, f"The {line_item_type} was added."
         )
         return HttpResponseRedirect(
             reverse("booking_manage", args=(location.slug, booking.id))
@@ -522,8 +518,7 @@ def AddBillLineItem(request, location_slug, bill_id):
         messages.add_message(
             request,
             messages.INFO,
-            "The %s was added to the bill for %s."
-            % (line_item_type, bill.subscriptionbill.period_start.strftime("%B %Y")),
+            "The {} was added to the bill for {}.".format(line_item_type, bill.subscriptionbill.period_start.strftime("%B %Y")),
         )
         return HttpResponseRedirect(
             reverse("subscription_manage_detail", args=(location.slug, subscription.id))
@@ -621,15 +616,13 @@ def submit_payment(request, booking_uuid, location_slug):
             comment = request.POST.get("comment")
 
             pay_user = None
-            try:
+            with contextlib.suppress(Exception):
                 pay_user = User.objects.filter(email=pay_email).first()
-            except Exception:
-                pass
 
             # create the charge on Stripe's servers - this will charge the user's card
-            charge_descr = "payment from %s (%s)." % (pay_name, pay_email)
+            charge_descr = f"payment from {pay_name} ({pay_email})."
             if comment:
-                charge_descr += " Comment added: %s" % comment
+                charge_descr += f" Comment added: {comment}"
             try:
                 charge = payment_gateway.stripe_charge_card_third_party(
                     booking, amount, token, charge_descr
@@ -662,15 +655,13 @@ def submit_payment(request, booking_uuid, location_slug):
                     messages.add_message(
                         request,
                         messages.INFO,
-                        "Thanks you for your payment! A receipt is being emailed to you at %s"
-                        % pay_email,
+                        f"Thanks you for your payment! A receipt is being emailed to you at {pay_email}",
                     )
                 else:
                     messages.add_message(
                         request,
                         messages.INFO,
-                        "Thanks you for your payment! There is now a pending amount due of $%.2f"
-                        % booking.bill.total_owed(),
+                        f"Thanks you for your payment! There is now a pending amount due of ${booking.bill.total_owed():.2f}",
                     )
                     form = PaymentForm(default_amount=booking.bill.total_owed)
 
@@ -680,7 +671,7 @@ def submit_payment(request, booking_uuid, location_slug):
                     messages.INFO,
                     "Drat, there was a problem with your card. Sometimes this reflects a card transaction limit, or bank "
                     + "hold due to an unusual charge. Please contact your bank or credit card, or try a different card. The "
-                    + "error returned was: <em>%s</em>" % e,
+                    + f"error returned was: <em>{e}</em>",
                 )
         else:
             logger.debug("payment form not valid")
@@ -689,10 +680,7 @@ def submit_payment(request, booking_uuid, location_slug):
     else:
         form = PaymentForm(default_amount=booking.bill.total_owed)
 
-    if booking.bill.total_owed() > 0.0:
-        owed_color = "text-danger"
-    else:
-        owed_color = "text-success"
+    owed_color = "text-danger" if booking.bill.total_owed() > 0.0 else "text-success"
     return render(
         request,
         "payment.html",
@@ -898,7 +886,7 @@ def SubscriptionManageCreate(request, location_slug):
             messages.add_message(
                 request,
                 messages.INFO,
-                "There is no user with the username %s" % username,
+                f"There is no user with the username {username}",
             )
             return HttpResponseRedirect(
                 reverse("booking_manage_create", args=(location.slug,))
@@ -917,8 +905,7 @@ def SubscriptionManageCreate(request, location_slug):
             messages.add_message(
                 request,
                 messages.INFO,
-                "The subscription for %s %s was created."
-                % (subscription.user.first_name, subscription.user.last_name),
+                f"The subscription for {subscription.user.first_name} {subscription.user.last_name} was created.",
             )
             return HttpResponseRedirect(
                 reverse(
@@ -1023,7 +1010,7 @@ def SubscriptionManageDetail(request, location_slug, subscription_id):
 
 @house_admin_required
 def SubscriptionManageUpdateEndDate(request, location_slug, subscription_id):
-    location = get_object_or_404(Location, slug=location_slug)
+    get_object_or_404(Location, slug=location_slug)
     subscription = Subscription.objects.get(id=subscription_id)
     logger.debug(request.POST)
 
@@ -1043,8 +1030,7 @@ def SubscriptionManageUpdateEndDate(request, location_slug, subscription_id):
             messages.add_message(
                 request,
                 messages.INFO,
-                "Error! This subscription already has payments past the requested end date. Please choose an end date after %s."
-                % most_recent_paid.strftime("%B %d, %Y"),
+                "Error! This subscription already has payments past the requested end date. Please choose an end date after {}.".format(most_recent_paid.strftime("%B %d, %Y")),
             )
             return HttpResponseRedirect(
                 reverse(

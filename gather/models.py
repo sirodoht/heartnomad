@@ -45,7 +45,7 @@ class EventSeries(models.Model):
 def event_img_upload_to(instance, filename):
     ext = filename.split(".")[-1]
     # rename file to random string
-    filename = "%s.%s" % (uuid.uuid4(), ext.lower())
+    filename = f"{uuid.uuid4()}.{ext.lower()}"
 
     upload_path = "events/"
     upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
@@ -214,10 +214,7 @@ class Event(models.Model):
             ]
         )
 
-        if can_view:
-            viewable = True
-        else:
-            viewable = False
+        viewable = bool(can_view)
         return viewable
 
 

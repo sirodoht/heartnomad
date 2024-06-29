@@ -76,12 +76,7 @@ class BillAdmin(admin.ModelAdmin):
 class PaymentAdmin(admin.ModelAdmin):
     def user(self):
         if self.user:
-            return """<a href="/people/%s">%s %s</a> (%s)""" % (
-                self.user.username,
-                self.user.first_name,
-                self.user.last_name,
-                self.user.username,
-            )
+            return f"""<a href="/people/{self.user.username}">{self.user.first_name} {self.user.last_name}</a> ({self.user.username})"""
         else:
             return """None"""
 
@@ -89,11 +84,7 @@ class PaymentAdmin(admin.ModelAdmin):
 
     def booking(self):
         b = self.bill.bookingbill.booking
-        return """<a href="/locations/%s/booking/%s/">%s""" % (
-            b.use.location.slug,
-            r.id,
-            r,
-        )
+        return f"""<a href="/locations/{b.use.location.slug}/booking/{r.id}/">{r}"""
 
     booking.allow_tags = True
 
@@ -128,7 +119,7 @@ class BillInline(admin.StackedInline):
 
 def gen_message(queryset, noun, pl_noun, suffix):
     if len(queryset) == 1:
-        prefix = "1 %s was" % noun
+        prefix = f"1 {noun} was"
     else:
         prefix = "%d %s were" % (len(queryset), pl_noun)
     msg = prefix + " " + suffix + "."
@@ -165,12 +156,7 @@ class BookingAdmin(admin.ModelAdmin):
         return "$%d" % self.bill.total_paid()
 
     def user_profile(self):
-        return """<a href="/people/%s">%s %s</a> (%s)""" % (
-            self.use.user.username,
-            self.use.user.first_name,
-            self.use.user.last_name,
-            self.use.user.username,
-        )
+        return f"""<a href="/people/{self.use.user.username}">{self.use.user.first_name} {self.use.user.last_name}</a> ({self.use.user.username})"""
 
     user_profile.allow_tags = True
 
@@ -184,11 +170,10 @@ class BookingAdmin(admin.ModelAdmin):
                 failure_list.append(str(res.id))
         msg = ""
         if len(success_list) > 0:
-            msg += "Receipts sent for booking(s) %s. " % ",".join(success_list)
+            msg += "Receipts sent for booking(s) {}. ".format(",".join(success_list))
         if len(failure_list) > 0:
             msg += (
-                "Receipt sending failed for booking(s) %s. (Make sure all payment information has been entered in the booking details and that the status of the booking is either unpaid or paid.)"
-                % ",".join(failure_list)
+                "Receipt sending failed for booking(s) {}. (Make sure all payment information has been entered in the booking details and that the status of the booking is either unpaid or paid.)".format(",".join(failure_list))
             )
         self.message_user(request, msg)
 

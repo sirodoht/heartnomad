@@ -36,12 +36,12 @@ class AccountAdmin(admin.ModelAdmin):
 
     def account_owners(self, obj):
         return ", ".join(
-            ["%s %s" % (a.first_name, a.last_name) for a in obj.owners.all()]
+            [f"{a.first_name} {a.last_name}" for a in obj.owners.all()]
         )
 
     def account_admins(self, obj):
         return ", ".join(
-            ["%s %s" % (a.first_name, a.last_name) for a in obj.admins.all()]
+            [f"{a.first_name} {a.last_name}" for a in obj.admins.all()]
         )
 
 

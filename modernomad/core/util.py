@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 def monthly_occupant_report_console(location_slug, year, month):
     (occupants, messages) = monthly_occupant_report(location_slug, year, month)
-    logger.debug("occupancy report for %s %s" % (month, year))
+    logger.debug(f"occupancy report for {month} {year}")
     logger.debug(
         "name, email, total_nights, total_value, total_comped, owing, reference_ids"
     )

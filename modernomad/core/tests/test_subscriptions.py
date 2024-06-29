@@ -34,7 +34,7 @@ class SubscriptionTestCase(TestCase):
         self.location.house_admins.add(self.admin)
         self.location.save()
         # self.client = Client()
-        success = self.client.login(username=self.admin.username, password="secret")
+        self.client.login(username=self.admin.username, password="secret")
 
         today = timezone.now().date()
 
@@ -301,7 +301,7 @@ class SubscriptionTestCase(TestCase):
     def test_reject_zero_length_subscription(self):
         today = timezone.now().date()
         start = today - timedelta(days=100)
-        s = Subscription.objects.create(
+        Subscription.objects.create(
             location=self.location,
             user=self.user1,
             price=500.00,

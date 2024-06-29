@@ -16,7 +16,7 @@ from modernomad.core.models import (
 
 
 def create_username(first_name, last_name, suffix=""):
-    username = slugify("%s %s" % (first_name, last_name))
+    username = slugify(f"{first_name} {last_name}")
 
     if username == "":
         username = "unnamed"
@@ -26,7 +26,7 @@ def create_username(first_name, last_name, suffix=""):
     username = username[:25]
 
     if suffix:
-        username = "%s-%s" % (username, suffix)
+        username = f"{username}-{suffix}"
     return username
 
 
@@ -169,9 +169,8 @@ class UserProfileForm(forms.ModelForm):
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
-        if password1 and password2:
-            if password1 != password2:
-                raise forms.ValidationError(self.error_messages["password_mismatch"])
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError(self.error_messages["password_mismatch"])
         return password2
 
     def clean_email(self):
@@ -234,7 +233,7 @@ class UserProfileForm(forms.ModelForm):
         if len(email) == 0:
             raise forms.ValidationError("Email Required.")
         if User.objects.filter(email=email).count() > 0:
-            raise forms.ValidationError("Email address '%s' already in use." % email)
+            raise forms.ValidationError(f"Email address '{email}' already in use.")
 
         # Username generated in clean method
         username = self.cleaned_data["username"]
@@ -384,7 +383,7 @@ class LocationContentForm(forms.ModelForm):
 class BootstrapModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for field_name, field in self.fields.items():
+        for _field_name, field in self.fields.items():
             field.widget.attrs["class"] = "form-control"
 
 
@@ -426,7 +425,7 @@ class LocationPageForm(forms.Form):
 
 
 def all_users():
-    return [(u.id, "%s %s" % (u.first_name, u.last_name)) for u in User.objects.all()]
+    return [(u.id, f"{u.first_name} {u.last_name}") for u in User.objects.all()]
 
 
 class LocationRoomForm(forms.ModelForm):
@@ -506,8 +505,7 @@ class BookingUseForm(forms.ModelForm):
         if (depart - arrive).days > self.location.max_booking_days:
             self._errors["depart"] = self.error_class(
                 [
-                    "Sorry! We only accept booking requests greater than %s in special circumstances. Please limit your request to %s or shorter, and add a comment if you would like to be consdered for a longer stay."
-                    % (self.location.max_booking_days, self.location.max_booking_days)
+                    f"Sorry! We only accept booking requests greater than {self.location.max_booking_days} in special circumstances. Please limit your request to {self.location.max_booking_days} or shorter, and add a comment if you would like to be consdered for a longer stay."
                 ]
             )
         return cleaned_data
@@ -602,21 +600,12 @@ class BookingEmailTemplateForm(EmailTemplateForm):
 
         # add in the extra fields
         self.fields["sender"].initial = location.from_email()
-        self.fields["recipient"].initial = "%s, %s" % (
-            booking.use.user.email,
-            location.from_email(),
-        )
+        self.fields["recipient"].initial = f"{booking.use.user.email}, {location.from_email()}"
         self.fields["footer"].initial = forms.CharField(
             widget=forms.Textarea(attrs={"readonly": "readonly"})
         )
         self.fields["footer"].initial = (
-            """--------------------------------\nYour booking is from %s to %s.\nManage your booking at https://%s%s."""
-            % (
-                booking.use.arrive,
-                booking.use.depart,
-                domain,
-                booking.get_absolute_url(),
-            )
+            f"""--------------------------------\nYour booking is from {booking.use.arrive} to {booking.use.depart}.\nManage your booking at https://{domain}{booking.get_absolute_url()}."""
         )
 
         # both the subject and body fields expect to have access to all fields
@@ -665,10 +654,7 @@ class SubscriptionEmailTemplateForm(EmailTemplateForm):
 
         # add in the extra fields
         self.fields["sender"].initial = location.from_email()
-        self.fields["recipient"].initial = "%s, %s" % (
-            subscription.user.email,
-            location.from_email(),
-        )
+        self.fields["recipient"].initial = f"{subscription.user.email}, {location.from_email()}"
         self.fields["footer"].initial = forms.CharField(
             widget=forms.Textarea(attrs={"readonly": "readonly"})
         )

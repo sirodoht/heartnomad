@@ -25,10 +25,10 @@ class Currency(models.Model):
         super().save(*args, **kwargs)
         if not hasattr(self, "systemaccounts"):
             credit_account = Account.objects.create(
-                currency=self, name="%s SYSTEM CREDIT" % self.name, type=Account.CREDIT
+                currency=self, name=f"{self.name} SYSTEM CREDIT", type=Account.CREDIT
             )
             debit_account = Account.objects.create(
-                currency=self, name="%s SYSTEM DEBIT" % self.name, type=Account.DEBIT
+                currency=self, name=f"{self.name} SYSTEM DEBIT", type=Account.DEBIT
             )
             SystemAccounts.objects.create(
                 currency=self, credit=credit_account, debit=debit_account
@@ -70,7 +70,7 @@ class Account(models.Model):
     )
 
     def __str__(self):
-        return self.name + " (%s)" % (self.currency)
+        return self.name + f" ({self.currency})"
 
     def is_credit(self):
         return self.type == Account.CREDIT
@@ -119,7 +119,7 @@ class Transaction(models.Model):
     valid = models.BooleanField(default=False)
 
     def __str__(self):
-        return "Transaction %s" % self.pk
+        return f"Transaction {self.pk}"
 
     def save(self, *args, **kwargs):
         entries = self.entries.all()

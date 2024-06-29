@@ -26,7 +26,7 @@ class MailgunBackend(BaseEmailBackend):
             kwargs.pop("server_name", None),
         )
 
-        super(MailgunBackend, self).__init__(
+        super().__init__(
             fail_silently=fail_silently, *args, **kwargs
         )
 
@@ -39,8 +39,8 @@ class MailgunBackend(BaseEmailBackend):
             else:
                 raise
 
-        self._api_url = "https://api.mailgun.net/v2/%s/" % self._server_name
-        logger.debug("Mailgun URL: %s" % self._api_url)
+        self._api_url = f"https://api.mailgun.net/v2/{self._server_name}/"
+        logger.debug(f"Mailgun URL: {self._api_url}")
 
     def open(self):
         """Stub for open connection, all sends are done over HTTP POSTs"""
@@ -77,7 +77,7 @@ class MailgunBackend(BaseEmailBackend):
                 raise
             return False
 
-        logger.debug("Mailgun response: %s" % r.text)
+        logger.debug(f"Mailgun response: {r.text}")
 
         if r.status_code != 200:
             if not self.fail_silently:

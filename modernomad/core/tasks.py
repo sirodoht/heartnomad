@@ -89,7 +89,7 @@ def generate_subscription_bills():
             location=l, target_date=today
         )
         if len(subscriptions_ready) == 0:
-            logger.debug("no subscriptions are ready for billing at %s today." % l.name)
+            logger.debug(f"no subscriptions are ready for billing at {l.name} today.")
         for s in subscriptions_ready:
             logger.debug("")
             logger.debug("automatically generating bill for subscription %d" % s.id)
@@ -107,7 +107,7 @@ def _format_attachment(use, color):
         profile_img_url = domain + use.user.profile.image.url
     else:
         profile_img_url = domain + "/static/img/default.jpg"
-    booking_url = "<%s%s|%s - %s in %s>\n%s" % (
+    booking_url = "<{}{}|{} - {} in {}>\n{}".format(
         domain,
         use.booking.get_absolute_url(),
         use.arrive.strftime("%B %d"),
@@ -153,7 +153,7 @@ def slack_embassysf_daily():
     )
 
     payload = {
-        "text": "Arrivals and Departures for %s" % today.strftime("%B %d, %Y"),
+        "text": "Arrivals and Departures for {}".format(today.strftime("%B %d, %Y")),
         "attachments": [],
     }
     for a in arriving_today:
@@ -173,4 +173,4 @@ def slack_embassysf_daily():
     js = json.dumps(payload)
     logger.debug(js)
     resp = httpx.post(webhook, data=js)
-    logger.debug("Slack response: %s" % resp.text)
+    logger.debug(f"Slack response: {resp.text}")

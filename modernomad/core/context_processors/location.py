@@ -13,8 +13,8 @@ def location_variables(request):
         location_slug = match.group("location_slug")
         location = Location.objects.filter(slug=location_slug).first()
         if location:
-            location_about_path = "locations/%s/about/" % location_slug
-            location_stay_path = "locations/%s/stay/" % location_slug
+            location_about_path = f"locations/{location_slug}/about/"
+            location_stay_path = f"locations/{location_slug}/stay/"
             return {
                 "location": location,
                 "location_about_path": location_about_path,

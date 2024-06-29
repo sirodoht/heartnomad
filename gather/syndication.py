@@ -15,7 +15,7 @@ class PublicEventsFeed(ICalFeed):
         return get_object_or_404(Location, slug=location_slug)
 
     def items(self, obj):
-        rv = Location.objects.get(slug="redvic")
+        Location.objects.get(slug="redvic")
         return (
             Event.objects.filter(location=obj)
             .filter(status=Event.LIVE)

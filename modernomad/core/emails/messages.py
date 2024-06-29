@@ -69,10 +69,10 @@ def render_templates(context, location, email_key, language="en-us"):
             html_content = Template(t.html_body).render(Context(context))
     else:
         try:
-            text_content = get_template("emails/%s.txt" % email_key).render(context)
-            html_content = get_template("emails/%s.html" % email_key).render(context)
+            text_content = get_template(f"emails/{email_key}.txt").render(context)
+            html_content = get_template(f"emails/{email_key}.html").render(context)
         except TemplateDoesNotExist:
-            logger.debug('There is no template for email key "%s"' % email_key)
+            logger.debug(f'There is no template for email key "{email_key}"')
             logger.debug("Exiting quietly")
 
     translation.activate(prev_language)
@@ -86,19 +86,8 @@ def render_templates(context, location, email_key, language="en-us"):
 
 def send_booking_receipt(booking, send_to=None):
     location = booking.use.location
-    subject = "[%s] Receipt for Booking %s - %s" % (
-        location.email_subject_prefix,
-        str(booking.use.arrive),
-        str(booking.use.depart),
-    )
-    if send_to:
-        recipient = [
-            send_to,
-        ]
-    else:
-        recipient = [
-            booking.use.user.email,
-        ]
+    subject = f"[{location.email_subject_prefix}] Receipt for Booking {str(booking.use.arrive)} - {str(booking.use.depart)}"
+    recipient = [send_to] if send_to else [booking.use.user.email]
     c = {
         "today": timezone.localtime(timezone.now()),
         "user": booking.use.user,
@@ -160,7 +149,7 @@ def send_invoice(booking):
         return send_comp_invoice(booking)
 
     location = booking.use.location
-    subject = "[%s] Thanks for Staying with us!" % location.email_subject_prefix
+    subject = f"[{location.email_subject_prefix}] Thanks for Staying with us!"
     recipient = [
         booking.use.user.email,
     ]
@@ -184,14 +173,8 @@ def new_booking_notify(booking):
     domain = Site.objects.get_current().domain
     location = booking.use.location
 
-    subject = "[%s] Booking Request, %s %s, %s - %s" % (
-        location.email_subject_prefix,
-        booking.use.user.first_name,
-        booking.use.user.last_name,
-        str(booking.use.arrive),
-        str(booking.use.depart),
-    )
-    sender = location.from_email()
+    subject = f"[{location.email_subject_prefix}] Booking Request, {booking.use.user.first_name} {booking.use.user.last_name}, {str(booking.use.arrive)} - {str(booking.use.depart)}"
+    location.from_email()
     recipients = []
     for admin in house_admins:
         recipients.append(admin.email)
@@ -241,23 +224,13 @@ def subscription_note_notify(subscription):
         ),
     )
     text_content = (
-        """Howdy,\n\nA new note has been added to a subscription for %s %s. \n\nManage this subscription at %s%s."""
-        % (
-            subscription.user.first_name,
-            subscription.user.last_name,
-            domain,
-            admin_path,
-        )
+        f"""Howdy,\n\nA new note has been added to a subscription for {subscription.user.first_name} {subscription.user.last_name}. \n\nManage this subscription at {domain}{admin_path}."""
     )
     recipients = []
     for admin in subscription.location.house_admins.all():
         if admin.email not in recipients:
             recipients.append(admin.email)
-    subject = "[%s] New subscription note for %s %s" % (
-        subscription.location.email_subject_prefix,
-        subscription.user.first_name,
-        subscription.user.last_name,
-    )
+    subject = f"[{subscription.location.email_subject_prefix}] New subscription note for {subscription.user.first_name} {subscription.user.last_name}"
     mailgun_data = {
         "from": subscription.location.from_email(),
         "to": recipients,
@@ -291,11 +264,7 @@ def admin_new_subscription_notify(subscription):
     for admin in subscription.location.house_admins.all():
         if admin.email not in recipients:
             recipients.append(admin.email)
-    subject = "[%s] Subscription Added for %s %s" % (
-        subscription.location.email_subject_prefix,
-        subscription.user.first_name,
-        subscription.user.last_name,
-    )
+    subject = f"[{subscription.location.email_subject_prefix}] Subscription Added for {subscription.user.first_name} {subscription.user.last_name}"
     mailgun_data = {
         "from": subscription.location.from_email(),
         "to": recipients,
@@ -306,8 +275,8 @@ def admin_new_subscription_notify(subscription):
 
 
 def updated_booking_notify(booking):
-    domain = Site.objects.get_current().domain
-    admin_path = reverse(
+    Site.objects.get_current().domain
+    reverse(
         "booking_manage",
         args=(
             booking.use.location.slug,
@@ -321,13 +290,7 @@ def updated_booking_notify(booking):
     for admin in booking.use.location.house_admins.all():
         if admin.email not in recipients:
             recipients.append(admin.email)
-    subject = "[%s] Booking Updated, %s %s, %s - %s" % (
-        booking.use.location.email_subject_prefix,
-        booking.use.user.first_name,
-        booking.use.user.last_name,
-        str(booking.use.arrive),
-        str(booking.use.depart),
-    )
+    subject = f"[{booking.use.location.email_subject_prefix}] Booking Updated, {booking.use.user.first_name} {booking.use.user.last_name}, {str(booking.use.arrive)} - {str(booking.use.depart)}"
     mailgun_data = {
         "from": booking.use.location.from_email(),
         "to": recipients,
@@ -363,7 +326,7 @@ def goodbye_email(use):
         c, location, LocationEmailTemplate.DEPARTURE
     )
 
-    subject = "[%s] Thank you for staying with us" % location.email_subject_prefix
+    subject = f"[{location.email_subject_prefix}] Thank you for staying with us"
     mailgun_data = {
         "from": use.location.from_email(),
         "to": [use.user.email],
@@ -390,7 +353,6 @@ def guest_welcome(use):
         .filter(start__gte=use.arrive)
         .filter(end__lte=use.depart)
     )
-    profiles = None
     day_of_week = weekday_number_to_name[use.arrive.weekday()]
 
     c = {
@@ -398,7 +360,7 @@ def guest_welcome(use):
         "day_of_week": day_of_week,
         "location": use.location,
         "use": use,
-        "current_email": "current@%s.mail.embassynetwork.com" % location.slug,
+        "current_email": f"current@{location.slug}.mail.embassynetwork.com",
         "site_url": "https://"
         + domain
         + reverse("location_detail", args=(location.slug,)),
@@ -428,8 +390,7 @@ def guest_welcome(use):
     mailgun_data = {
         "from": use.location.from_email(),
         "to": [use.user.email],
-        "subject": "[%s] See you on %s"
-        % (use.location.email_subject_prefix, day_of_week),
+        "subject": f"[{use.location.email_subject_prefix}] See you on {day_of_week}",
         "text": text_content,
     }
     if html_content:
@@ -460,14 +421,11 @@ def guests_residents_daily_update(location):
 
     if not arriving_today and not departing_today and not events_today:
         logger.debug(
-            "Nothing happening today at %s, skipping daily email" % location.name
+            f"Nothing happening today at {location.name}, skipping daily email"
         )
         return
 
-    subject = "[%s] Events, Arrivals and Departures for %s" % (
-        location.email_subject_prefix,
-        str(today.date()),
-    )
+    subject = f"[{location.email_subject_prefix}] Events, Arrivals and Departures for {str(today.date())}"
 
     admin_emails = []
     for admin in location.house_admins.all():
@@ -552,18 +510,18 @@ def admin_daily_update(location):
         and not subscriptions_ready
     ):
         logger.debug(
-            "Nothing happening today at %s, skipping daily email" % location.name
+            f"Nothing happening today at {location.name}, skipping daily email"
         )
         return
 
-    subject = "[%s] %s Events and Guests" % (location.email_subject_prefix, today)
+    subject = f"[{location.email_subject_prefix}] {today} Events and Guests"
 
     admins_emails = []
     for admin in location.house_admins.all():
         if admin.email not in admins_emails:
             admins_emails.append(admin.email)
     if len(admins_emails) == 0:
-        logger.debug("%s: No admins to send to" % location.slug)
+        logger.debug(f"{location.slug}: No admins to send to")
         return None
 
     c = {
@@ -617,7 +575,7 @@ def current(request, location_slug):
         # XXX TODO reject and bounce back to sender?
         logger.error("location not found")
         return HttpResponse(status=200)
-    logger.debug("current@ for location: %s" % location)
+    logger.debug(f"current@ for location: {location}")
     today = timezone.localtime(timezone.now())
 
     # we think that message_headers is a list of strings
@@ -639,9 +597,9 @@ def current(request, location_slug):
         return HttpResponse(status=200)
 
     recipient = request.POST.get("recipient")
-    logger.debug("from: %s" % from_address)
+    logger.debug(f"from: {from_address}")
     sender = request.POST.get("sender")
-    logger.debug("sender: %s" % sender)
+    logger.debug(f"sender: {sender}")
     subject = request.POST.get("subject")
     body_plain = request.POST.get("body-plain")
     body_html = request.POST.get("body-html")
@@ -665,7 +623,7 @@ def current(request, location_slug):
     for email in current_emails:
         if email not in bcc_list:
             bcc_list.append(email)
-    logger.debug("bcc list: %s" % bcc_list)
+    logger.debug(f"bcc list: {bcc_list}")
 
     # Make sure this person can post to our list
     # if not sender in bcc_list:
@@ -687,23 +645,21 @@ def current(request, location_slug):
             "[" + location.email_subject_prefix + "] [Current Guests and Residents] "
         )
         subject = prefix + subject
-    logger.debug("subject: %s" % subject)
+    logger.debug(f"subject: {subject}")
 
     # add in footer
     text_footer = (
-        """\n\n-------------------------------------------\nYou are receiving this email because you are a current guest or resident at %s. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond."""
-        % location.name
+        f"""\n\n-------------------------------------------\nYou are receiving this email because you are a current guest or resident at {location.name}. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond."""
     )
     body_plain = body_plain + text_footer
     if body_html:
         html_footer = (
-            """<br><br>-------------------------------------------<br>You are receiving this email because you are a current guest or resident at %s. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond."""
-            % location.name
+            f"""<br><br>-------------------------------------------<br>You are receiving this email because you are a current guest or resident at {location.name}. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond."""
         )
         body_html = body_html + html_footer
 
     # send the message
-    list_address = "current@%s.%s" % (location.slug, settings.LIST_DOMAIN)
+    list_address = f"current@{location.slug}.{settings.LIST_DOMAIN}"
     mailgun_data = {
         "from": from_address,
         "to": [
@@ -734,7 +690,7 @@ def unsubscribe(request, location_slug):
     except Exception:
         # XXX TODO reject and bounce back to sender?
         return HttpResponse(status=200)
-    logger.debug("unsubscribe@ for location: %s" % location)
+    logger.debug(f"unsubscribe@ for location: {location}")
     logger.debug(request.POST)
     logger.debug(request.FILES)
     return HttpResponse(status=200)
@@ -749,7 +705,7 @@ def test80085(request, location_slug):
     except Exception:
         # XXX TODO reject and bounce back to sender?
         return HttpResponse(status=200)
-    logger.debug("test80085@ for location: %s" % location)
+    logger.debug(f"test80085@ for location: {location}")
     logger.debug(request.POST)
     logger.debug(request.FILES)
 
@@ -772,18 +728,18 @@ def test80085(request, location_slug):
         return HttpResponse(status=200)
 
     recipient = request.POST.get("recipient")
-    to = request.POST.get("To")
+    request.POST.get("To")
     from_address = request.POST.get("from")
-    logger.debug("from: %s" % from_address)
+    logger.debug(f"from: {from_address}")
     sender = request.POST.get("sender")
-    logger.debug("sender: %s" % sender)
+    logger.debug(f"sender: {sender}")
     subject = request.POST.get("subject")
     body_plain = request.POST.get("body-plain")
     body_html = request.POST.get("body-html")
 
     # retrieve the current house admins for this location
     bcc_list = ["jsayles@gmail.com", "jessy@jessykate.com"]
-    logger.debug("bcc list: %s" % bcc_list)
+    logger.debug(f"bcc list: {bcc_list}")
 
     # Make sure this person can post to our list
     # if not sender in bcc_list:
@@ -821,7 +777,7 @@ def test80085(request, location_slug):
     if subject.find("EN Test") < 0:
         prefix = "[EN Test!] "
         subject = prefix + subject
-    logger.debug("subject: %s" % subject)
+    logger.debug(f"subject: {subject}")
 
     # add in footer
     text_footer = """\n\n-------------------------------------------\nYou are receiving this email because someone at Embassy Network wanted to use you as a guinea pig. %mailing_list_unsubscribe_url%"""
@@ -862,7 +818,7 @@ def stay(request, location_slug):
     except Exception:
         # XXX TODO reject and bounce back to sender?
         return HttpResponse(status=200)
-    logger.debug("stay@ for location: %s" % location)
+    logger.debug(f"stay@ for location: {location}")
     logger.debug(request.POST)
 
     # we think that message_headers is a list of strings
@@ -884,11 +840,11 @@ def stay(request, location_slug):
         return HttpResponse(status=200)
 
     recipient = request.POST.get("recipient")
-    to = request.POST.get("To")
+    request.POST.get("To")
     from_address = request.POST.get("from")
-    logger.debug("from: %s" % from_address)
+    logger.debug(f"from: {from_address}")
     sender = request.POST.get("sender")
-    logger.debug("sender: %s" % sender)
+    logger.debug(f"sender: {sender}")
     subject = request.POST.get("subject")
     body_plain = request.POST.get("body-plain")
     body_html = request.POST.get("body-html")
@@ -899,7 +855,7 @@ def stay(request, location_slug):
     for person in location_admins:
         if person.email not in bcc_list:
             bcc_list.append(person.email)
-    logger.debug("bcc list: %s" % bcc_list)
+    logger.debug(f"bcc list: {bcc_list}")
 
     # Make sure this person can post to our list
     # if not sender in bcc_list:
@@ -919,18 +875,16 @@ def stay(request, location_slug):
     if subject.find(location.email_subject_prefix) < 0:
         prefix = "[" + location.email_subject_prefix + "] [Admin] "
         subject = prefix + subject
-    logger.debug("subject: %s" % subject)
+    logger.debug(f"subject: {subject}")
 
     # add in footer
     text_footer = (
-        """\n\n-------------------------------------------\nYou are receiving email to %s because you are a location admin at %s. Send mail to this list to reach other admins."""
-        % (recipient, location.name)
+        f"""\n\n-------------------------------------------\nYou are receiving email to {recipient} because you are a location admin at {location.name}. Send mail to this list to reach other admins."""
     )
     body_plain = body_plain + text_footer
     if body_html:
         html_footer = (
-            """<br><br>-------------------------------------------<br>You are receiving email to %s because you are a location admin at %s. Send mail to this list to reach other admins."""
-            % (recipient, location.name)
+            f"""<br><br>-------------------------------------------<br>You are receiving email to {recipient} because you are a location admin at {location.name}. Send mail to this list to reach other admins."""
         )
         body_html = body_html + html_footer
 
@@ -970,7 +924,7 @@ def residents(request, location_slug):
         # XXX TODO reject and bounce back to sender?
         logger.error("location not found")
         return HttpResponse(status=200)
-    logger.debug("residents@ for location: %s" % location)
+    logger.debug(f"residents@ for location: {location}")
 
     # we think that message_headers is a list of strings
     header_txt = request.POST.get("message-headers")
@@ -992,9 +946,9 @@ def residents(request, location_slug):
 
     recipient = request.POST.get("recipient")
     from_address = request.POST.get("from")
-    logger.debug("from: %s" % from_address)
+    logger.debug(f"from: {from_address}")
     sender = request.POST.get("sender")
-    logger.debug("sender: %s" % sender)
+    logger.debug(f"sender: {sender}")
     subject = request.POST.get("subject")
     body_plain = request.POST.get("body-plain")
     body_html = request.POST.get("body-html")
@@ -1010,7 +964,7 @@ def residents(request, location_slug):
     for email in resident_emails:
         if email not in bcc_list:
             bcc_list.append(email)
-    logger.debug("bcc list: %s" % bcc_list)
+    logger.debug(f"bcc list: {bcc_list}")
 
     # Make sure this person can post to our list
     # if not sender in bcc_list:
@@ -1030,24 +984,22 @@ def residents(request, location_slug):
     if subject.find(location.email_subject_prefix) < 0:
         prefix = "[" + location.email_subject_prefix + "] "
         subject = prefix + subject
-    logger.debug("subject: %s" % subject)
+    logger.debug(f"subject: {subject}")
 
     # add in footer
     text_footer = (
-        """\n\n-------------------------------------------\n*~*~*~* %s residents email list *~*~*~* """
-        % location.name
+        f"""\n\n-------------------------------------------\n*~*~*~* {location.name} residents email list *~*~*~* """
     )
     body_plain = body_plain + text_footer
 
     if body_html:
         html_footer = (
-            """<br><br>-------------------------------------------<br>*~*~*~* %s residents email list *~*~*~* """
-            % location.name
+            f"""<br><br>-------------------------------------------<br>*~*~*~* {location.name} residents email list *~*~*~* """
         )
         body_html = body_html + html_footer
 
     # send the message
-    list_address = "residents@%s.%s" % (location.slug, settings.LIST_DOMAIN)
+    list_address = f"residents@{location.slug}.{settings.LIST_DOMAIN}"
     mailgun_data = {
         "from": from_address,
         "to": [
@@ -1080,7 +1032,7 @@ def announce(request, location_slug):
         # XXX TODO reject and bounce back to sender?
         logger.error("location not found")
         return HttpResponse(status=200)
-    logger.debug("announce@ for location: %s" % location)
+    logger.debug(f"announce@ for location: {location}")
 
     # Make sure this person can post to our list
     sender = request.POST.get("from")
@@ -1096,13 +1048,13 @@ def announce(request, location_slug):
             break
     if not this_sender_allowed:
         # TODO - This could send a response so they know they were blocked
-        logger.warn("Sender (%s) not allowed.  Exiting quietly." % sender)
+        logger.warn(f"Sender ({sender}) not allowed.  Exiting quietly.")
         return HttpResponse(status=200)
 
     weekly_notifications_on = EventNotifications.objects.filter(
         location_weekly=location
     )
-    remindees_for_location = [notify.user for notify in weekly_notifications_on]
+    [notify.user for notify in weekly_notifications_on]
 
     # TESTING
     jessy = User.objects.get(id=1)
@@ -1128,19 +1080,17 @@ def send_announce(request, user, location):
 
     prefix = "[" + location.email_subject_prefix + "] "
     subject = prefix + subject
-    logger.debug("subject: %s" % subject)
+    logger.debug(f"subject: {subject}")
 
     # add in footer
     text_footer = (
-        """\n\n-------------------------------------------\n*~*~*~* %s Announce *~*~*~* """
-        % location.name
+        f"""\n\n-------------------------------------------\n*~*~*~* {location.name} Announce *~*~*~* """
     )
     body_plain = body_plain + text_footer
 
     if body_html:
         html_footer = (
-            """<br><br>-------------------------------------------<br>*~*~*~* %s Announce *~*~*~* """
-            % location.name
+            f"""<br><br>-------------------------------------------<br>*~*~*~* {location.name} Announce *~*~*~* """
         )
         body_html = body_html + html_footer
 

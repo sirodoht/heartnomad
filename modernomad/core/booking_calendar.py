@@ -8,7 +8,7 @@ class GuestCalendar(HTMLCalendar):
     def __init__(self, uses, year, month, location):
         # self.formatmonth(year, month)
         self.year, self.month = year, month
-        super(GuestCalendar, self).__init__()
+        super().__init__()
         self.uses = self.group_by_day(uses)
         self.location = location
 
@@ -18,9 +18,8 @@ class GuestCalendar(HTMLCalendar):
             cssclass = self.cssclasses[weekday]
             if date.today() == date(self.year, self.month, day):
                 cssclass += " today"
-                today = True
             else:
-                today = False
+                pass
             if day in self.uses:
                 body = ["<ul>"]
                 num_today = len(self.uses[day])
@@ -40,7 +39,7 @@ class GuestCalendar(HTMLCalendar):
                         # body.append('<a href="#booking%d">' % use.booking.id)
                     body.append(
                         esc(
-                            "%s (%s)" % (use.user.first_name.title(), use.resource.name)
+                            f"{use.user.first_name.title()} ({use.resource.name})"
                         )
                     )
                     body.append("</a>")
@@ -63,10 +62,7 @@ class GuestCalendar(HTMLCalendar):
         next_month = (self.month + 1) % 12
         if next_month == 0:
             next_month = 12
-        if next_month < self.month:
-            next_months_year = self.year + 1
-        else:
-            next_months_year = self.year
+        next_months_year = self.year + 1 if next_month < self.month else self.year
         days = (
             date(next_months_year, next_month, 1) - date(self.year, self.month, 1)
         ).days
@@ -85,4 +81,4 @@ class GuestCalendar(HTMLCalendar):
         return guests_by_day
 
     def day_cell(self, cssclass, body):
-        return '<td class="%s">%s</td>' % (cssclass, body)
+        return f'<td class="{cssclass}">{body}</td>'

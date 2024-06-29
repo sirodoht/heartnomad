@@ -129,8 +129,7 @@ class AccountList(View):
             messages.add_message(
                 request,
                 messages.INFO,
-                "The form contained errors, your transfer was not completed. %s"
-                % transaction_form.errors,
+                f"The form contained errors, your transfer was not completed. {transaction_form.errors}",
             )
 
         return redirect("account_list")
