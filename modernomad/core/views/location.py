@@ -86,7 +86,7 @@ def LocationEditSettings(request, location_slug):
         form = LocationSettingsForm(request.POST, instance=location)
         if form.is_valid():
             form.save()
-            messages.add_message(request, messages.INFO, "Location Updated.")
+            messages.info(request, "Location Updated.")
     else:
         form = LocationSettingsForm(instance=location)
     return render(
@@ -100,13 +100,10 @@ def LocationEditSettings(request, location_slug):
 def LocationEditUsers(request, location_slug):
     location = get_object_or_404(Location, slug=location_slug)
     if request.method == "POST":
-        admin_user = resident_user = event_admin_user = readonly_admin_user = None
+        admin_user = event_admin_user = readonly_admin_user = None
         if "admin_username" in request.POST:
             admin_username = request.POST.get("admin_username")
             admin_user = User.objects.filter(username=admin_username).first()
-        elif "resident_username" in request.POST:
-            resident_username = request.POST.get("resident_username")
-            resident_user = User.objects.filter(username=resident_username).first()
         elif "readonly_admin_username" in request.POST:
             readonly_admin_username = request.POST.get("readonly_admin_username")
             readonly_admin_user = User.objects.filter(
@@ -124,19 +121,17 @@ def LocationEditUsers(request, location_slug):
                 # Remove user
                 location.house_admins.remove(admin_user)
                 location.save()
-                messages.add_message(
+                messages.info(
                     request,
-                    messages.INFO,
-                    "User '%s' removed from house admin group." % admin_username,
+                    f"User '{admin_username}' removed from house admin group.",
                 )
             elif action == "Add":
                 # Add user
                 location.house_admins.add(admin_user)
                 location.save()
-                messages.add_message(
+                messages.info(
                     request,
-                    messages.INFO,
-                    "User '%s' added to house admin group." % admin_username,
+                    f"User '{admin_username}' added to house admin group.",
                 )
         elif readonly_admin_user:
             action = request.POST.get("action")
@@ -144,21 +139,17 @@ def LocationEditUsers(request, location_slug):
                 # Remove user
                 location.readonly_admins.remove(readonly_admin_user)
                 location.save()
-                messages.add_message(
+                messages.info(
                     request,
-                    messages.INFO,
-                    "User '%s' removed from readonly admin group."
-                    % readonly_admin_username,
+                    f"User '{readonly_admin_username}' removed from readonly admin group.",
                 )
             elif action == "Add":
                 # Add user
                 location.readonly_admins.add(readonly_admin_user)
                 location.save()
-                messages.add_message(
+                messages.info(
                     request,
-                    messages.INFO,
-                    "User '%s' added to readonly admin group."
-                    % readonly_admin_username,
+                    f"User '{readonly_admin_username}' added to readonly admin group.",
                 )
         elif event_admin_user:
             action = request.POST.get("action")
@@ -167,23 +158,21 @@ def LocationEditUsers(request, location_slug):
                 event_admin_group = location.event_admin_group
                 event_admin_group.users.remove(event_admin_user)
                 event_admin_group.save()
-                messages.add_message(
+                messages.info(
                     request,
-                    messages.INFO,
-                    "User '%s' removed from event admin group." % event_admin_username,
+                    f"User '{event_admin_username}' removed from event admin group.",
                 )
             elif action == "Add":
                 # Add user
                 event_admin_group = location.event_admin_group
                 event_admin_group.users.add(event_admin_user)
                 event_admin_group.save()
-                messages.add_message(
+                messages.info(
                     request,
-                    messages.INFO,
-                    "User '%s' added to event admin group." % event_admin_username,
+                    f"User '{event_admin_username}' added to event admin group.",
                 )
         else:
-            messages.add_message(request, messages.ERROR, "Username Required!")
+            messages.error(request, "Username Required!")
     all_users = User.objects.all().order_by("username")
     return render(
         request,
@@ -198,7 +187,7 @@ def LocationEditPages(request, location_slug):
 
     if request.method == "POST":
         action = request.POST["action"]
-        logger.debug("action=%s" % action)
+        logger.debug(f"action={action}")
         logger.debug(request.POST)
         if action == "Add Menu":
             try:
@@ -212,17 +201,13 @@ def LocationEditPages(request, location_slug):
                 ):
                     LocationMenu.objects.create(location=location, name=menu)
             except Exception as e:
-                messages.add_message(
-                    request, messages.ERROR, "Could not create menu: %s" % e
-                )
+                messages.error(request, f"Could not create menu: {e}")
         elif action == "Delete Menu" and "menu_id" in request.POST:
             try:
                 menu = LocationMenu.objects.get(pk=request.POST["menu_id"])
                 menu.delete()
             except Exception as e:
-                messages.add_message(
-                    request, messages.ERROR, "Could not delete menu: %s" % e
-                )
+                messages.error(request, f"Could not delete menu: {e}")
         elif action == "Save Changes" and "page_id" in request.POST:
             try:
                 page = LocationFlatPage.objects.get(pk=request.POST["page_id"])
@@ -231,32 +216,28 @@ def LocationEditPages(request, location_slug):
                 page.save()
 
                 url_slug = request.POST["slug"].strip().lower()
-                page.flatpage.url = "/locations/%s/%s/" % (location.slug, url_slug)
+                page.flatpage.url = f"/locations/{location.slug}/{url_slug}/"
                 page.flatpage.title = request.POST["title"]
                 page.flatpage.content = request.POST["content"]
                 page.flatpage.save()
-                messages.add_message(request, messages.INFO, "The page was updated.")
+                messages.info(request, "The page was updated.")
             except Exception as e:
-                messages.add_message(
-                    request, messages.ERROR, "Could not edit page: %s" % e
-                )
+                messages.error(request, f"Could not edit page: {e}")
         elif action == "Delete Page" and "page_id" in request.POST:
             logger.debug("in Delete Page")
             try:
                 page = LocationFlatPage.objects.get(pk=request.POST["page_id"])
                 page.delete()
-                messages.add_message(request, messages.INFO, "The page was deleted")
+                messages.info(request, "The page was deleted")
             except Exception as e:
-                messages.add_message(
-                    request, messages.ERROR, "Could not delete page: %s" % e
-                )
+                messages.error(request, f"Could not delete page: {e}")
         elif action == "Create Page":
             try:
                 menu = LocationMenu.objects.get(pk=request.POST["menu"])
                 url_slug = request.POST["slug"].strip().lower()
-                url = "/locations/%s/%s/" % (location.slug, url_slug)
+                url = f"/locations/{location.slug}/{url_slug}/"
                 if not url_slug or FlatPage.objects.filter(url=url).count() != 0:
-                    raise Exception("Invalid slug (%s)" % url_slug)
+                    raise Exception(f"Invalid slug ({url_slug})")
                 flatpage = FlatPage.objects.create(
                     url=url,
                     title=request.POST["title"],
@@ -265,9 +246,7 @@ def LocationEditPages(request, location_slug):
                 flatpage.sites.add(Site.objects.get_current())
                 LocationFlatPage.objects.create(menu=menu, flatpage=flatpage)
             except Exception as e:
-                messages.add_message(
-                    request, messages.ERROR, "Could not edit page: %s" % e
-                )
+                messages.error(request, f"Could not edit page: {e}")
 
     menus = location.get_menus()
     new_page_form = LocationPageForm(location=location)
@@ -322,7 +301,6 @@ def LocationEditRoom(request, location_slug, room_id):
 
     logger.debug(request.method)
     if request.method == "POST":
-        page = request.POST.get("page")
         form = LocationRoomForm(
             request.POST, request.FILES, instance=Resource.objects.get(id=room_id)
         )
@@ -331,30 +309,25 @@ def LocationEditRoom(request, location_slug, room_id):
             new_backing_date = form.cleaned_data["new_backing_date"]
             backers = [User.objects.get(pk=i) for i in backer_ids]
             resource = form.save()
-            messages.add_message(request, messages.INFO, "%s updated." % resource.name)
+            messages.info(request, f"{resource.name} updated.")
             if backers and backers != form.instance.backers():
                 if not new_backing_date:
-                    messages.add_message(
+                    messages.error(
                         request,
-                        messages.ERROR,
                         "You must supply both a backer and a date if you want to update the backing",
                     )
                 else:
                     logger.debug("found both backer id and new date. updating backing")
                     resource.set_next_backing(backers, new_backing_date)
-                    messages.add_message(
-                        request, messages.INFO, "Backing was scheduled."
-                    )
+                    messages.info(request, "Backing was scheduled.")
             elif backers:
-                messages.add_message(
+                messages.info(
                     request,
-                    messages.INFO,
                     "The new room backers must be different from the current room backers",
                 )
         else:
-            messages.add_message(
+            messages.info(
                 request,
-                messages.INFO,
                 "There was an error in your form, please see below.",
             )
 
@@ -390,7 +363,7 @@ def LocationNewRoom(request, location_slug):
             new_room = form.save(commit=False)
             new_room.location = location
             new_room.save()
-            messages.add_message(request, messages.INFO, "%s created." % new_room.name)
+            messages.info(request, f"{new_room.name} created.")
             return HttpResponseRedirect(
                 reverse(
                     "location_edit_room",
@@ -422,7 +395,7 @@ def LocationEditContent(request, location_slug):
         form = LocationContentForm(request.POST, request.FILES, instance=location)
         if form.is_valid():
             form.save()
-            messages.add_message(request, messages.INFO, "Location Updated.")
+            messages.info(request, "Location Updated.")
     else:
         form = LocationContentForm(instance=location)
     return render(
