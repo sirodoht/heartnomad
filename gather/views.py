@@ -37,9 +37,8 @@ def create_event(request, location_slug=None):
     # if the user doesn't have a proper profile, then make sure they extend it first
     logger.debug(current_user.id)
     if current_user.id is None:
-        messages.add_message(
+        messages.info(
             request,
-            messages.INFO,
             "We want to know who you are! Please create a profile before submitting an event.",
         )
         next_url = f"/locations/{location.slug}/events/create/"
@@ -47,9 +46,8 @@ def create_event(request, location_slug=None):
     elif current_user.is_authenticated and (
         (not current_user.profile.bio) or (not current_user.profile.image)
     ):
-        messages.add_message(
+        messages.info(
             request,
-            messages.INFO,
             "We want to know a bit more about you! Please complete your profile before submitting an event.",
         )
         return HttpResponseRedirect(f"/people/{current_user.username}/edit/")
@@ -81,7 +79,7 @@ def create_event(request, location_slug=None):
 
             new_event_notification(event, location)
 
-            messages.add_message(request, messages.INFO, "The event has been created.")
+            messages.info(request, "The event has been created.")
             return HttpResponseRedirect(
                 reverse(
                     "gather_view_event",
@@ -132,7 +130,7 @@ def edit_event(request, event_id, event_slug, location_slug=None):
             logger.debug(co_organizers)
             event.organizers.add(*co_organizers)
             event.save()
-            messages.add_message(request, messages.INFO, "The event has been saved.")
+            messages.info(request, "The event has been saved.")
             return HttpResponseRedirect(
                 reverse(
                     "gather_view_event",
@@ -280,8 +278,8 @@ def view_event(request, event_id, event_slug, location_slug=None):
 
     elif not current_user:
         # if the user is not logged in and this is not a public event, have them login and try again
-        messages.add_message(
-            request, messages.INFO, "Please log in to view this event."
+        messages.info(
+            request, "Please log in to view this event."
         )
         next_url = reverse(
             "gather_view_event", args=(event.location.slug, event.id, event.slug)
@@ -289,9 +287,8 @@ def view_event(request, event_id, event_slug, location_slug=None):
         return HttpResponseRedirect(f"/people/login/?next={next_url}")
     else:
         # the user is logged in but the event is not viewable to them based on their status
-        messages.add_message(
+        messages.info(
             request,
-            messages.INFO,
             "Oops! You do not have permission to view this event.",
         )
         return HttpResponseRedirect(f"/locations/{location.slug}")
@@ -501,7 +498,7 @@ def email_preferences(request, username, location_slug=None):
 
     notifications.save()
     logger.debug(notifications.location_weekly.all())
-    messages.add_message(request, messages.INFO, "Your preferences have been updated.")
+    messages.info(request, "Your preferences have been updated.")
     return HttpResponseRedirect(f"/people/{u.username}/")
 
 
@@ -522,14 +519,9 @@ def event_approve(request, event_id, event_slug, location_slug=None):
 
     event.status = Event.READY
     event.save()
-    if request.user in location_event_admin.users.all():
-        pass
-    else:
-        pass
-    request.user in event.organizers.all()
 
     msg_success = "Success! The event has been approved."
-    messages.add_message(request, messages.INFO, msg_success)
+    messages.info(request, msg_success)
 
     # notify the event organizers and admins
     event_approved_notification(event, location)
@@ -556,13 +548,8 @@ def event_publish(request, event_id, event_slug, location_slug=None):
     logger.debug(request.POST)
     event.status = Event.LIVE
     event.save()
-    if request.user in location_event_admin.users.all():
-        pass
-    else:
-        pass
-    request.user in event.organizers.all()
     msg_success = "Success! The event has been published."
-    messages.add_message(request, messages.INFO, msg_success)
+    messages.info(request, msg_success)
 
     # notify the event organizers and admins
     event_published_notification(event, location)
@@ -589,13 +576,8 @@ def event_cancel(request, event_id, event_slug, location_slug=None):
 
     event.status = Event.CANCELED
     event.save()
-    if request.user in location_event_admin.users.all():
-        pass
-    else:
-        pass
-    request.user in event.organizers.all()
     msg = "The event has been canceled."
-    messages.add_message(request, messages.INFO, msg)
+    messages.info(request, msg)
 
     return HttpResponseRedirect(
         reverse("gather_view_event", args=(location.slug, event.id, event.slug))
@@ -627,11 +609,10 @@ def event_send_mail(request, event_id, event_slug, location_slug=None):
 
     logger.debug(resp)
     if resp.status_code == 200:
-        messages.add_message(request, messages.INFO, "Your message was sent.")
+        messages.info(request, "Your message was sent.")
     else:
-        messages.add_message(
+        messages.info(
             request,
-            messages.INFO,
             "There was a connection problem and your message was not sent.",
         )
     return HttpResponseRedirect(
@@ -757,9 +738,8 @@ def rsvp_new_user(request, event_id, event_slug, location_slug=None):
         event.attendees.add(new_user)
         logger.debug(event.attendees.all())
         event.save()
-        messages.add_message(
+        messages.info(
             request,
-            messages.INFO,
             "Thanks! Your account has been created. Check your email for login info and how to update your preferences.",
         )
         return HttpResponse(status=200)

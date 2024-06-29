@@ -84,7 +84,6 @@ def room_occupancy_month(room, month, year):
     start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 
     # note the day parameter is meaningless
-    datetime.date(year, month, 1)
     uses = (
         Use.objects.filter(resource=room)
         .filter(status="confirmed")
@@ -113,7 +112,6 @@ def room_occupancy_month(room, month, year):
     # payments this month for previous months
     # payments for this month FROM past months (except inasmuch as its captured in the payments_accrual)
 
-    Decimal(0.0)
     total_user_value = Decimal(0.0)
     net_to_house = Decimal(0.0)
     externalized_fees = Decimal(0.0)
@@ -227,7 +225,6 @@ def room_occupancy(request, location_slug, room_id, year):
 
 def monthly_occupant_report(location_slug, year, month):
     location = get_object_or_404(Location, slug=location_slug)
-    datetime.date.today()
     start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 
     occupants = {}
@@ -354,7 +351,6 @@ def monthly_occupant_report(location_slug, year, month):
 @resident_or_admin_required
 def occupancy(request, location_slug):
     location = get_object_or_404(Location, slug=location_slug)
-    datetime.date.today()
     month = request.GET.get("month")
     year = request.GET.get("year")
 
@@ -632,7 +628,6 @@ def manage_today(request, location_slug):
 @login_required
 def calendar(request, location_slug):
     location = get_object_or_404(Location, slug=location_slug)
-    timezone.localtime(timezone.now())
     month = request.GET.get("month")
     year = request.GET.get("year")
 

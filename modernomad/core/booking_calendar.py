@@ -18,8 +18,6 @@ class GuestCalendar(HTMLCalendar):
             cssclass = self.cssclasses[weekday]
             if date.today() == date(self.year, self.month, day):
                 cssclass += " today"
-            else:
-                pass
             if day in self.uses:
                 body = ["<ul>"]
                 num_today = len(self.uses[day])
