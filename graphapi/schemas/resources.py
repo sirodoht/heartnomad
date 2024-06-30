@@ -7,7 +7,7 @@ from graphene.types.datetime import DateTime
 from graphene_django.filter.fields import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
 
-from modernomad.core.models import Backing, Resource
+from core.models import Backing, Resource
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ class ResourceNode(DjangoObjectType):
         start_date = arrive.date()
         end_date = depart.date() - timedelta(days=1)
 
-        logger.debug("%s drftable between? " % self.name)
+        logger.debug(f"{self.name} drftable between? ")
         logger.debug(self.drftable_between(start_date, end_date))
         return self.drftable_between(start_date, end_date)
 

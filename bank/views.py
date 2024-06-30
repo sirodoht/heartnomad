@@ -45,9 +45,8 @@ class AccountDetail(View):
             )
             return render(request, self.template_name, {"account": account})
         except Exception:
-            messages.add_message(
+            messages.info(
                 request,
-                messages.INFO,
                 "The account does not exist or you are not authorized.",
             )
             return HttpResponseRedirect("/404")
@@ -86,9 +85,8 @@ class AccountList(View):
                     or request.user in from_account.admins.all()
                 )
             except Exception:
-                messages.add_message(
+                messages.info(
                     request,
-                    messages.INFO,
                     "You do not have permission to transfer from this account",
                 )
                 prerequisites_met = False
@@ -97,9 +95,8 @@ class AccountList(View):
             try:
                 assert from_account.get_balance() >= amount
             except AssertionError:
-                messages.add_message(
+                messages.info(
                     request,
-                    messages.INFO,
                     "Insufficient balance on source account %s (%d)"
                     % (from_account.name, from_account.id),
                 )
@@ -109,28 +106,23 @@ class AccountList(View):
             try:
                 assert to_account != from_account
             except Exception:
-                messages.add_message(
-                    request, messages.INFO, "You must select two different accounts"
-                )
+                messages.info(request, "You must select two different accounts")
                 prerequisites_met = False
 
             if prerequisites_met:
                 success = create_transaction(reason, amount, from_account, to_account)
                 if success:
-                    messages.add_message(request, messages.INFO, "Submitted")
+                    messages.info(request, "Submitted")
                 else:
-                    messages.add_message(
+                    messages.info(
                         request,
-                        messages.INFO,
                         "Oops, something went wrong. Please try again.",
                     )
         else:
             logger.debug(transaction_form.errors)
-            messages.add_message(
+            messages.info(
                 request,
-                messages.INFO,
-                "The form contained errors, your transfer was not completed. %s"
-                % transaction_form.errors,
+                f"The form contained errors, your transfer was not completed. {transaction_form.errors}",
             )
 
         return redirect("account_list")

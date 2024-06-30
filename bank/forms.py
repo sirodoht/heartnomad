@@ -39,7 +39,7 @@ class TransactionForm(forms.Form):
     amount = forms.IntegerField(required=True)
 
     def __init__(self, user, *args, **kwargs):
-        super(TransactionForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         accounts = Account.objects.filter(
             currency=Currency.objects.get(name="DRFT")
         ).filter(Q(owners=user.pk) | Q(admins=user.pk))

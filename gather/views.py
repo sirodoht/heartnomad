@@ -15,6 +15,8 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
 
+from core.forms import UserProfileForm
+from core.models import Location
 from gather.emails import (
     event_approved_notification,
     event_published_notification,
@@ -23,8 +25,6 @@ from gather.emails import (
 )
 from gather.forms import EventEmailTemplateForm, EventForm
 from gather.models import Event, EventAdminGroup
-from modernomad.core.forms import UserProfileForm
-from modernomad.core.models import Location
 
 logger = logging.getLogger(__name__)
 
@@ -32,40 +32,35 @@ logger = logging.getLogger(__name__)
 def create_event(request, location_slug=None):
     location = get_object_or_404(Location, slug=location_slug)
     current_user = request.user
-    logger.debug("create_event: location:%s, user:%s" % (location, current_user))
+    logger.debug(f"create_event: location:{location}, user:{current_user}")
 
     # if the user doesn't have a proper profile, then make sure they extend it first
     logger.debug(current_user.id)
-    if current_user.id == None:
-        messages.add_message(
+    if current_user.id is None:
+        messages.info(
             request,
-            messages.INFO,
             "We want to know who you are! Please create a profile before submitting an event.",
         )
-        next_url = "/locations/%s/events/create/" % location.slug
-        return HttpResponseRedirect("/people/register/?next=%s" % next_url)
+        next_url = f"/locations/{location.slug}/events/create/"
+        return HttpResponseRedirect(f"/people/register/?next={next_url}")
     elif current_user.is_authenticated and (
         (not current_user.profile.bio) or (not current_user.profile.image)
     ):
-        messages.add_message(
+        messages.info(
             request,
-            messages.INFO,
             "We want to know a bit more about you! Please complete your profile before submitting an event.",
         )
-        return HttpResponseRedirect("/people/%s/edit/" % current_user.username)
+        return HttpResponseRedirect(f"/people/{current_user.username}/edit/")
 
     other_users = User.objects.exclude(id=current_user.id)
     # get a list of users so that those creating an event can select from
     # existing users as event co-organizers
     user_list = [u.username for u in other_users]
     location_admin_group = EventAdminGroup.objects.get(location=location)
-    if current_user in location_admin_group.users.all():
-        is_event_admin = True
-    else:
-        is_event_admin = False
+    is_event_admin = current_user in location_admin_group.users.all()
 
     if request.method == "POST":
-        logger.debug("create_event: POST=%s" % request.POST)
+        logger.debug(f"create_event: POST={request.POST}")
         form = EventForm(request.POST, request.FILES)
         if form.is_valid():
             event = form.save(commit=False)
@@ -84,7 +79,7 @@ def create_event(request, location_slug=None):
 
             new_event_notification(event, location)
 
-            messages.add_message(request, messages.INFO, "The event has been created.")
+            messages.info(request, "The event has been created.")
             return HttpResponseRedirect(
                 reverse(
                     "gather_view_event",
@@ -135,7 +130,7 @@ def edit_event(request, event_id, event_slug, location_slug=None):
             logger.debug(co_organizers)
             event.organizers.add(*co_organizers)
             event.save()
-            messages.add_message(request, messages.INFO, "The event has been saved.")
+            messages.info(request, "The event has been saved.")
             return HttpResponseRedirect(
                 reverse(
                     "gather_view_event",
@@ -196,10 +191,7 @@ def view_event(request, event_id, event_slug, location_slug=None):
     # is the event in the past?
     today = timezone.now()
     logger.debug(event.end)
-    if event.end < today:
-        past = True
-    else:
-        past = False
+    past = event.end < today
 
     # set up for those without accounts to RSVP
     if request.user.is_authenticated:
@@ -257,10 +249,7 @@ def view_event(request, event_id, event_slug, location_slug=None):
             )
         )
         formatted_location = event.where.replace(" ", "+")
-        event_google_cal_link = (
-            """https://www.google.com/calendar/render?action=TEMPLATE&text=%s&dates=%s&details=For+details%%3a+%s&location=%s&sf=true&output=xml"""
-            % (formatted_title, formatted_dates, detail_url, formatted_location)
-        )
+        event_google_cal_link = f"""https://www.google.com/calendar/render?action=TEMPLATE&text={formatted_title}&dates={formatted_dates}&details=For+details%3a+{detail_url}&location={formatted_location}&sf=true&output=xml"""
         if user_is_event_admin or user_is_organizer:
             email_form = EventEmailTemplateForm(event, location)
         else:
@@ -289,31 +278,25 @@ def view_event(request, event_id, event_slug, location_slug=None):
 
     elif not current_user:
         # if the user is not logged in and this is not a public event, have them login and try again
-        messages.add_message(
-            request, messages.INFO, "Please log in to view this event."
-        )
+        messages.info(request, "Please log in to view this event.")
         next_url = reverse(
             "gather_view_event", args=(event.location.slug, event.id, event.slug)
         )
-        return HttpResponseRedirect("/people/login/?next=%s" % next_url)
+        return HttpResponseRedirect(f"/people/login/?next={next_url}")
     else:
         # the user is logged in but the event is not viewable to them based on their status
-        messages.add_message(
+        messages.info(
             request,
-            messages.INFO,
             "Oops! You do not have permission to view this event.",
         )
-        return HttpResponseRedirect("/locations/%s" % location.slug)
+        return HttpResponseRedirect(f"/locations/{location.slug}")
 
 
 def upcoming_events_all_locations(request):
     """if a site supports multiple locations this page can be used to show
     events across all locations."""
-    if request.user.is_authenticated:
-        current_user = request.user
-    else:
-        current_user = None
-    today = datetime.datetime.today()
+    current_user = request.user if request.user.is_authenticated else None
+    datetime.datetime.today()
     all_upcoming = Event.objects.upcoming(current_user=request.user)
     culled_upcoming = []
     for event in all_upcoming:
@@ -346,11 +329,8 @@ def upcoming_events_all_locations(request):
 def upcoming_events(request, location_slug=None):
     """upcoming events limited to a specific location (either the one
     specified or the default single location)."""
-    if request.user.is_authenticated:
-        current_user = request.user
-    else:
-        current_user = None
-    today = datetime.datetime.today()
+    current_user = request.user if request.user.is_authenticated else None
+    datetime.datetime.today()
     location = get_object_or_404(Location, slug=location_slug)
     all_upcoming = Event.objects.upcoming(current_user=request.user, location=location)
     culled_upcoming = []
@@ -446,10 +426,7 @@ def needs_review(request, location_slug=None):
 
 def past_events(request, location_slug=None):
     location = get_object_or_404(Location, slug=location_slug)
-    if request.user.is_authenticated:
-        current_user = request.user
-    else:
-        current_user = None
+    current_user = request.user if request.user.is_authenticated else None
     today = datetime.datetime.today()
     # most recent first
     all_past = (
@@ -504,7 +481,7 @@ def email_preferences(request, username, location_slug=None):
             and location not in notifications.location_weekly.all()
         ):
             notifications.location_weekly.add(location)
-        if weekly_updates == None and location in notifications.location_weekly.all():
+        if weekly_updates is None and location in notifications.location_weekly.all():
             notifications.location_weekly.remove(location)
 
         # update preferences on new event notifications
@@ -514,13 +491,13 @@ def email_preferences(request, username, location_slug=None):
             and location not in notifications.location_publish.all()
         ):
             notifications.location_publish.add(location)
-        if publish_notify == None and location in notifications.location_publish.all():
+        if publish_notify is None and location in notifications.location_publish.all():
             notifications.location_publish.remove(location)
 
     notifications.save()
     logger.debug(notifications.location_weekly.all())
-    messages.add_message(request, messages.INFO, "Your preferences have been updated.")
-    return HttpResponseRedirect("/people/%s/" % u.username)
+    messages.info(request, "Your preferences have been updated.")
+    return HttpResponseRedirect(f"/people/{u.username}/")
 
 
 def event_approve(request, event_id, event_slug, location_slug=None):
@@ -540,17 +517,9 @@ def event_approve(request, event_id, event_slug, location_slug=None):
 
     event.status = Event.READY
     event.save()
-    if request.user in location_event_admin.users.all():
-        user_is_event_admin = True
-    else:
-        user_is_event_admin = False
-    if request.user in event.organizers.all():
-        user_is_organizer = True
-    else:
-        user_is_organizer = False
 
     msg_success = "Success! The event has been approved."
-    messages.add_message(request, messages.INFO, msg_success)
+    messages.info(request, msg_success)
 
     # notify the event organizers and admins
     event_approved_notification(event, location)
@@ -577,16 +546,8 @@ def event_publish(request, event_id, event_slug, location_slug=None):
     logger.debug(request.POST)
     event.status = Event.LIVE
     event.save()
-    if request.user in location_event_admin.users.all():
-        user_is_event_admin = True
-    else:
-        user_is_event_admin = False
-    if request.user in event.organizers.all():
-        user_is_organizer = True
-    else:
-        user_is_organizer = False
     msg_success = "Success! The event has been published."
-    messages.add_message(request, messages.INFO, msg_success)
+    messages.info(request, msg_success)
 
     # notify the event organizers and admins
     event_published_notification(event, location)
@@ -613,16 +574,8 @@ def event_cancel(request, event_id, event_slug, location_slug=None):
 
     event.status = Event.CANCELED
     event.save()
-    if request.user in location_event_admin.users.all():
-        user_is_event_admin = True
-    else:
-        user_is_event_admin = False
-    if request.user in event.organizers.all():
-        user_is_organizer = True
-    else:
-        user_is_organizer = False
     msg = "The event has been canceled."
-    messages.add_message(request, messages.INFO, msg)
+    messages.info(request, msg)
 
     return HttpResponseRedirect(
         reverse("gather_view_event", args=(location.slug, event.id, event.slug))
@@ -633,7 +586,7 @@ def event_send_mail(request, event_id, event_slug, location_slug=None):
     if request.method != "POST":
         return HttpResponseRedirect("/404")
 
-    location = get_object_or_404(Location, slug=location_slug)
+    get_object_or_404(Location, slug=location_slug)
     subject = request.POST.get("subject")
     recipients = [
         request.POST.get("recipient"),
@@ -654,11 +607,10 @@ def event_send_mail(request, event_id, event_slug, location_slug=None):
 
     logger.debug(resp)
     if resp.status_code == 200:
-        messages.add_message(request, messages.INFO, "Your message was sent.")
+        messages.info(request, "Your message was sent.")
     else:
-        messages.add_message(
+        messages.info(
             request,
-            messages.INFO,
             "There was a connection problem and your message was not sent.",
         )
     return HttpResponseRedirect(
@@ -679,10 +631,7 @@ def rsvp_event(request, event_id, event_slug, location_slug=None):
     user_id_str = request.POST.get("user_id")
     event = Event.objects.get(id=event_id)
     user = User.objects.get(pk=int(user_id_str))
-    if user in event.organizers.all():
-        user_is_organizer = True
-    else:
-        user_is_organizer = False
+    user_is_organizer = user in event.organizers.all()
     if user not in event.attendees.all():
         event.attendees.add(user)
         event.save()
@@ -716,10 +665,7 @@ def rsvp_cancel(request, event_id, event_slug, location_slug=None):
     logger.debug("event slug: %s", event_slug)
     event = Event.objects.get(id=event_id)
     user = User.objects.get(pk=int(user_id_str))
-    if user in event.organizers.all():
-        user_is_organizer = True
-    else:
-        user_is_organizer = False
+    user_is_organizer = user in event.organizers.all()
 
     if user in event.attendees.all():
         event.attendees.remove(user)
@@ -754,16 +700,10 @@ def rsvp_new_user(request, event_id, event_slug, location_slug=None):
     # but it's not part of the user model.
     weekly_updates = request.POST.get("weekly-email-notifications")
     notify_new = request.POST.get("new-event-notifications")
-    if weekly_updates == "on":
-        weekly_updates = True
-    else:
-        weekly_updates = False
+    weekly_updates = weekly_updates == "on"
     logger.debug("weekly updates?")
     logger.debug(weekly_updates)
-    if notify_new == "on":
-        notify_new = True
-    else:
-        notify_new = False
+    notify_new = notify_new == "on"
 
     # Create new user but simplify the process
     form = UserProfileForm(request.POST)
@@ -796,9 +736,8 @@ def rsvp_new_user(request, event_id, event_slug, location_slug=None):
         event.attendees.add(new_user)
         logger.debug(event.attendees.all())
         event.save()
-        messages.add_message(
+        messages.info(
             request,
-            messages.INFO,
             "Thanks! Your account has been created. Check your email for login info and how to update your preferences.",
         )
         return HttpResponse(status=200)

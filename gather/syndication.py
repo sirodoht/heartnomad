@@ -2,8 +2,8 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django_ical.views import ICalFeed
 
+from core.models import Location
 from gather.models import Event
-from modernomad.core.models import Location
 
 
 class PublicEventsFeed(ICalFeed):
@@ -15,7 +15,7 @@ class PublicEventsFeed(ICalFeed):
         return get_object_or_404(Location, slug=location_slug)
 
     def items(self, obj):
-        rv = Location.objects.get(slug="redvic")
+        Location.objects.get(slug="redvic")
         return (
             Event.objects.filter(location=obj)
             .filter(status=Event.LIVE)

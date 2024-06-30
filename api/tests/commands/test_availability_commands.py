@@ -3,8 +3,8 @@ import unittest
 from django.test import TestCase
 
 from api.commands.capacities import *
-from modernomad.core.factories import *
-from modernomad.core.models import *
+from core.factories import *
+from core.models import *
 
 
 @unittest.skip(
@@ -67,7 +67,7 @@ class AddCapacityChangeTestCase(TestCase):
         self.assertEqual(command.result().serialize(), expected_data)
 
     def test_that_changing_capacity_to_the_same_quantity_has_no_effect(self):
-        capacity = CapacityChange.objects.create(
+        CapacityChange.objects.create(
             start_date="4016-01-13", resource=self.resource, quantity=2
         )
 
@@ -104,7 +104,7 @@ class AddCapacityChangeTestCase(TestCase):
         self.assertEqual(command.result().serialize(), {"data": expected_data})
 
     def test_cannot_udpate_capacity_in_the_past(self):
-        capacity = CapacityChange.objects.create(
+        CapacityChange.objects.create(
             start_date="1016-01-13", resource=self.resource, quantity=2
         )
 
@@ -120,7 +120,7 @@ class AddCapacityChangeTestCase(TestCase):
         self.assertEqual(command.result().serialize(), expected_data)
 
     def test_that_update_command_from_non_house_admin_fails(self):
-        capacity = CapacityChange.objects.create(
+        CapacityChange.objects.create(
             start_date="4016-01-13", resource=self.resource, quantity=2
         )
 
@@ -174,7 +174,7 @@ class DeleteCapacityChangeTestCase(TestCase):
     def test_deleting_capacity_also_deletes_next_one_if_it_is_the_same_as_previous(
         self,
     ):
-        previous_capacity = CapacityChange.objects.create(
+        CapacityChange.objects.create(
             start_date=datetime.date(4016, 1, 12), resource=self.resource, quantity=3
         )
         capacity = CapacityChange.objects.create(
@@ -189,13 +189,13 @@ class DeleteCapacityChangeTestCase(TestCase):
     def test_deleting_capacity_doesnt_deletes_next_one_if_it_different_to_previous(
         self,
     ):
-        previous_capacity = CapacityChange.objects.create(
+        CapacityChange.objects.create(
             start_date=datetime.date(4016, 1, 12), resource=self.resource, quantity=4
         )
         capacity = CapacityChange.objects.create(
             start_date=datetime.date(4016, 1, 13), resource=self.resource, quantity=2
         )
-        next_capacity = CapacityChange.objects.create(
+        CapacityChange.objects.create(
             start_date=datetime.date(4016, 1, 14), resource=self.resource, quantity=3
         )
         self.command = DeleteCapacityChange(self.user, capacity=capacity)

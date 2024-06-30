@@ -8,14 +8,9 @@
                 <td>{{s.start_date}} - {{s.end_date|default:"ongoing"}}.  </td>
                 <td> <i class="fa fa-repeat text-success"></i> ${{s.price}} on the {{s.start_date|date:"jS"}}.  </td>
                 <td> <a href="mailto:{{ s.location.from_email }}"><i class="fa fa-envelope"></i> Inquiries</a> </td>
-                
             </tr>
         {% endfor %}
     </table>
-
 {% else %}
-
     <p>No subscriptions. </p>
-
 {% endif %}
-

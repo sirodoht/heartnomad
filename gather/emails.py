@@ -15,7 +15,7 @@ from gather.models import Event, EventAdminGroup, EventNotifications
 
 logger = logging.getLogger(__name__)
 
-from modernomad.core.emails.mailgun import mailgun_send
+from core.emails.mailgun import mailgun_send
 
 
 def new_event_notification(event, location):
@@ -29,7 +29,7 @@ def new_event_notification(event, location):
         "["
         + location.email_subject_prefix
         + "]"
-        + " A new event has been created: %s" % event_short_title
+        + f" A new event has been created: {event_short_title}"
     )
     from_address = location.from_email()
     plaintext = get_template("emails/new_event_notify.txt")
@@ -89,7 +89,7 @@ def event_published_notification(event, location):
         "["
         + location.email_subject_prefix
         + "]"
-        + " Your event is now live: %s" % event_short_title
+        + f" Your event is now live: {event_short_title}"
     )
     from_address = location.from_email()
     plaintext = get_template("emails/event_published_notify.txt")
@@ -105,7 +105,7 @@ def event_published_notification(event, location):
         "subject": subject,
         "text": body_plain,
     }
-    status = mailgun_send(mailgun_data)
+    mailgun_send(mailgun_data)
 
     # then notify subscribed user accounts of this event
     notify_published = EventNotifications.objects.filter(
@@ -116,12 +116,12 @@ def event_published_notification(event, location):
     subscribed_users = [notify.user.email for notify in notify_published]
 
     subject = (
-        "[" + location.email_subject_prefix + "]" + " New event: %s" % event_short_title
+        "[" + location.email_subject_prefix + "]" + f" New event: {event_short_title}"
     )
     from_address = location.from_email()
     plaintext = get_template("emails/new_event_announce.txt")
     htmltext = get_template("emails/new_event_announce.html")
-    domain = Site.objects.get_current().domain
+    Site.objects.get_current().domain
 
     c_text = {
         "event": event,
@@ -145,8 +145,7 @@ def event_published_notification(event, location):
             u = User.objects.get(email=subscriber)
         except Exception:
             logger.error(
-                "There was an error retrieving the user associated with email address %s, likely because the email is not unique. Skipping this notification."
-                % subscriber
+                f"There was an error retrieving the user associated with email address {subscriber}, likely because the email is not unique. Skipping this notification."
             )
             return
         if (event.visibility == Event.PUBLIC) or (
@@ -159,7 +158,7 @@ def event_published_notification(event, location):
                 "text": text_content,
                 "html": html_content,
             }
-            status = mailgun_send(mailgun_data)
+            mailgun_send(mailgun_data)
 
 
 ###############################################
@@ -174,9 +173,9 @@ def create_route(route_name, route_pattern, path):
     forward_url = "https://" + forward_url
     logger.debug(forward_url)
     logger.debug(list_domain)
-    expression = "match_recipient('%s')" % route_pattern
+    expression = f"match_recipient('{route_pattern}')"
     logger.debug(expression)
-    forward_url = "forward('%s')" % forward_url
+    forward_url = f"forward('{forward_url}')"
     logger.debug(forward_url)
     return requests.post(
         "https://api.mailgun.net/v2/routes",
@@ -223,16 +222,16 @@ def event_message(request, location_slug=None):
     # we know that the route is always in the form eventXX, where XX is the
     # event id.
     alias = recipient.split("@")[0]
-    logger.debug("event_message: alias=%s" % alias)
+    logger.debug(f"event_message: alias={alias}")
     event = None
     try:
         event_id = int(alias[5:])
-        logger.debug("event_message: event_id=%s" % event_id)
+        logger.debug(f"event_message: event_id={event_id}")
         event = Event.objects.get(id=event_id)
     except Exception:
         pass
     if not event:
-        logger.warn("Event (%s) not found.  Exiting quietly." % alias)
+        logger.warn(f"Event ({alias}) not found.  Exiting quietly.")
         return HttpResponse(status=200)
 
     # Do some sanity checkint so we don't mailbomb everyone
@@ -263,18 +262,18 @@ def event_message(request, location_slug=None):
     for admin in admins:
         if admin.email not in bcc_list:
             bcc_list.append(admin.email)
-    logger.debug("BCC List: %s" % bcc_list)
+    logger.debug(f"BCC List: {bcc_list}")
 
     # Make sure this person can post to our list
     if sender not in bcc_list:
         # TODO - This shoud possibly send a response so they know they were blocked
-        logger.warn("Sender (%s) not allowed.  Exiting quietly." % sender)
+        logger.warn(f"Sender ({sender}) not allowed.  Exiting quietly.")
         return HttpResponse(status=200)
     bcc_list.remove(sender)
 
     # prefix subject
     if subject.find("[Event Discussion") < 0:
-        prefix = "[Event Discussion: %s] " % event.slug[0:30]
+        prefix = f"[Event Discussion: {event.slug[0:30]}] "
         subject = prefix + subject
 
     # Add in footer
@@ -282,10 +281,7 @@ def event_message(request, location_slug=None):
     event_url = request.build_absolute_uri(
         reverse("gather_view_event", args=(event.location.slug, event.id, event.slug))
     )
-    footer_msg = (
-        "You are receving this email because you are one of the organizers or an event admin at this location. Visit this event online at %s"
-        % event_url
-    )
+    footer_msg = f"You are receving this email because you are one of the organizers or an event admin at this location. Visit this event online at {event_url}"
     body_plain = (
         body_plain + "\n\n-------------------------------------------\n" + footer_msg
     )

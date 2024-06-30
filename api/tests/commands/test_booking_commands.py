@@ -3,7 +3,7 @@ from datetime import date, timedelta
 from django.test import TestCase
 
 from api.commands.bookings import *
-from modernomad.core.factories import *
+from core.factories import *
 
 
 class CommandErrorMatchers:
@@ -24,7 +24,9 @@ class CommandErrorMatchers:
         error = self.result.errors.get(key)
         self.assertNotEqual(error, None)
 
-    def assertModelSaved(self, model, values={}):
+    def assertModelSaved(self, model, values=None):
+        if values is None:
+            values = {}
         self.assertTrue(model)
         self.assertTrue(model.pk)
         for key, value in values.items():

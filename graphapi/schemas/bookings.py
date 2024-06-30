@@ -4,7 +4,7 @@ from graphene.types.datetime import *
 from graphene_django.types import DjangoObjectType
 
 from api.commands.bookings import RequestBooking
-from modernomad.core.models import Booking
+from core.models import Booking
 
 
 def commandErrorsToGraphQL(errors):

@@ -57,13 +57,14 @@ class EventForm(forms.ModelForm):
             username = username.strip()
             if username != "":
                 try:
-                    co_org_user = User.objects.get(username=username)
+                    User.objects.get(username=username)
                     co_organizers.append(User.objects.get(username=username))
                 except ObjectDoesNotExist:
                     raise forms.ValidationError(
                         _(
-                            "'%s' is not a recognized user, please remove them to save your event. Only users with existing accounts can be listed as co-organizers (but you can always add them later!)"
-                            % username
+                            "'{}' is not a recognized user, please remove them to save your event. Only users with existing accounts can be listed as co-organizers (but you can always add them later!)".format(
+                                username
+                            )
                         ),
                     )
         return co_organizers
@@ -108,7 +109,7 @@ class EventEmailTemplateForm(EmailTemplateForm):
 
         domain = Site.objects.get_current().domain
         # calling super will initialize the form fields
-        super(EventEmailTemplateForm, self).__init__()
+        super().__init__()
 
         # add in the extra fields
         self.fields["sender"].initial = location.from_email()
@@ -116,10 +117,9 @@ class EventEmailTemplateForm(EmailTemplateForm):
             widget=forms.Textarea(attrs={"readonly": "readonly"})
         )
         path = reverse("gather_view_event", args=(location.slug, event.id, event.slug))
-        self.fields["footer"].initial = (
-            """--------------------------------\nThis message was sent to attendees of the event '%s' at %s. You can view event details and update your RSVP status on the event page https://%s/%s."""
-            % (event.title, location.name, domain, path)
-        )
+        self.fields[
+            "footer"
+        ].initial = f"""--------------------------------\nThis message was sent to attendees of the event '{event.title}' at {location.name}. You can view event details and update your RSVP status on the event page https://{domain}/{path}."""
 
         # the recipients will be *all* the event attendees
         self.fields["recipient"].initial = ", ".join(

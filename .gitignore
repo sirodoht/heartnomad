@@ -1,23 +1,19 @@
-media
-*.*~
-*.swp
-*.swo
-*.swn
-modernomad.db
-*.pyc
-local_settings.py
+# os / editors
 .DS_Store
-local_templates/
-local_templates_hidden/
-django.log
-.vagrant
-modernomad.komodoproject
-modernomad/local_settings.py.bak
-ghostdriver.log
-.env
-static/CACHE/
+Thumbs.db
+*.swp
+*.*~
+._*
 
-/node_modules
+# python
+*.pyc
 
+# environment
 .venv/
 .envrc
+
+# django
+media
+
+# node.js
+/node_modules

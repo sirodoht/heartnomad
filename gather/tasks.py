@@ -8,9 +8,9 @@ from django.urls import reverse
 from django.utils import timezone
 from zoneinfo import ZoneInfo
 
+from core.emails.mailgun import mailgun_send
+from core.models import Location
 from gather.models import Event, EventNotifications
-from modernomad.core.emails.mailgun import mailgun_send
-from modernomad.core.models import Location
 
 logger = logging.getLogger(__name__)
 
@@ -27,10 +27,7 @@ weekday_number_to_name = {
 
 def send_events_list(user, event_list, location):
     profile_url = reverse("user_detail", args=(user.username,))
-    footer = (
-        "You are receiving this email because your preferences for event reminders are on. To turn them off, visit %s"
-        % profile_url
-    )
+    footer = f"You are receiving this email because your preferences for event reminders are on. To turn them off, visit {profile_url}"
     sender = location.from_email()
     subject = (
         "[" + location.email_subject_prefix + "]" + " Reminder of your events today"
@@ -66,16 +63,13 @@ def weekly_reminder_email(user, event_list, location):
     today_local = timezone.now().astimezone(current_tz).date()
     tomorrow_local = today_local + datetime.timedelta(days=1)
     week_name = tomorrow_local.strftime("%B %d, %Y")
-    footer = (
-        "You are receiving this email because you requested weekly updates of upcoming events from %s. To turn them off, visit %s"
-        % (location_name, profile_url)
-    )
+    footer = f"You are receiving this email because you requested weekly updates of upcoming events from {location_name}. To turn them off, visit {profile_url}"
     sender = location.from_email()
     subject = (
         "["
         + location.email_subject_prefix
         + "]"
-        + " Upcoming events for the week of %s" % week_name
+        + f" Upcoming events for the week of {week_name}"
     )
     current_tz = timezone.get_current_timezone()
     today_local = timezone.now().astimezone(current_tz).date()
@@ -265,7 +259,7 @@ def weekly_upcoming_events():
         events_this_week_at_location = published_events_this_week_local(location)
         if len(events_this_week_at_location) == 0:
             logger.debug(
-                "no events this week at %s; skipping email notification" % location.name
+                f"no events this week at {location.name}; skipping email notification"
             )
             continue
         # for each event,

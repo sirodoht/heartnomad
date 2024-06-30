@@ -13,12 +13,12 @@
         <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700|Raleway:800" rel="stylesheet">
 
         <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
-        <link rel="stylesheet" href="{% static 'css/custom.css' %}" />
+        <link rel="stylesheet" href="{% static 'css/custom.css' %}">
         <link rel="stylesheet" href="{% static 'css/chosen.min.css' %}">
-        <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
-        <link rel="stylesheet" href="{% static 'css/react-datepicker.css' %}" />
+        <link rel="stylesheet" href="{% static 'css/leaflet.css' %}">
+        <link rel="stylesheet" href="{% static 'css/react-datepicker.css' %}">
         <link rel="stylesheet" href="{% static 'fonts/font-awesome-4.6.3/css/font-awesome.min.css' %}">
-        <link rel="stylesheet" href="{% static 'css/flick/jquery-ui-1.9.1.custom.css' %}" />
+        <link rel="stylesheet" href="{% static 'css/flick/jquery-ui-1.9.1.custom.css' %}">
 
         <link rel="shortcut icon" href="/favicon.ico">
 
@@ -26,7 +26,7 @@
     </head>
 
     <body>
-        <div id="full-page-wrapper">
+        <div>
             <div class="container-fluid">
                 <div class="row">
 
@@ -45,7 +45,6 @@
                             <li style="padding-top: 15px; padding-bottom:15px; color: #777; " class="hidden-xs hidden-sm">:: <em>Communities experimenting with culture and commoning.</em></li>
                         </ul>
                         <ul class="nav navbar-nav navbar-right">
-                            <!-- <li><a class="locations-btn">Locations</a></li> -->
                             {% if user.is_authenticated %}
                             <li class="dropdown">
                             <a class="dropdown-toggle" id="drop2" role="button" data-toggle="dropdown" href="#">
@@ -60,7 +59,12 @@
                                 {% if user.is_superuser %}
                                     <li><a tabindex="-1" href="{% url 'admin:index' %}">Django Admin</a></li>
                                 {% endif %}
-                                <li><a tabindex="-1" href="/people/logout/">Logout</a></li>
+                                <li>
+                                    <form method="post" action="{% url 'logout' %}" style="display: inline-block;">
+                                        {% csrf_token %}
+                                        <input type="submit" value="Logout" tabindex="-1" style="border: none; background: unset; padding: 3px 20px;">
+                                    </form>
+                                </li>
                             </ul>
                             </li>
                             {% endif %}
@@ -71,10 +75,10 @@
                     </div> <!-- end navbar-collapse -->
                     </nav>
                 </div> <!-- end row -->
-            </div> <!-- end container-fluid -->
 
-            {% block body %}
-            {% endblock %}
+                {% block body %}
+                {% endblock %}
+            </div> <!-- end container-fluid -->
         </div>
 
 

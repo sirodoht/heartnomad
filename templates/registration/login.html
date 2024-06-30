@@ -1,4 +1,4 @@
-{% extends "root.html" %}
+{% extends 'root.html' %}
 
 {% block body %}
 
@@ -19,36 +19,44 @@
 
 <div class="row">
     <div class="col-md-1"></div>
+
     <div class="col-md-6">
         <h2>Log in to your account</h2>
-        <p>If you have not already, you need to <a href="{% url 'registration_register' %}">create an account</a>.</p>
-        <form enctype="multipart/form-data" method="post">{% csrf_token %}
+        <p>
+            If you have not already, you need to <a href="{% url 'registration_register' %}">create an account</a>.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
 
             {% if next %}
-                    <input type="hidden" name="next" value="{{ next }}" />
-                {% endif %}
-                <div class="control-group">
-                    <label class="control-label" for="username">Email Address</label>
-                    <div class="controls">
-                        <input type="text" id="username" name="username" placeholder="Email Address" size="32">
-                    </div>
+            <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+
+            <div class="control-group">
+                <label class="control-label" for="username">Username</label>
+                <div class="controls">
+                    <input type="text" id="username" name="username" placeholder="Username" size="32">
                 </div>
-                <div class="control-group">
-                    <label class="control-label" for="password">Password</label>
-                    <div class="controls">
-                        <input type="password" name="password" id="password" placeholder="Password" size="32">
-                    </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="password">Password</label>
+                <div class="controls">
+                    <input type="password" name="password" id="password" placeholder="Password" size="32">
                 </div>
-                <div class="control-group">
-                    <div class="controls">
-                        <button type="submit" class="btn">Login</button>
-                    </div>
+            </div>
+            <div class="control-group">
+                <div class="controls">
+                    <button type="submit" class="btn">Login</button>
                 </div>
+            </div>
         </form>
 
-        <p><a href="{% url 'password_reset' %}">Forgot your password?</a></p>
+        <p>
+            <a href="{% url 'password_reset' %}">Forgot your password?</a>
+        </p>
     </div>
+
     <div class="col-md-5"></div>
 </div>
-
 {% endblock %}

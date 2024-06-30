@@ -4,5 +4,4 @@ export MAILGUN_API_KEY=""
 # LIST DOMAIN must be set correctly for Mailgun to work
 export LIST_DOMAIN=""
 
-# export BASICAUTH_USER="test"
-# export BASICAUTH_PASS="password"
+export ENABLE_SLACK=0
