@@ -1,4 +1,5 @@
 {% extends 'root.html' %}
+
 {% load static %}
 
 {% block extrahead %}
@@ -8,18 +9,18 @@
 
 <!-- block body -->
 {% block body %}
-  {% if location %}
-  <div class="house-box">
-    <img src="{{ MEDIA_URL }}{{ location.image }}" class="house-image">
-    <div class="house-name hidden-xs">
-      <h1 class="bold text-center"><a href="{% url 'location_detail' location.slug %}">{{ location.name }}</a></h1>
+    {% if location %}
+    <div class="house-box">
+        <img src="{{ MEDIA_URL }}{{ location.image }}" class="house-image">
+        <div class="house-name hidden-xs">
+        <h1 class="bold text-center"><a href="{% url 'location_detail' location.slug %}">{{ location.name }}</a></h1>
+        </div>
     </div>
-  </div>
 
-  {% include 'snippets/house_nav.html' %}
+    {% include 'snippets/house_nav.html' %}
 
-  {% block content %}
-  {% endblock %}
+    {% block content %}
+    {% endblock %}
 
-  {% endif %}
+    {% endif %}
 {% endblock %}

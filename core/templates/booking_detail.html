@@ -1,127 +1,86 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+
 {% load static %}
 {% load core_tag_extras %}
 
 {% block content %}
-
 <div class="container">
-  {% include "snippets/messages.html" %}
+    {% include "snippets/messages.html" %}
 
-
-  <!-- Modal -->
-  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-body center">
-          <p class="para-padding">
-              Share this link with a 3rd party if they are submitting payment for you.
-          </p>
-          <p class="bg-warning para-padding">
-          <a target="_blank" href="https://{{domain}}{% url 'booking_payment' location.slug booking.uuid %}">https://{{domain}}{% url 'booking_payment' location.slug booking.uuid %}</a>
-          </p>
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-body center">
+                    <p class="para-padding">
+                        Share this link with a 3rd party if they are submitting payment for you.
+                    </p>
+                    <p class="bg-warning para-padding">
+                        <a target="_blank" href="https://{{domain}}{% url 'booking_payment' location.slug booking.uuid %}">
+                            https://{{domain}}{% url 'booking_payment' location.slug booking.uuid %}
+                        </a>
+                    </p>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 
-  <div class="row {% if booking.use.status == 'canceled' %}greyed-out{% endif %}">
+    <div class="row {% if booking.use.status == 'canceled' %}greyed-out{% endif %}">
+        {% if booking.use.status == 'canceled' %}
+        <div class="col-md-12">
+            <div class="alert alert-danger">
+                <span class="fa fa-ban"></span> This booking is canceled
+            </div>
+        </div>
 
-      {% if booking.use.status == 'canceled' %}
-          <div class="col-md-12">
-              <div class="alert alert-danger">
-                  <span class="fa fa-ban"></span> This booking is canceled
-              </div>
-          </div>
+        {% elif booking.is_paid %}
+        <div class="col-md-12">
+            <div class="alert alert-success">
+                <span class="fa fa-check text-success"></span> Huzzah! Your booking is confirmed. We look forward to having you!
+            </div>
+        </div>
 
-      {% elif booking.is_paid %}
-          <div class="col-md-12">
-              <div class="alert alert-success">
-                  <span class="fa fa-check text-success"></span> Huzzah! Your booking is confirmed. We look forward to having you!
-              </div>
-          </div>
-      {% else %}
-          <div class="col-md-12">
-              <div class="alert alert-warning">
-                  {% if booking.use.accounted_by == 'drft' %}
-                    <div>
+        {% else %}
+        <div class="col-md-12">
+            <div class="alert alert-warning">
+            {% if booking.use.accounted_by == 'drft' %}
+                <div>
                     <span class="fa fa-exclamation-circle"></span>
-                    This booking is awaiting confirmation. You have a balance of Ɖ{{ drft_balance }}, and this room accepts DRFT. This booking will be paid with DRFT unless otherwise requested.
-                    </div>
-                  {% elif booking.use.user.profile.stripe_customer_id %}
-                    <div>
-                      <span class="fa fa-exclamation-circle"></span>
-                      This booking is awaiting confirmation and you will receive an email when your card has been charged.
-                    </div>
-                  {% else %}
-
-                      <p class="row-spacer">
-                          <span class="fa fa-credit-card"> </span>
-                          Please enter a credit card so that we can confirm this booking.
-                      </p>
-
-                      <div class="col-md-4">
-                          <form action="{% url 'user_add_card' booking.use.user.username %}" class="form-horizontal" method="POST" id="payment-form">{% csrf_token %}
-
-                              <input type="hidden" name="res-id" value="{{booking.id}}">
-
-                              <div id="payment-errors text-danger"></div>
-
-                              <div class="row sm-row-spacer">
-                                  <div class="col-sm-2">
-                                      <label>
-                                          <span>Card</span>
-                                      </label>
-                                  </div>
-                                  <div class="col-sm-10">
-                                      <input class="form-control" type="text" data-stripe="number"/>
-                                  </div>
-                              </div>
-
-                              <div class="row sm-row-spacer">
-                                  <div class="col-sm-2">
-                                      <label> CVC </label>
-                                  </div>
-                                  <div class="col-sm-3">
-                                      <input class="form-control" type="text" size="4" data-stripe="cvc"/>
-                                  </div>
-
-                                  <div class="col-sm-1">
-                                      <label>
-                                          <span>Exp</span>
-                                      </label>
-                                  </div>
-                                  <div class="col-sm-6 form-inline">
-                                      <input class="form-control" type="text" size="4" data-stripe="exp-month" placeholder="MM"/> /
-                                      <input class="form-control" type="text" size="6" data-stripe="exp-year" placeholder="YYYY"/>
-                                  </div>
-                              </div>
-                              <div class="row sm-row-spacer">
-                                  <div class="col-md-4 col-md-offset-2">
-                                      <button type="submit" class="btn btn-default">Add Card</button>
-                                  </div>
-                              </div>
-                          </form>
-                      </div>
-                      <div class="clear"></div>
-
-                      <p>
-                          Someone else paying? Send them the <a href="" data-toggle="modal" data-target="#myModal">3rd party payment link</a> (they will not have to log in).
-                      </p>
-
-                      <p><em><small>We use <a href="http://stripe.com">Stripe's</a> secure credit card processing with SSL encryption. Your card card information is never stored on our servers.</small></em></p>
-                  {% endif %}
-              </div>
-          </div>
-      {% endif %}
+                    This booking is awaiting confirmation. You have a balance of Ɖ{{ drft_balance }},
+                    and this room accepts DRFT. This booking will be paid with DRFT unless otherwise requested.
+                </div>
+            {% elif booking.use.user.profile.stripe_customer_id %}
+            <div>
+                <span class="fa fa-exclamation-circle"></span>
+                This booking is awaiting confirmation and you will receive an email when your card has been charged.
+            </div>
+            {% else %}
+            <p>
+                <span class="fa fa-credit-card"> </span>
+                Please enter a credit card so that we can confirm this booking.
+                <form class="userprofile-card-form" action="{% url 'create_checkout_session' user.username %}" method="POST">
+                    {% csrf_token %}
+                    <input type="submit" id="pay-button" class="btn btn-success res-status-btn" value="Add Credit Card">
+                    <p style="margin-top: 8px;">
+                        <em>We use <a href="http://stripe.com">Stripe's</a>
+                        secure credit card processing with SSL encryption. Your card
+                        information is never stored on our servers.</em>
+                    </p>
+                </form>    
+            </p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
   </div>
 
   <div class="row">
       <div class="col-md-4 col-md-push-8">
           {% if user in location.house_admins.all %}
               <div class="row">
-              <div class="col-sm-12 align-right">
-                  <a href="{% url 'booking_manage' location.slug booking.id %}">Manage Booking <span class="fa fa-mail-forward"></span></a>
-              </div>
+                <div class="col-sm-12 align-right">
+                    <a href="{% url 'booking_manage' location.slug booking.id %}">Manage Booking <span class="fa fa-mail-forward"></span></a>
+                </div>
               </div>
           {% endif %}
 
@@ -198,24 +157,27 @@
 
   </div>
 
-  <div class="row top-spacer-xl {% if booking.use.status == 'canceled' %}greyed-images greyed-out {% endif %}">
-          <div class="col-md-12">
-              <h3> Also here during your stay</h3>
-              {% for subset in users_during_stay|subsets_size:12 %}
-                  <div class="row row-spacer">
-                      {% for user in subset %}
-                          <div class="col-md-2 col-sm-3 col-xs-6">
+    <div class="row top-spacer-xl {% if booking.use.status == 'canceled' %}greyed-images greyed-out {% endif %}">
+        <div class="col-md-12">
+            <h3> Also here during your stay</h3>
+            {% for subset in users_during_stay|subsets_size:12 %}
+            <div class="row row-spacer">
+                {% for user in subset %}
+                <div class="col-md-2 col-sm-3 col-xs-6">
                 <a href="{% url 'user_detail' user.username %}">
-                                <img src="{{ MEDIA_URL }}{{ user.profile.image_thumb|default:'static/img/default.jpg'}}" class="small-profile-pic">
-                                <p class="text-center">{{user.first_name}}</p>
+                    {% if user.profile.image_thumb %}
+                    <img src="{{ MEDIA_URL }}{{ user.profile.image_thumb }}" style="max-width: 160px;">
+                    {% else %}
+                    <img src="{% static 'img/default.jpg' %}" style="max-width: 160px;">
+                    {% endif %}
+                    <p class="text-center">{{user.first_name}}</p>
                 </a>
-                          </div>
-                      {% endfor %}
-                  </div>
-              {% endfor %}
-          </div>
-      </div>
-
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 
   {% if booking.use.user == user %}
       <div class="res-modify-btn row-spacer">
@@ -305,6 +267,5 @@ $("#res-delete").click(function (e) {
     e.preventDefault();
 });
 </script>
-
 
 {% endblock %}
