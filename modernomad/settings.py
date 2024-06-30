@@ -15,22 +15,22 @@ ALLOWED_HOSTS = [
     "localhost",
 ]
 
-DEBUG = True
+DEBUG = True if os.getenv("DEBUG") == "1" else False
 
-LOCALDEV = True
+LOCALDEV = True if os.getenv("LOCALDEV") == "1" else False
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-OLGfXpLCkPPddMOXVlPXcz7Gmp")
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-OLGfXpLCkPPddMOXVlPXcz7Gmp")
 
 CANONICAL_URL = "http://localhost:8000"
 if LOCALDEV:
     CANONICAL_URL = "http://localhost:8000"
 
-STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY")
-STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
+STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-database_url = os.environ.get("DATABASE_URL")
+database_url = os.getenv("DATABASE_URL")
 database_url = parse.urlparse(database_url)
 # e.g. postgres://modernomad:password@127.0.0.1:5432/modernomad
 database_name = database_url.path[1:]  # url.path is '/modernomad'
@@ -78,27 +78,9 @@ MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "/media/"
 
 # Generate thumbnails on save
-# IMAGEKIT_DEFAULT_CACHEFILE_STRATEGY = "imagekit.cachefiles.strategies.Optimistic"
+IMAGEKIT_DEFAULT_CACHEFILE_STRATEGY = "imagekit.cachefiles.strategies.Optimistic"
 
-
-# Absolute path to the directory static files should be collected to.
-# Don't put anything in this directory yourself; store your static files
-# in apps' "static/" subdirectories and in STATICFILES_DIRS.
-# Example: "/home/media/media.lawrence.com/static/"
-# STATIC_ROOT = BASE_DIR / "static"
-# STATICFILES_DIRS = ("client/dist",)
-# STATIC_URL = "/static/"
-# STATICFILES_FINDERS = (
-#     "django.contrib.staticfiles.finders.FileSystemFinder",
-#     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-#     # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
-#     # "compressor.finders.CompressorFinder",
-# )
-# COMPRESS_CSS_FILTERS = [
-#     "compressor.filters.css_default.CssAbsoluteFilter",
-#     "compressor.filters.cssmin.rCSSMinFilter",
-# ]
-
+# Static files
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "static"
 
@@ -109,33 +91,30 @@ AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
 )
 
-MAILGUN_API_KEY = os.environ.get("MAILGUN_API_KEY")
+MAILGUN_API_KEY = os.getenv("MAILGUN_API_KEY")
 if MAILGUN_API_KEY:
     EMAIL_BACKEND = "modernomad.backends.MailgunBackend"
     # This should only ever be true in the production environment. Defaults to False.
     MAILGUN_CAUTION_SEND_REAL_MAIL = (
-        os.environ.get("MAILGUN_CAUTION_SEND_REAL_MAIL") == "1"
+        os.getenv("MAILGUN_CAUTION_SEND_REAL_MAIL") == "1"
     )
 else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 
 # this will be used as the subject line prefix for all emails sent from this app.
-# EMAIL_SUBJECT_PREFIX = env("EMAIL_SUBJECT_PREFIX", default="[Modernomad] ")
-# DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="stay@example.com")
-# LIST_DOMAIN = env("LIST_DOMAIN", default="somedomain.com")
+EMAIL_SUBJECT_PREFIX = os.getenv("EMAIL_SUBJECT_PREFIX", "[Modernomad] ")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "stay@example.com")
+LIST_DOMAIN = os.getenv("LIST_DOMAIN", "somedomain.com")
+
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-            # Always use forward slashes, even on Windows.
-            # Don't forget to use absolute paths, not relative paths.
             BASE_DIR / "templates",
-            BASE_DIR / "modernomad" / "core" / "templates",
+            # BASE_DIR / "modernomad" / "core" / "templates",
         ],
-        # default template context processors
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -147,9 +126,8 @@ TEMPLATES = [
                 "django.template.context_processors.tz",
                 "django.template.context_processors.request",
                 "django.contrib.messages.context_processors.messages",
-                "modernomad.core.context_processors.location.location_variables",
-                "modernomad.core.context_processors.location.network_locations",
-                # "modernomad.core.context_processors.analytics.google_analytics",
+                "core.context_processors.location.location_variables",
+                "core.context_processors.location.network_locations",
             ],
         },
     },
@@ -157,34 +135,28 @@ TEMPLATES = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    # "basicauth.middleware.BasicAuthMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    # 'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
-    # "modernomad.middleware.crossdomainxhr.CORSMiddleware",
+    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-
-# other JWT options available at https://github.com/jpadilla/django-jwt-auth
-JWT_EXPIRATION_DELTA = datetime.timedelta(days=1000)
 
 ROOT_URLCONF = "modernomad.urls.main"
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = "modernomad.wsgi.application"
 
-# WEBPACK_LOADER = {
-#     "DEFAULT": {
-#         "BUNDLE_DIR_NAME": "client/build/",
-#         "STATS_FILE": BASE_DIR / "client" / "webpack-stats.json",
-#     }
-# }
 
 INSTALLED_APPS = [
-    # django stuff
+    "core",
+    "bank",
+    "gather",
+    "modernomad",
+    "api",
+    "graphapi",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -195,27 +167,14 @@ INSTALLED_APPS = [
     "django.contrib.flatpages",
     "django.contrib.admindocs",
     "django.contrib.humanize",
-    # 3rd party
-    # 'compressor',
-    # 'django_extensions',
-    # 'django_filters',
-    # 'graphene_django',
-    # 'imagekit',
-    # 'rest_framework',
-    # 'rules.apps.AutodiscoverRulesConfig',
-    # 'webpack_loader',
-    # modernomad
-    "modernomad.core",
-    "bank",
-    "gather",
-    "modernomad",
-    "api",
-    "graphapi",
+    'django_filters',
+    'graphene_django',
+    'imagekit',
+    'rest_framework',
+    'rules.apps.AutodiscoverRulesConfig',
 ]
 
-# COMPRESS_PRECOMPILERS = (("text/less", "lessc {infile} {outfile}"),)
-
-AUTH_PROFILE_MODULE = "modernomad.core.UserProfile"
+AUTH_PROFILE_MODULE = "core.UserProfile"
 ACCOUNT_ACTIVATION_DAYS = 7  # One week account activation window.
 
 # If we add a page for the currently-logged-in user to view and edit
@@ -271,29 +230,10 @@ if "test" in sys.argv[1:]:
 
 os.environ["DJANGO_LIVE_TEST_SERVER_ADDRESS"] = "localhost:8000-8010,8080,9200-9300"
 
-# Setting unique=True on a ForeignKey has the same effect as using a OneToOneField.
-# SILENCED_SYSTEM_CHECKS = ["fields.W342"]
 
 # Enable Slack daily arrival/departure messages
-# TODO: this would be better if the hook URLs were configured in the database as part of each location
-# ENABLE_SLACK = env.bool("ENABLE_SLACK", default=False)
-
-# Put entire site behind basic auth by setting BASICAUTH_USER and BASICAUTH_PASS
-# if env("BASICAUTH_USER", default=""):
-#     BASICAUTH_USERS = {}
-#     BASICAUTH_USERS[env("BASICAUTH_USER")] = env("BASICAUTH_PASS")
-# else:
-#     BASICAUTH_DISABLE = True
-
-# if production:
-# WEBPACK_LOADER = {
-#     "DEFAULT": {
-#         "BUNDLE_DIR_NAME": "",
-#         "CACHE": True,
-#         "STATS_FILE": BASE_DIR / "client/webpack-stats-prod.json",
-#     }
-# }
-# COMPRESS_OFFLINE = True
+# TODO: Change hook URLs to be configured in the database per location
+ENABLE_SLACK = True if os.getenv("ENABLE_SLACK") == "1" else False
 
 
 # Default primary key field type
