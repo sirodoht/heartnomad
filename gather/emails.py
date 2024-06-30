@@ -15,7 +15,7 @@ from gather.models import Event, EventAdminGroup, EventNotifications
 
 logger = logging.getLogger(__name__)
 
-from modernomad.core.emails.mailgun import mailgun_send
+from core.emails.mailgun import mailgun_send
 
 
 def new_event_notification(event, location):

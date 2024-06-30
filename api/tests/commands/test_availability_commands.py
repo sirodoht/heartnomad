@@ -3,8 +3,8 @@ import unittest
 from django.test import TestCase
 
 from api.commands.capacities import *
-from modernomad.core.factories import *
-from modernomad.core.models import *
+from core.factories import *
+from core.models import *
 
 
 @unittest.skip(

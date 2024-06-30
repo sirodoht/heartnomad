@@ -3,7 +3,7 @@ from django.urls import reverse
 from django_ical.views import ICalFeed
 
 from gather.models import Event
-from modernomad.core.models import Location
+from core.models import Location
 
 
 class PublicEventsFeed(ICalFeed):

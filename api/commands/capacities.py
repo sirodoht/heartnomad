@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from api.command import Command
-from modernomad.core.models import CapacityChange, Resource
+from core.models import CapacityChange, Resource
 
 
 def user_can_administer_a_resource(user, resource):

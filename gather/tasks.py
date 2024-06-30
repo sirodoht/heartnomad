@@ -9,8 +9,8 @@ from django.utils import timezone
 from zoneinfo import ZoneInfo
 
 from gather.models import Event, EventNotifications
-from modernomad.core.emails.mailgun import mailgun_send
-from modernomad.core.models import Location
+from core.emails.mailgun import mailgun_send
+from core.models import Location
 
 logger = logging.getLogger(__name__)
 

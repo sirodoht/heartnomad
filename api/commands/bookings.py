@@ -2,7 +2,7 @@ from django import forms
 from django.db import transaction
 
 from api.command import FormCommand
-from modernomad.core.models import Booking, Resource, Use
+from core.models import Booking, Resource, Use
 
 
 class RequestBooking(FormCommand):

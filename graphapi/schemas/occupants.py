@@ -5,7 +5,7 @@ from graphene_django.filter.fields import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
 
 from gather.models import Event
-from modernomad.core.models import Use
+from core.models import Use
 
 from .events import EventNode
 

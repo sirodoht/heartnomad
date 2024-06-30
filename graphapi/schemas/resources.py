@@ -7,7 +7,7 @@ from graphene.types.datetime import DateTime
 from graphene_django.filter.fields import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
 
-from modernomad.core.models import Backing, Resource
+from core.models import Backing, Resource
 
 logger = logging.getLogger(__name__)
 

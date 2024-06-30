@@ -23,8 +23,8 @@ from gather.emails import (
 )
 from gather.forms import EventEmailTemplateForm, EventForm
 from gather.models import Event, EventAdminGroup
-from modernomad.core.forms import UserProfileForm
-from modernomad.core.models import Location
+from core.forms import UserProfileForm
+from core.models import Location
 
 logger = logging.getLogger(__name__)
 

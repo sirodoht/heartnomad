@@ -3,7 +3,7 @@ from datetime import date, timedelta
 from django.test import TestCase
 
 from api.commands.bookings import *
-from modernomad.core.factories import *
+from core.factories import *
 
 
 class CommandErrorMatchers:

@@ -5,7 +5,7 @@ from django.urls import include, re_path
 from django.views.generic import RedirectView
 
 import gather.views
-import modernomad.core.urls.location
+import core.urls.location
 import modernomad.views
 
 admin.autodiscover()
@@ -19,7 +19,7 @@ urlpatterns = [
     re_path(r"^404/$", modernomad.views.ErrorView),
     re_path(r"^admin/", admin.site.urls),
     re_path(r"^people/", include("modernomad.urls.user")),
-    re_path(r"^locations/", include("modernomad.core.urls.location")),
+    re_path(r"^locations/", include("core.urls.location")),
     re_path(r"^events/$", gather.views.upcoming_events_all_locations),
     re_path(
         r"^events/emailpreferences/(?P<username>[\w\d\-\.@+_]+)/$",
@@ -35,7 +35,6 @@ urlpatterns = [
     ),
     re_path(r"^robots\.txt$", modernomad.views.robots),
     # api things
-    # re_path(r"^api-token-auth/", jwt_auth.views.obtain_jwt_token),
     re_path(r"^api/", include("api.urls")),
     re_path(r"^", include("graphapi.urls")),
 ]

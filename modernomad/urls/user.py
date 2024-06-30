@@ -2,15 +2,15 @@ from django.contrib.auth import views as auth_views
 from django.urls import re_path
 
 import gather.views
-from modernomad.core.views.billing import (
+from core.views.billing import (
     PeopleDaterangeQuery,
     checkout_success,
     create_checkout_session,
     user_delete_card,
 )
-from modernomad.core.views.booking import UserBookings
-from modernomad.core.views.redirects import old_user_bookings_redirect
-from modernomad.core.views.user import (
+from core.views.booking import UserBookings
+from core.views.redirects import old_user_bookings_redirect
+from core.views.user import (
     ListUsers,
     UserAvatar,
     UserDetail,
