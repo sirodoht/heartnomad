@@ -60,7 +60,12 @@
                                 {% if user.is_superuser %}
                                     <li><a tabindex="-1" href="{% url 'admin:index' %}">Django Admin</a></li>
                                 {% endif %}
-                                <li><a tabindex="-1" href="/people/logout/">Logout</a></li>
+                                <li>
+                                    <form method="post" action="{% url 'logout' %}" style="display: inline-block;">
+                                        {% csrf_token %}
+                                        <input type="submit" value="Logout" tabindex="-1" style="border: none; background: unset; padding: 3px 20px;">
+                                    </form>
+                                </li>
                             </ul>
                             </li>
                             {% endif %}

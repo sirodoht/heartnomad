@@ -84,7 +84,7 @@ urlpatterns = [
     re_path(
         r"^(?P<username>[\w\d\-\.@+_]+)/reservations/$", old_user_bookings_redirect
     ),
-    re_path(r"^logout/$", auth_views.LogoutView.as_view()),
+    re_path(r"^logout/$", auth_views.LogoutView.as_view(), name="logout"),
     re_path(
         r"^password/reset/$",
         auth_views.PasswordResetView.as_view(),

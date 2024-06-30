@@ -278,9 +278,7 @@ def view_event(request, event_id, event_slug, location_slug=None):
 
     elif not current_user:
         # if the user is not logged in and this is not a public event, have them login and try again
-        messages.info(
-            request, "Please log in to view this event."
-        )
+        messages.info(request, "Please log in to view this event.")
         next_url = reverse(
             "gather_view_event", args=(event.location.slug, event.id, event.slug)
         )

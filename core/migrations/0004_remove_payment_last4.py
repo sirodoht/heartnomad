@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0003_userprofile_stripe_payment_method_id'),
+        ("core", "0003_userprofile_stripe_payment_method_id"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='payment',
-            name='last4',
+            model_name="payment",
+            name="last4",
         ),
     ]

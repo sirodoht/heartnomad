@@ -95,9 +95,7 @@ MAILGUN_API_KEY = os.getenv("MAILGUN_API_KEY")
 if MAILGUN_API_KEY:
     EMAIL_BACKEND = "modernomad.backends.MailgunBackend"
     # This should only ever be true in the production environment. Defaults to False.
-    MAILGUN_CAUTION_SEND_REAL_MAIL = (
-        os.getenv("MAILGUN_CAUTION_SEND_REAL_MAIL") == "1"
-    )
+    MAILGUN_CAUTION_SEND_REAL_MAIL = os.getenv("MAILGUN_CAUTION_SEND_REAL_MAIL") == "1"
 else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
@@ -140,7 +138,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
+    "django.contrib.flatpages.middleware.FlatpageFallbackMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
@@ -167,11 +165,11 @@ INSTALLED_APPS = [
     "django.contrib.flatpages",
     "django.contrib.admindocs",
     "django.contrib.humanize",
-    'django_filters',
-    'graphene_django',
-    'imagekit',
-    'rest_framework',
-    'rules.apps.AutodiscoverRulesConfig',
+    "django_filters",
+    "graphene_django",
+    "imagekit",
+    "rest_framework",
+    "rules.apps.AutodiscoverRulesConfig",
 ]
 
 AUTH_PROFILE_MODULE = "core.UserProfile"
@@ -180,6 +178,7 @@ ACCOUNT_ACTIVATION_DAYS = 7  # One week account activation window.
 # If we add a page for the currently-logged-in user to view and edit
 # their profile, we might want to use that here instead.
 LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
 LOGIN_URL = "/people/login/"
 LOGOUT_URL = "/people/logout/"
 

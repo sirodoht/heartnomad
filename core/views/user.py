@@ -256,9 +256,8 @@ def register(request):
             logger.debug(profile_form.errors)
     else:
         if request.user.is_authenticated:
-            messages.add_message(
+            messages.info(
                 request,
-                messages.INFO,
                 'You are already logged in. Please <a href="/people/logout">log out</a> to create a new account',
             )
             return HttpResponseRedirect(
