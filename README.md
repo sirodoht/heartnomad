@@ -29,10 +29,11 @@ We love contributors! Add an issue if you have an idea or bug report, visit the 
 [Read more about contributing](docs/contributing.md).
 
 ## License
+
 Modernomad is licensed under the [Affero General Public License](agpl-3.0.txt),
 which is like the GPL but requires you provide access to the source code for
 any modified versions that are running publicly (among other things). The
 [intent](http://www.gnu.org/licenses/why-affero-gpl.html) is for anyone
 improving the software makes those improvements available to others.
 
-<img src="modernomad/core/static/img/agplv3-88x31.png">
+<img src="core/static/img/agplv3-88x31.png">
