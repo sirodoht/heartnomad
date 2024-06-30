@@ -5,7 +5,6 @@ import uuid
 from datetime import date, timedelta
 from decimal import Decimal
 
-# imports for signals
 import django.dispatch
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -20,17 +19,10 @@ from django.utils import timezone
 from imagekit.models import ImageSpecField, ProcessedImageField
 from imagekit.processors import ResizeToFill
 
-# bank app imports
 from bank.models import Account, Currency, Transaction
 from core.libs.dates import count_range_objects_on_day, dates_within
 
 logger = logging.getLogger(__name__)
-
-# there is a weird db issue it seems with setting a field to null=False after it has been defined as null=True.
-# see http://od-eon.com/blogs/stefan/adding-not-null-column-south/ and
-# http://south.aeracode.org/ticket/782
-# one suggestion was to try setting default value in the model file, but this hasn't worked either.
-# currently the field are still set to null=True, though they shouldn't be.
 
 
 def location_img_upload_to(instance, filename):
@@ -361,10 +353,10 @@ def get_location(location_slug):
     if location_slug:
         try:
             location = Location.objects.filter(slug=location_slug).first()
-        except Exception:
+        except Exception as e:
             raise LocationDoesNotExistException(
                 f"The requested location does not exist: {location_slug}"
-            )
+            ) from e
     else:
         if Location.objects.count() == 1:
             location = Location.objects.get(id=1)

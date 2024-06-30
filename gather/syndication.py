@@ -2,8 +2,8 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django_ical.views import ICalFeed
 
-from gather.models import Event
 from core.models import Location
+from gather.models import Event
 
 
 class PublicEventsFeed(ICalFeed):

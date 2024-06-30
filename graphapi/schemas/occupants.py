@@ -4,8 +4,8 @@ from graphene import Node, ObjectType
 from graphene_django.filter.fields import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
 
-from gather.models import Event
 from core.models import Use
+from gather.models import Event
 
 from .events import EventNode
 

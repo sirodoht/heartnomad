@@ -1,6 +1,5 @@
 # Django settings for modernomad project.
 
-import datetime
 import logging
 import os
 import sys

@@ -2,9 +2,9 @@ from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
-from gather.models import EventAdminGroup
 from core.emails.messages import *
 from core.models import *
+from gather.models import EventAdminGroup
 
 
 class EmailTemplateAdmin(admin.ModelAdmin):

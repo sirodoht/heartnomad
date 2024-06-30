@@ -1,8 +1,8 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 
-from gather.models import Event
 from core.models import Location, Resource
+from gather.models import Event
 
 
 def index(request):

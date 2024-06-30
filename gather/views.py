@@ -15,6 +15,8 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
 
+from core.forms import UserProfileForm
+from core.models import Location
 from gather.emails import (
     event_approved_notification,
     event_published_notification,
@@ -23,8 +25,6 @@ from gather.emails import (
 )
 from gather.forms import EventEmailTemplateForm, EventForm
 from gather.models import Event, EventAdminGroup
-from core.forms import UserProfileForm
-from core.models import Location
 
 logger = logging.getLogger(__name__)
 

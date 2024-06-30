@@ -11,8 +11,6 @@ from django.urls import reverse
 from django.utils import timezone, translation
 from django.views.decorators.csrf import csrf_exempt
 
-from gather.models import Event, EventAdminGroup, EventNotifications
-from gather.tasks import events_pending, published_events_today_local
 from core.emails.mailgun import mailgun_send
 from core.models import (
     LocationEmailTemplate,
@@ -20,6 +18,8 @@ from core.models import (
     Use,
     get_location,
 )
+from gather.models import Event, EventAdminGroup, EventNotifications
+from gather.tasks import events_pending, published_events_today_local
 
 logger = logging.getLogger(__name__)
 

@@ -5,7 +5,6 @@ from django.urls import include, re_path
 from django.views.generic import RedirectView
 
 import gather.views
-import core.urls.location
 import modernomad.views
 
 admin.autodiscover()

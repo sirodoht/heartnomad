@@ -8,9 +8,9 @@ from django.urls import reverse
 from django.utils import timezone
 from zoneinfo import ZoneInfo
 
-from gather.models import Event, EventNotifications
 from core.emails.mailgun import mailgun_send
 from core.models import Location
+from gather.models import Event, EventNotifications
 
 logger = logging.getLogger(__name__)
 

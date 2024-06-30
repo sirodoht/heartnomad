@@ -12,7 +12,6 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_exempt
 
-from gather.tasks import published_events_today_local
 from core.booking_calendar import GuestCalendar
 from core.decorators import resident_or_admin_required
 from core.models import (
@@ -23,6 +22,7 @@ from core.models import (
     Subscription,
     Use,
 )
+from gather.tasks import published_events_today_local
 
 logger = logging.getLogger(__name__)
 

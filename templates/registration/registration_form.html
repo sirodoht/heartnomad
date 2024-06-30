@@ -18,17 +18,18 @@
     {% if existing_user %}
     <h3>Edit Your Profile</h3>
     {% else %}
-    <h3>Register for an Account</h3>
+    <h3>Apply for a membership</h3>
     {% endif %}
 
     <p>
-        Introduce yourself! This information will be shared with other members of the community (and theirs with you).
+        Register for an account and apply for membership. We offer two types of membership,
+        short term and long term.
     </p>
-    {% if not user.is_authenticated %}
     <p>
-        If you already have an account, you can <a href="/people/login/">log in</a> instead.
+        <strong>
+            Being a member does not guarantee that a location will accept your stay.
+        </strong>
     </p>
-    {% endif %}
 
     <hr>
 
