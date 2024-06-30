@@ -16,22 +16,25 @@
     {% endif %}
 
     {% if existing_user %}
-        <h3>Edit Your Profile</h3>
+    <h3>Edit Your Profile</h3>
     {% else %}
-        <h3>Register for an Account</h3>
+    <h3>Register for an Account</h3>
     {% endif %}
 
     <p>
         Introduce yourself! This information will be shared with other members of the community (and theirs with you).
     </p>
     {% if not user.is_authenticated %}
-        <p>If you already have an account, you can <a href="/people/login/">log in</a> instead. </p>
+    <p>
+        If you already have an account, you can <a href="/people/login/">log in</a> instead.
+    </p>
     {% endif %}
 
-    <hr/>
+    <hr>
 
-    <div class="row"><div class="col-md-6">
-        <form class="registration-form form-horizontal" id="newprofileform" enctype="multipart/form-data" method="post">
+    <div class="row">
+        <div class="col-md-6">
+            <form class="registration-form form-horizontal" id="newprofileform" method="post">
             {% csrf_token %}
             {{ form.username }}
 
@@ -46,8 +49,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="clear"></div>
 
             <div class="form-group">
                 {{ form.bio.errors|safe }}
@@ -156,7 +157,6 @@
             <div class="col-sm-10 col-sm-offset-2" id="profilesubmit-wrapper">
                 <input id="profilesubmit" class="btn btn-primary" type="submit" value="Submit" />
             </div>
-
         </form>
     </div>
 
@@ -189,7 +189,7 @@
     $(function() {
         var availableUsers = [
             {% for user in all_users %}
-                 "{{user.username}}",
+                "{{user.username}}",
             {% endfor %}
         ];
         $( "#id_referral" ).autocomplete({
@@ -203,28 +203,27 @@
     );
 
     $.validator.addMethod("strictPassword", function(value, element) {
-        return value.length >= 6;
+            return value.length >= 6;
         }, "Password is too short."
     );
 
-
     $.validator.addMethod("listOfUrls", function(value, element) {
-        items = value.split(",");
-        for (var i=0; i< items.length; i++) {
-            var val_to_test = $.trim(items[i]);
-            // new gTLDs can be up to 65 characters long :-O
-            var valid = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,64}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g.test(val_to_test);
-            if (val_to_test.length > 0 && !valid) {
-                console.log(valid)
-                return false;
+            items = value.split(",");
+            for (var i=0; i< items.length; i++) {
+                var val_to_test = $.trim(items[i]);
+                // new gTLDs can be up to 65 characters long :-O
+                var valid = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,64}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g.test(val_to_test);
+                if (val_to_test.length > 0 && !valid) {
+                    console.log(valid)
+                    return false;
+                }
+                // JKS second check to see if there's a space. not sure where
+                // the above regex IS allowing a space, but it is.
+                if (/ +/.test(val_to_test)) {
+                    return false;
+                }
             }
-            // JKS second check to see if there's a space. not sure where
-            // the above regex IS allowing a space, but it is.
-            if (/ +/.test(val_to_test)) {
-                return false;
-            }
-        }
-        return true;
+            return true;
         }, "One of the entered URLs is incorrectly formatted."
     );
 
@@ -243,7 +242,7 @@
         rules: {
             image: {
                 {% if not has_image %}
-                    required: true
+                required: true
                 {% endif %}
             },
             bio: {

@@ -4,24 +4,6 @@
 
 body {
   font-family:'Open Sans', sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-#login,
-.btn,
-.event .date,
-.event .date span,
-.event-date-day,
-.event-date-separator,.event-date-month,
-.event-date-time,
-.event-location  {
-  -webkit-font-smoothing: antialiased;
 }
 
 h1,
@@ -55,10 +37,6 @@ h3 {
 .panel {
   border-radius: 2px;
   border: 1px solid #ddd;
-}
-
-.fancy-header {
-  -webkit-font-smoothing: antialiased;
 }
 
 /* increases line spacing for text that is too tight */
@@ -1354,15 +1332,8 @@ table tr.row-even td { background: #eee; }
   border-top:thin double black;
 }
 
-#full-page-wrapper {
-  /*margin-bottom: 50px;*/
-}
-
 .bottom-pad-thirty {
   padding-bottom: 30px;
-}
-
-.affix {
 }
 
 .bottom-spacer {
