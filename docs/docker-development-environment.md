@@ -15,19 +15,19 @@ This will boot up everything that Modernomad needs to run, and stay running in t
 In another console, run these commands to set up the database and set up a user:
 
 ```sh
-docker compose run web ./manage.py migrate
+docker compose run django ./manage.py migrate
 ```
 
 Your docker image is now running with your local development code. Browse to `http://localhost:8000/` to access your running image. You can run any of the other `manage.py` commands in the same way. E.g., to run the test suite:
 
 ```sh
-docker compose run web ./manage.py test
+docker compose run django ./manage.py test
 ```
 
 The first time you get this going, you will want to generate some test data:
 
 ```sh
-docker compose run web ./manage.py generate_test_data
+docker compose run django ./manage.py generate_test_data
 ```
 
 This will create a superuser with the credentials `admin` and `password`. 
@@ -36,12 +36,13 @@ You only need to run these commands once. Wen you want to work on the developmen
 
 ## Configuration
 
-You can configure the development environment using environment variables in a file called `.env`. It looks something like this:
+You can configure environment variables using the `docker-compose.override.yml` file. Copy the example:
 
 ```sh
-STRIPE_SECRET_KEY=...
-STRIPE_PUBLISHABLE_KEY=...
-MAILGUN_API_KEY=...
+cp docker-compose.override.example.yml docker-compose.override.yml
 ```
+
+And then edit `docker-compose.override.yml` at will. It's git-ignored, so no changes
+will show up on git.
 
 To learn about what can be configured, see the [configuration documentation](configuration.md).
