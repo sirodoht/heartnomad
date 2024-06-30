@@ -12,8 +12,12 @@ Thumbs.db
 .venv/
 .envrc
 
+# docker
+docker-compose.override.yml
+
 # django
-media
+/media
+/static
 
 # node.js
 /node_modules
