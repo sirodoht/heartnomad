@@ -12,6 +12,8 @@ ExecReload=/bin/kill -HUP $MAINPID
 Environment="DEBUG={{ debug }}"
 Environment="SECRET_KEY={{ secret_key }}"
 Environment="DATABASE_URL=postgres://modernomad:{{ postgres_password }}@localhost:5432/modernomad"
+Environment="STRIPE_SECRET_KEY={{ stripe_secret_key }}"
+Environment="STRIPE_PUBLISHABLE_KEY={{ stripe_publishable_key }}"
 TimeoutSec=15
 Restart=always
 
