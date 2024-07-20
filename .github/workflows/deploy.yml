@@ -35,3 +35,4 @@ jobs:
         ANSIBLE_USER: ${{ vars.ANSIBLE_USER }}
         DEBUG: ${{ vars.DEBUG }}
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
