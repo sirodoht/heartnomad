@@ -36,4 +36,4 @@ jobs:
         DEBUG: ${{ vars.DEBUG }}
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-        DOMAIN_NAME: ${{ secrets.domain_name }}
+        DOMAIN_NAME: ${{ vars.domain_name }}
