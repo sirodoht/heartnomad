@@ -7,7 +7,6 @@ export ANSIBLE_USER=
 
 # vars.yaml
 
-export EMAIL=
 export DOMAIN_NAME=
 
 # Show exceptions and tracebacks on errors
