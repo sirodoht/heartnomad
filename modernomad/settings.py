@@ -12,6 +12,7 @@ ALLOWED_HOSTS = [
     "0.0.0.0",
     "127.0.0.1",
     "localhost",
+    "jdxn.01z.io",
 ]
 
 DEBUG = True if os.getenv("DEBUG") == "1" else False

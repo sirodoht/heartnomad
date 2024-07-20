@@ -7,8 +7,18 @@ export ANSIBLE_USER=
 
 # vars.yaml
 
+export EMAIL=
+export DOMAIN_NAME=
+
 # Show exceptions and tracebacks on errors
 export DEBUG=1
 
 # Used by Django to encrypt session login cookies
-export SECRET_KEY=xxx
+export SECRET_KEY=
+
+export POSTGRES_PASSWORD=
+export MAILGUN_API_KEY=
+export LIST_DOMAIN=
+
+export STRIPE_SECRET_KEY=
+export STRIPE_PUBLISHABLE_KEY=
