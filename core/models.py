@@ -7,6 +7,7 @@ from decimal import Decimal
 
 import django.dispatch
 from dateutil.relativedelta import relativedelta
+from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.flatpages.models import FlatPage
@@ -821,6 +822,32 @@ class Bill(models.Model):
     def is_subscription_bill(self):
         return hasattr(self, "subscriptionbill")
 
+class Membership(models.Model):
+    class MembershipType(models.Textchoices):
+        RESIDENT = 'Res', _('Resident')
+        SHORT = 'Short', _('Short')
+        LONG = 'Long', _('Long')
+    
+    membership_type = models.CharField(
+        max_length=2,
+        choices=MembershipType.choices,
+        default=MembershipType.SHORT,
+    )
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    start_date = models.DateField()
+    end_date = models.DateField(blank=True, null=True)
+
+    def is_active(self, target_date=None):
+        if not target_date:
+            target_date = timezone.now().date()
+        return self.start_date <= target_date and (
+            self.end_date is None or self.end_date >= target_date
+        )
+
+
 
 class SubscriptionManager(models.Manager):
     def inactive_subscriptions(self, target_date=None):
@@ -868,7 +895,7 @@ class SubscriptionManager(models.Manager):
             if this_period_start == target_date:
                 pret_a_manger.append(s)
         return pret_a_manger
-
+   
 
 class Subscription(models.Model):
     created = models.DateTimeField(auto_now_add=True)
