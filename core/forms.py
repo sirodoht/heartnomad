@@ -5,14 +5,7 @@ from django.template import Context, Template
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
-from core.models import (
-    Location,
-    LocationMenu,
-    Resource,
-    Subscription,
-    Use,
-    UserProfile,
-)
+from core import models
 
 
 def create_username(first_name, last_name, suffix=""):
@@ -92,13 +85,14 @@ class UserProfileForm(forms.ModelForm):
     )
 
     class Meta:
-        model = UserProfile
+        model = models.UserProfile
         exclude = [
             "user",
             "status",
             "image_thumb",
             "stripe_customer_id",
             "primary_accounts",
+            "membership",
         ]
         # fields = ['first_name', 'last_name', 'email', 'username', 'password1', 'password2', 'image', 'bio', 'links']
         widgets = {
@@ -176,7 +170,7 @@ class UserProfileForm(forms.ModelForm):
     def clean_email(self):
         email = self.cleaned_data["email"]
         if not self.instance.id:
-            if email and User.objects.filter(email=email):
+            if email and models.User.objects.filter(email=email):
                 raise forms.ValidationError(
                     "There is already a user with this email. If this is your account and you need to recover your password, you can do so from the login page."
                 )
@@ -189,7 +183,7 @@ class UserProfileForm(forms.ModelForm):
             username = create_username(
                 self.cleaned_data["first_name"], self.cleaned_data["last_name"]
             )
-            while User.objects.filter(username=username).count() > 0:
+            while models.User.objects.filter(username=username).count() > 0:
                 tries = tries + 1
                 username = create_username(
                     self.cleaned_data["first_name"],
@@ -265,6 +259,7 @@ class UserProfileForm(forms.ModelForm):
             # Adding
             user = self.create_user()
             profile.user = user
+            models.Membership.objects.create(user=profile.user)
 
         profile.save()
         return user
@@ -272,7 +267,7 @@ class UserProfileForm(forms.ModelForm):
 
 class LocationSettingsForm(forms.ModelForm):
     class Meta:
-        model = Location
+        model = models.Location
         # Not sure about Timezones and Bank Information.  Not including for now - JLS
         fields = [
             "name",
@@ -319,7 +314,7 @@ class LocationSettingsForm(forms.ModelForm):
 
 class LocationUsersForm(forms.ModelForm):
     class Meta:
-        model = Location
+        model = models.Location
         fields = [
             "house_admins",
         ]
@@ -327,7 +322,7 @@ class LocationUsersForm(forms.ModelForm):
 
 class LocationContentForm(forms.ModelForm):
     class Meta:
-        model = Location
+        model = models.Location
         fields = [
             "short_description",
             "stay_page",
@@ -389,7 +384,7 @@ class BootstrapModelForm(forms.ModelForm):
 
 class LocationMenuForm(BootstrapModelForm):
     class Meta:
-        model = LocationMenu
+        model = models.LocationMenu
         exclude = ["location"]
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control", "size": "32"}),
@@ -401,7 +396,7 @@ class LocationPageForm(forms.Form):
         location = kwargs.pop("location", None)
         super().__init__(*args, **kwargs)
         if location:
-            self.fields["menu"].queryset = LocationMenu.objects.filter(
+            self.fields["menu"].queryset = models.LocationMenu.objects.filter(
                 location=location
             )
 
@@ -433,7 +428,7 @@ class LocationRoomForm(forms.ModelForm):
     new_backing_date = forms.DateField(required=False)
 
     class Meta:
-        model = Resource
+        model = models.Resource
         exclude = ["location"]
         widgets = {
             "description": forms.Textarea(attrs={"rows": "3"}),
@@ -458,7 +453,7 @@ class BookingUseForm(forms.ModelForm):
     )
 
     class Meta:
-        model = Use
+        model = models.Use
         exclude = [
             "created",
             "updated",
@@ -513,7 +508,7 @@ class BookingUseForm(forms.ModelForm):
 
 class AdminBookingForm(forms.ModelForm):
     class Meta:
-        model = Use
+        model = models.Use
         exclude = ["created", "updated", "user", "last_msg", "status", "location"]
 
 
@@ -693,5 +688,5 @@ class SubscriptionEmailTemplateForm(EmailTemplateForm):
 
 class AdminSubscriptionForm(forms.ModelForm):
     class Meta:
-        model = Subscription
+        model = models.Subscription
         exclude = ["created", "updated", "created_by", "location", "bills", "user"]
