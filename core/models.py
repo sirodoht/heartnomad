@@ -7,7 +7,6 @@ from decimal import Decimal
 
 import django.dispatch
 from dateutil.relativedelta import relativedelta
-from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.flatpages.models import FlatPage
@@ -17,6 +16,7 @@ from django.db.models.signals import m2m_changed, pre_save
 from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from imagekit.models import ImageSpecField, ProcessedImageField
 from imagekit.processors import ResizeToFill
 
@@ -822,23 +822,25 @@ class Bill(models.Model):
     def is_subscription_bill(self):
         return hasattr(self, "subscriptionbill")
 
+
 class Membership(models.Model):
-    class MembershipType(models.Textchoices):
-        RESIDENT = 'Res', _('Resident')
-        SHORT = 'Short', _('Short')
-        LONG = 'Long', _('Long')
-    
+    class MembershipType(models.TextChoices):
+        RESIDENT = "Resident", _("Resident")
+        SHORT = "Short", _("Short")
+        LONG = "Long", _("Long")
+
     membership_type = models.CharField(
-        max_length=2,
+        max_length=20,
         choices=MembershipType.choices,
         default=MembershipType.SHORT,
     )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    start_date = models.DateField()
+    start_date = models.DateField(default=timezone.now)
     end_date = models.DateField(blank=True, null=True)
+
+    user = models.OneToOneField(User, on_delete=models.PROTECT)
 
     def is_active(self, target_date=None):
         if not target_date:
@@ -846,7 +848,6 @@ class Membership(models.Model):
         return self.start_date <= target_date and (
             self.end_date is None or self.end_date >= target_date
         )
-
 
 
 class SubscriptionManager(models.Manager):
@@ -895,7 +896,7 @@ class SubscriptionManager(models.Manager):
             if this_period_start == target_date:
                 pret_a_manger.append(s)
         return pret_a_manger
-   
+
 
 class Subscription(models.Model):
     created = models.DateTimeField(auto_now_add=True)
