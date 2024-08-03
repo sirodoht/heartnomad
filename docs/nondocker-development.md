@@ -29,7 +29,7 @@ The first time you get this going, you will want to generate some test data:
 python manage.py generate_test_data
 ```
 
-This will create a superuser with the credentials `admin` and `password`. 
+This will create a superuser with the credentials `admin` and `password`.
 
 You only need to run these commands once.
 
@@ -37,6 +37,12 @@ To run a dev server:
 
 ```sh
 python manage.py runserver
+```
+
+With debug logging enabled:
+
+```sh
+DJANGO_LOG_LEVEL=DEBUG python manage.py runserver
 ```
 
 ## Configuration
