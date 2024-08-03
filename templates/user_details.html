@@ -29,6 +29,8 @@
             <div><a class="word-wrap" href="mailto: {{u.email}}">{{u.email}}</a></div>
             <div>phone: {{u.profile.phone|default:'None provided'}}</div>
         {% endif %}
+
+        {{ u.membership.membership_type }} Membership
     </div>
 
     <div id="edit-profile">
