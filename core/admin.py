@@ -1,14 +1,14 @@
+from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
-from core.emails.messages import *
-from core.models import *
-from gather.models import EventAdminGroup
+from core import models
+from gather import models as gather_models
 
 
+@admin.register(models.EmailTemplate)
 class EmailTemplateAdmin(admin.ModelAdmin):
-    model = EmailTemplate
     exclude = ("creator",)
 
     def save_model(self, request, obj, form, change):
@@ -16,33 +16,34 @@ class EmailTemplateAdmin(admin.ModelAdmin):
         obj.save()
 
 
+@admin.register(models.LocationEmailTemplate)
 class LocationEmailTemplateAdmin(admin.ModelAdmin):
-    model = LocationEmailTemplate
     list_display = ("location", "key")
 
 
 class EventAdminGroupInline(admin.TabularInline):
-    model = EventAdminGroup
+    model = gather_models.EventAdminGroup
     filter_horizontal = ["users"]
     raw_id_fields = ("users",)
 
 
 class CapacityChangeAdminInline(admin.TabularInline):
-    model = CapacityChange
+    model = models.CapacityChange
     ordering = ("start_date",)
 
 
+@admin.register(models.Resource)
 class ResourceAdmin(admin.ModelAdmin):
-    model = Resource
     inlines = [CapacityChangeAdminInline]
     save_as = True
 
 
 class ResourceAdminInline(admin.TabularInline):
-    model = Resource
+    model = models.Resource
     extra = 0
 
 
+@admin.register(models.Location)
 class LocationAdmin(admin.ModelAdmin):
     def send_admin_daily_update(self, request, queryset):
         for res in queryset:
@@ -56,7 +57,6 @@ class LocationAdmin(admin.ModelAdmin):
         msg = gen_message(queryset, "email", "emails", "sent")
         self.message_user(request, msg)
 
-    model = Location
     save_as = True
     list_display = ("name", "address")
     list_filter = ("name",)
@@ -69,10 +69,11 @@ class LocationAdmin(admin.ModelAdmin):
         inlines.append(EventAdminGroupInline)
 
 
-class BillAdmin(admin.ModelAdmin):
-    model = Bill
+@admin.register(models.Bill)
+class BillAdmin(admin.ModelAdmin): ...
 
 
+@admin.register(models.Payment)
 class PaymentAdmin(admin.ModelAdmin):
     def user(self):
         if self.user:
@@ -88,31 +89,32 @@ class PaymentAdmin(admin.ModelAdmin):
 
     booking.allow_tags = True
 
-    model = Payment
+    model = models.Payment
     list_display = ("payment_date", user, "payment_method", "paid_amount")
     list_filter = ("payment_method",)
     ordering = ["-payment_date"]
 
 
 class PaymentInline(admin.TabularInline):
-    model = Payment
+    model = models.Payment
     extra = 0
 
 
+@admin.register(models.BillLineItem)
 class BillLineItemAdmin(admin.ModelAdmin):
     list_display = ("id", "description", "amount", "paid_by_house")
     list_filter = ("fee", "paid_by_house")
 
 
 class BillLineItemInline(admin.TabularInline):
-    model = BillLineItem
+    model = models.BillLineItem
     fields = ("fee", "description", "amount", "paid_by_house")
     readonly_fields = ("fee",)
     extra = 0
 
 
 class BillInline(admin.StackedInline):
-    model = Bill
+    model = models.Bill
     extra = 0
     inlines = [BillLineItemInline, PaymentInline]
 
@@ -126,14 +128,15 @@ def gen_message(queryset, noun, pl_noun, suffix):
     return msg
 
 
-class UseTransactionAdmin(admin.ModelAdmin):
-    model = UseTransaction
+@admin.register(models.UseTransaction)
+class UseTransactionAdmin(admin.ModelAdmin): ...
 
 
-class UseAdmin(admin.ModelAdmin):
-    model = Use
+@admin.register(models.Use)
+class UseAdmin(admin.ModelAdmin): ...
 
 
+@admin.register(models.Booking)
 class BookingAdmin(admin.ModelAdmin):
     def rate(self):
         if self.rate is None:
@@ -243,7 +246,6 @@ class BookingAdmin(admin.ModelAdmin):
         msg = gen_message(queryset, "bill", "bills", "recalculated")
         self.message_user(request, msg)
 
-    model = Booking
     list_filter = ("status_deprecated", "location_deprecated")
     list_display = (
         "id",
@@ -283,9 +285,13 @@ class BookingAdmin(admin.ModelAdmin):
 
 
 class UserProfileInline(admin.StackedInline):
-    model = UserProfile
+    model = models.UserProfile
 
 
+admin.site.unregister(User)
+
+
+@admin.register(User)
 class UserProfileAdmin(UserAdmin):
     actions = ["create_primary_drft_account"]
 
@@ -327,19 +333,30 @@ class UserProfileAdmin(UserAdmin):
 
 
 class LocationFlatPageInline(admin.StackedInline):
-    model = LocationFlatPage
+    model = models.LocationFlatPage
 
 
+@admin.register(models.LocationMenu)
 class LocationMenuAdmin(admin.ModelAdmin):
-    model = LocationMenu
     inlines = [LocationFlatPageInline]
     list_display = ("location", "name")
 
 
-class UserNoteAdmin(admin.ModelAdmin):
-    model = UserNote
+@admin.register(models.UserNote)
+class UserNoteAdmin(admin.ModelAdmin): ...
 
 
+@admin.register(models.Membership)
+class MembershipAdmin(admin.ModelAdmin):
+    list_display = (
+        "membership_type",
+        "user",
+        "start_date",
+        "end_date",
+    )
+
+
+@admin.register(models.Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
     def bill_count(self):
         return self.bills.count()
@@ -360,7 +377,6 @@ class SubscriptionAdmin(admin.ModelAdmin):
             except Exception as e:
                 self.message_user(request, e)
 
-    model = Subscription
     list_display = (
         "description",
         "user",
@@ -375,40 +391,25 @@ class SubscriptionAdmin(admin.ModelAdmin):
     exclude = ("bills",)
 
 
+@admin.register(models.CapacityChange)
 class CapacityChangeAdmin(admin.ModelAdmin):
-    model = CapacityChange
     list_display = ("resource", "start_date", "quantity")
 
 
-class HouseAccountAdmin(admin.ModelAdmin):
-    model = HouseAccount
+@admin.register(models.HouseAccount)
+class HouseAccountAdmin(admin.ModelAdmin): ...
 
 
+@admin.register(models.Backing)
 class BackingAdmin(admin.ModelAdmin):
-    model = Backing
+    model = models.Backing
     raw_id_fields = ("users",)
     list_filter = ("resource",)
 
 
-admin.site.register(LocationMenu, LocationMenuAdmin)
-admin.site.register(Booking, BookingAdmin)
-admin.site.register(Resource, ResourceAdmin)
-admin.site.register(Location, LocationAdmin)
-admin.site.register(Bill, BillAdmin)
-admin.site.register(Payment, PaymentAdmin)
-admin.site.register(Subscription, SubscriptionAdmin)
-admin.site.register(EmailTemplate, EmailTemplateAdmin)
-admin.site.register(LocationEmailTemplate, LocationEmailTemplateAdmin)
-admin.site.register(BillLineItem, BillLineItemAdmin)
-admin.site.register(UserNote, UserNoteAdmin)
-admin.site.register(CapacityChange, CapacityChangeAdmin)
-admin.site.register(Use, UseAdmin)
-admin.site.register(UseTransaction, UseTransactionAdmin)
-admin.site.register(HouseAccount, HouseAccountAdmin)
-admin.site.register(Backing, BackingAdmin)
+@admin.register(models.Fee)
+class FeeAdmin(admin.ModelAdmin): ...
 
-admin.site.unregister(User)
-admin.site.register(User, UserProfileAdmin)
 
-admin.site.register(Fee)
-admin.site.register(LocationFee)
+@admin.register(models.LocationFee)
+class LocationFeeAdmin(admin.ModelAdmin): ...

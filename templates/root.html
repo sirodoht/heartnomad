@@ -5,12 +5,9 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>{% block pagetitle %}Embassy Network{% endblock %}</title>
-        <!-- responsive support -->
+        <title>{% block pagetitle %}JDXN{% endblock %}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="A Global Housing Layer for the New World">
-
-        <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700|Raleway:800" rel="stylesheet">
 
         <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
         <link rel="stylesheet" href="{% static 'css/custom.css' %}">
@@ -19,10 +16,10 @@
         <link rel="stylesheet" href="{% static 'css/react-datepicker.css' %}">
         <link rel="stylesheet" href="{% static 'fonts/font-awesome-4.6.3/css/font-awesome.min.css' %}">
         <link rel="stylesheet" href="{% static 'css/flick/jquery-ui-1.9.1.custom.css' %}">
-
         <link rel="shortcut icon" href="/favicon.ico">
 
-        {% block extrahead %}{% endblock %}
+        {% block extrahead %}
+        {% endblock %}
     </head>
 
     <body>
@@ -38,12 +35,11 @@
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </button>
-                        <a href="/" class="navbar-brand"><span class="highlight"><img src="{% static 'img/en-logo-transparent.png' %}" class="logo" alt="" width="37" height="30"> Embassy Network</span></a>
+                        <a href="/" class="navbar-brand">
+                            JDXN
+                        </a>
                     </div>
                     <div class="collapse navbar-collapse" id="main-navbar">
-                        <ul class="nav navbar-nav navbar-left">
-                            <li style="padding-top: 15px; padding-bottom:15px; color: #777; " class="hidden-xs hidden-sm">:: <em>Communities experimenting with culture and commoning.</em></li>
-                        </ul>
                         <ul class="nav navbar-nav navbar-right">
                             {% if user.is_authenticated %}
                             <li class="dropdown">
@@ -81,73 +77,26 @@
             </div> <!-- end container-fluid -->
         </div>
 
-
         {% block footer %}
-        <div id="network-footer">
-            <div class="container text-center">
-                <div class="row">
-                    <h3>Commune with us on</h3>
-                    <div id="footer-socialmedia">
-                        <a href="https://twitter.com/embassynetwork" target="_blank">
-                            <span class="fa-stack fa-3x">
-                              <i class="fa fa-circle-thin fa-stack-2x"></i>
-                              <i class="fa fa-twitter fa-stack-1x"></i>
-                            </span>
-                        </a>
-                        <a href="https://www.facebook.com/embassynetwork" target="_blank">
-                            <span class="fa-stack fa-3x">
-                              <i class="fa fa-circle-thin fa-stack-2x"></i>
-                              <i class="fa fa-facebook fa-stack-1x"></i>
-                            </span>
-                        </a>
-                        <a href="https://medium.com/embassy-network" target="_blank">
-                            <span class="fa-stack fa-3x">
-                              <i class="fa fa-circle-thin fa-stack-2x"></i>
-                              <i class="fa fa-medium fa-stack-1x"></i>
-                            </span>
-                        </a>
-                    </div>
-                    <div class="text-muted">
-                <h5>© Embassy Network</h5>
-              </div>
-                </div>
-            </div>
-        </div>
         {% endblock %}
 
-    <script type="text/javascript">
-      window.modernomadSettings = {
-        MEDIA_URL: "{{ MEDIA_URL|escapejs }}"
-      };
-    </script>
+        <script type="text/javascript">
+        window.modernomadSettings = {
+            MEDIA_URL: "{{ MEDIA_URL|escapejs }}"
+        };
+        </script>
 
-    <script src="{% static 'webpack-build/main.js' %}"></script>
+        <script src="{% static 'webpack-build/main.js' %}"></script>
 
-    <!-- JQuery -->
-    <script src="{% static 'js/jquery-1.8.2.js' %}"></script>
-    <script src="{% static 'js/jquery-ui-1.9.1.custom.js' %}"></script>
+        <!-- JQuery -->
+        <script src="{% static 'js/jquery-1.8.2.js' %}"></script>
+        <script src="{% static 'js/jquery-ui-1.9.1.custom.js' %}"></script>
 
-    <!-- Le javascript -->
-    <script src="{% static 'js/bootstrap.js' %}"></script>
-    <script src="{% static 'js/leaflet.js' %}"></script>
+        <!-- Le javascript -->
+        <script src="{% static 'js/bootstrap.js' %}"></script>
+        <script src="{% static 'js/leaflet.js' %}"></script>
 
-    <!-- javascript for every page -->
-    <script type="text/javascript">
-
-    // call to action scroll
-    $(".locations-btn").click(function() {
-        mixpanel.track("Locations button clicked");
-        $('html, body').animate({
-                scrollTop: $("#locations").offset().top
-        }, 500);
-    });
-    </script>
-
-    {% if GOOGLE_ANALYTICS_PROPERTY_ID %}
-      {% include "snippets/google_analytics.html" %}
-    {% endif %}
-
-    {% block extrajs %}
-    {% endblock %}
-  </body>
+        {% block extrajs %}
+        {% endblock %}
+    </body>
 </html>

@@ -3,182 +3,186 @@
 
 {% block body %}
 
-<div class="row"><div class="col-sm-10 col-sm-offset-1">
-    {% if messages %}
-    <div class="messages top-spacer">
-        {% for message in messages %}
-        <div class="alert alert-info">
-            <button type="button" class="close" data-dismiss="alert">×</button>
-            <div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+<div class="row">
+    <div class="col-sm-10 col-sm-offset-1">
+        {% if messages %}
+        <div class="messages top-spacer">
+            {% for message in messages %}
+            <div class="alert alert-info">
+                <button type="button" class="close" data-dismiss="alert">×</button>
+                <div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    {% if existing_user %}
-    <h3>Edit Your Profile</h3>
-    {% else %}
-    <h3>Apply for a membership</h3>
-    {% endif %}
-
-    <p>
-        Register for an account and apply for membership. We offer two types of membership,
-        short term and long term.
-    </p>
-    <p>
-        <strong>
-            Being a member does not guarantee that a location will accept your stay.
-        </strong>
-    </p>
-
-    <hr>
-
-    <div class="row">
-        <div class="col-md-6">
-            <form class="registration-form form-horizontal" id="newprofileform" method="post">
-            {% csrf_token %}
-            {{ form.username }}
-
-            <div class="form-group">
-                {{ form.image.errors|safe }}
-                <div class="row">
-                    <label class="light col-sm-2 control-label">
-                        {% if has_image %} Update image {% else %} Image {% endif %}
-                    </label>
-                    <div class="form-field-body col-sm-10">
-                        {{ form.image }}
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                {{ form.bio.errors|safe }}
-                <label class="light col-sm-2 control-label" for="{{form.bio.label.id_for_label}}">{{ form.bio.label }}</label>
-                <div class="form-field-body col-sm-10">
-                    {{ form.bio }}
-                </div>
-            </div>
-
-            <div class="form-group">
-                {{ form.projects.errors|safe }}
-                <label class="light col-sm-2 control-label" for="{{form.projects.label.id_for_label}}">{{ form.projects.label }}</label>
-                <div class="form-field-body col-sm-10">
-                    {{ form.projects }}
-                    <span class="form-help-text">{{ form.projects.help_text }}</span>
-                </div>
-            </div>
-
-            <div class="form-group">
-                {{ form.sharing.errors|safe }}
-                <label class="light col-sm-2 control-label" for="{{form.sharing.label.id_for_label}}">{{ form.sharing.label }}</label>
-                <div class="form-field-body col-sm-10">
-                    {{ form.sharing }}
-                    <span class="form-help-text">{{ form.sharing.help_text }}</span>
-                </div>
-            </div>
-
-            <div class="form-group">
-                {{ form.discussion.errors|safe }}
-                <label class="light col-sm-2 control-label" for="{{form.discussion.label.id_for_label}}">{{ form.discussion.label }}</label>
-                <div class="form-field-body col-sm-10">
-                    {{ form.discussion }}
-                    <span class="form-help-text">{{ form.discussion.help_text }}</span>
-                </div>
-            </div>
-
-            <div class="form-group">
-                {{ form.links.errors|safe }}
-                <label class="light col-sm-2 control-label" for="{{form.links.label.id_for_label}}">{{ form.links.label }}</label>
-                <div class="form-field-body col-sm-10">
-                    {{ form.links }}
-                    <span class="form-help-text">{{ form.links.help_text }}</span>
-                </div>
-            </div>
-
-            <hr class="page-spacer">
-
-            <div class="form-group">
-                <div class="col-md-2">
-                    <label>Account Information</label>
-                </div>
-
-                {{ form.first_name.errors|safe }}
-                <div class="form-field-body col-sm-5">
-                    {{ form.first_name }}
-                    <span class="form-help-text">{{ form.first_name.help_text }}</span>
-                </div>
-                {{ form.last_name.errors|safe }}
-                <div class="form-field-body col-sm-5">
-                    {{ form.last_name }}
-                    <span class="form-help-text">{{ form.last_name.help_text }}</span>
-                </div>
-            </div>
-
-            <div class="form-group">
-                {{ form.referral.errors|safe }}
-                <div class="form-field-body col-sm-5 col-sm-offset-2">
-                    {{ form.referral }}
-                    <span class="form-help-text">{{ form.referral.help_text }}</span>
-                </div>
-                {{ form.city.errors|safe }}
-                <div class="form-field-body col-sm-5">
-                    {{ form.city }}
-                    <span class="form-help-text">{{ form.city.help_text }}</span>
-                </div>
-            </div>
-
-            <hr>
-
-            <div class="form-group">
-                <div class="form-field-body col-sm-5 col-sm-offset-2">
-                    {{ form.email }}
-                    <span class="form-help-text">{{ form.email.help_text }}</span>
-                    {{ form.email.errors|safe }}
-                </div>
-                {{ form.city.errors|safe }}
-                <div class="form-field-body col-sm-5">
-                    {{ form.phone }}
-                    <span class="form-help-text">{{ form.phone.help_text }}</span>
-                </div>
-            </div>
-
-            <div class="form-group">
-                {{ form.password1.errors|safe }}
-                <div class="form-field-body col-sm-5 col-sm-offset-2">
-                    {{ form.password1 }}
-                    <span class="form-help-text">{{ form.password1.help_text }}</span>
-                </div>
-                {{ form.password2.errors|safe }}
-                <div class="form-field-body col-sm-5">
-                    {{ form.password2 }}
-                    <span class="form-help-text">{{ form.password2.help_text }}</span>
-                </div>
-            </div>
-
-            <div class="col-sm-10 col-sm-offset-2" id="profilesubmit-wrapper">
-                <input id="profilesubmit" class="btn btn-primary" type="submit" value="Submit" />
-            </div>
-        </form>
-    </div>
-
-    <div class="col-md-4 col-md-offset-1" id="res-detail">
-        {% if booking %}
-            <div id="booking-amount-summary-box">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Pending Booking: Summary</h3>
-                    </div>
-                    {% with booking.bill as bill %}
-                        {% include 'snippets/booking_bill_line_items_and_payments.html' %}
-                    {% endwith %}
-                    <div class="panel-footer text-muted">
-                        <em>Cancellation policy for the {{ booking.resource.name }} is {{booking.resource.cancellation_policy}}.</em>
-                    </div>
-                </div>
-            </div>
         {% endif %}
-    </div></div>
-</div></div>
+
+        {% if existing_user %}
+        <h3>Edit Your Profile</h3>
+        {% else %}
+        <h3>Apply for a membership</h3>
+        {% endif %}
+
+        <p>
+            Register for an account and apply for membership. We offer two types of membership,
+            short term and long term.
+        </p>
+        <p>
+            <strong>
+                Being a member does not guarantee that a location will accept your stay.
+            </strong>
+        </p>
+
+        <hr>
+
+        <div class="row">
+            <div class="col-md-6">
+                <form class="registration-form form-horizontal" id="newprofileform" enctype="multipart/form-data" method="post">
+
+                    {{ form.username }}
+
+                    <div class="form-group">
+                        {{ form.image.errors|safe }}
+                        <div class="row">
+                            <label class="light col-sm-2 control-label">
+                                {% if has_image %} Update image {% else %} Image {% endif %}
+                            </label>
+                            <div class="form-field-body col-sm-10">
+                                {{ form.image }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.bio.errors|safe }}
+                        <label class="light col-sm-2 control-label" for="{{form.bio.label.id_for_label}}">{{ form.bio.label }}</label>
+                        <div class="form-field-body col-sm-10">
+                            {{ form.bio }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.projects.errors|safe }}
+                        <label class="light col-sm-2 control-label" for="{{form.projects.label.id_for_label}}">{{ form.projects.label }}</label>
+                        <div class="form-field-body col-sm-10">
+                            {{ form.projects }}
+                            <span class="form-help-text">{{ form.projects.help_text }}</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.sharing.errors|safe }}
+                        <label class="light col-sm-2 control-label" for="{{form.sharing.label.id_for_label}}">{{ form.sharing.label }}</label>
+                        <div class="form-field-body col-sm-10">
+                            {{ form.sharing }}
+                            <span class="form-help-text">{{ form.sharing.help_text }}</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.discussion.errors|safe }}
+                        <label class="light col-sm-2 control-label" for="{{form.discussion.label.id_for_label}}">{{ form.discussion.label }}</label>
+                        <div class="form-field-body col-sm-10">
+                            {{ form.discussion }}
+                            <span class="form-help-text">{{ form.discussion.help_text }}</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.links.errors|safe }}
+                        <label class="light col-sm-2 control-label" for="{{form.links.label.id_for_label}}">{{ form.links.label }}</label>
+                        <div class="form-field-body col-sm-10">
+                            {{ form.links }}
+                            <span class="form-help-text">{{ form.links.help_text }}</span>
+                        </div>
+                    </div>
+
+                    <hr class="page-spacer">
+
+                    <div class="form-group">
+                        <div class="col-md-2">
+                            <label>Account Information</label>
+                        </div>
+
+                        {{ form.first_name.errors|safe }}
+                        <div class="form-field-body col-sm-5">
+                            {{ form.first_name }}
+                            <span class="form-help-text">{{ form.first_name.help_text }}</span>
+                        </div>
+                        {{ form.last_name.errors|safe }}
+                        <div class="form-field-body col-sm-5">
+                            {{ form.last_name }}
+                            <span class="form-help-text">{{ form.last_name.help_text }}</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.referral.errors|safe }}
+                        <div class="form-field-body col-sm-5 col-sm-offset-2">
+                            {{ form.referral }}
+                            <span class="form-help-text">{{ form.referral.help_text }}</span>
+                        </div>
+                        {{ form.city.errors|safe }}
+                        <div class="form-field-body col-sm-5">
+                            {{ form.city }}
+                            <span class="form-help-text">{{ form.city.help_text }}</span>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="form-group">
+                        <div class="form-field-body col-sm-5 col-sm-offset-2">
+                            {{ form.email }}
+                            <span class="form-help-text">{{ form.email.help_text }}</span>
+                            {{ form.email.errors|safe }}
+                        </div>
+                        {{ form.city.errors|safe }}
+                        <div class="form-field-body col-sm-5">
+                            {{ form.phone }}
+                            <span class="form-help-text">{{ form.phone.help_text }}</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.password1.errors|safe }}
+                        <div class="form-field-body col-sm-5 col-sm-offset-2">
+                            {{ form.password1 }}
+                            <span class="form-help-text">{{ form.password1.help_text }}</span>
+                        </div>
+                        {{ form.password2.errors|safe }}
+                        <div class="form-field-body col-sm-5">
+                            {{ form.password2 }}
+                            <span class="form-help-text">{{ form.password2.help_text }}</span>
+                        </div>
+                    </div>
+
+                    {% csrf_token %}
+                    <div class="col-sm-10 col-sm-offset-2" id="profilesubmit-wrapper">
+                        <input id="profilesubmit" class="btn btn-primary" type="submit" value="Submit">
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-md-4 col-md-offset-1" id="res-detail">
+                {% if booking %}
+                    <div id="booking-amount-summary-box">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Pending Booking: Summary</h3>
+                            </div>
+                            {% with booking.bill as bill %}
+                                {% include 'snippets/booking_bill_line_items_and_payments.html' %}
+                            {% endwith %}
+                            <div class="panel-footer text-muted">
+                                <em>Cancellation policy for the {{ booking.resource.name }} is {{booking.resource.cancellation_policy}}.</em>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extrajs %}

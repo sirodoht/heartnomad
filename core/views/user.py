@@ -13,6 +13,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
+from core import models
 from core.data_fetchers import (
     SerializedResourceCapacity,
 )
@@ -22,14 +23,6 @@ from core.emails.messages import (
 from core.forms import (
     LocationRoomForm,
     UserProfileForm,
-)
-from core.models import (
-    Booking,
-    Location,
-    Resource,
-    Subscription,
-    Use,
-    UserProfile,
 )
 
 from .view_helpers import _get_user_and_perms
@@ -57,7 +50,7 @@ def user_email_settings(request, username):
 def user_subscriptions(request, username):
     """TODO: rethink permissions here"""
     user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
-    subscriptions = Subscription.objects.filter(user=user).order_by("start_date")
+    subscriptions = models.Subscription.objects.filter(user=user).order_by("start_date")
 
     return render(
         request,
@@ -94,10 +87,10 @@ def user_events(request, username):
 def user_edit_room(request, username, room_id):
     user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
 
-    room = Resource.objects.get(id=room_id)
+    room = models.Resource.objects.get(id=room_id)
 
     # make sure this user has permissions on the room
-    if room not in Resource.objects.backed_by(user):
+    if room not in models.Resource.objects.backed_by(user):
         return HttpResponseRedirect("/404")
 
     has_image = bool(room.image)
@@ -157,7 +150,7 @@ def process_unsaved_booking(request):
         logger.debug("found booking")
         logger.debug(request.session["booking"])
         details = request.session.pop("booking")
-        use = Use(
+        use = models.Use(
             arrive=datetime.date(
                 details["arrive"]["year"],
                 details["arrive"]["month"],
@@ -168,15 +161,15 @@ def process_unsaved_booking(request):
                 details["depart"]["month"],
                 details["depart"]["day"],
             ),
-            location=Location.objects.get(id=details["location"]["id"]),
-            resource=Resource.objects.get(id=details["resource"]["id"]),
+            location=models.Location.objects.get(id=details["location"]["id"]),
+            resource=models.Resource.objects.get(id=details["resource"]["id"]),
             purpose=details["purpose"],
             arrival_time=details["arrival_time"],
             user=request.user,
         )
         use.save()
         comment = details["comments"]
-        booking = Booking(use=use, comments=comment)
+        booking = models.Booking(use=use, comments=comment)
         # reset rate calls set_rate which calls generate_bill
         booking.reset_rate()
         booking.save()
@@ -274,7 +267,7 @@ def register(request):
 
 @login_required
 def UserEdit(request, username):
-    profile = UserProfile.objects.get(user__username=username)
+    profile = models.UserProfile.objects.get(user__username=username)
     user = User.objects.get(username=username)
     if not (request.user.is_authenticated and request.user.id == user.id):
         messages.info(request, "You cannot edit this profile")
