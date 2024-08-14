@@ -1,0 +1,32 @@
+databases:
+  - name: modernomad
+    plan: starter
+    region: oregon
+    databaseName: modernomad
+    user: modernomad
+    postgresMajorVersion: "16"
+
+services:
+  - type: web
+    plan: starter
+    region: oregon
+    branch: main
+    name: modernomad
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "python -m gunicorn modernomad.wsgi -w 4"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: modernomad
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: 1
+      - key: LOCALDEV
+        value: 0
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
