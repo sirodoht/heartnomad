@@ -18,3 +18,4 @@ psycopg2-binary==2.9.9
 python-dateutil==2.9.0.post0
 rules==3.4
 stripe==9.8.0
+whitenoise==6.7.0
