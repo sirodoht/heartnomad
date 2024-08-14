@@ -85,7 +85,7 @@ STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "static"
 if not LOCALDEV:
     # Enable WhiteNoise storage backend
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 
 AUTHENTICATION_BACKENDS = (
