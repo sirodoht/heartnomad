@@ -15,9 +15,9 @@ ALLOWED_HOSTS = [
     os.getenv("DOMAIN_NAME"),
 ]
 
-DEBUG = True if os.getenv("DEBUG") == "1" else False
+DEBUG = os.getenv("DEBUG") == "1"
 
-LOCALDEV = True if os.getenv("LOCALDEV") == "1" else False
+LOCALDEV = os.getenv("LOCALDEV") == "1"
 
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-OLGfXpLCkPPddMOXVlPXcz7Gmp")
 
@@ -136,7 +136,6 @@ TEMPLATES = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -145,6 +144,9 @@ MIDDLEWARE = [
     "django.contrib.flatpages.middleware.FlatpageFallbackMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+if not LOCALDEV:
+    # We need whitenoise right after the security middleware.
+    MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
 
 ROOT_URLCONF = "modernomad.urls.main"
 
