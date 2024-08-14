@@ -7,7 +7,11 @@ export ANSIBLE_USER=
 
 # vars.yaml
 
+# Domain for allowed hosts and Caddy
 export DOMAIN_NAME=
+
+# Email for SSL certificate
+export EMAIL=
 
 # Show exceptions and tracebacks on errors
 export DEBUG=1
@@ -15,9 +19,13 @@ export DEBUG=1
 # Used by Django to encrypt session login cookies
 export SECRET_KEY=
 
+# Database password
 export POSTGRES_PASSWORD=
+
+# Mailgun configuration
 export MAILGUN_API_KEY=
 export LIST_DOMAIN=
 
+# Stripe API keys
 export STRIPE_SECRET_KEY=
 export STRIPE_PUBLISHABLE_KEY=
