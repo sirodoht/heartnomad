@@ -39,3 +39,5 @@ jobs:
         DEBUG=1 python manage.py test
       env:
         DATABASE_URL: 'postgres://postgres:postgres@localhost:5432/postgres'
+        DEBUG: 1
+        LOCALDEV: 1

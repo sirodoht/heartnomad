@@ -83,10 +83,10 @@ IMAGEKIT_DEFAULT_CACHEFILE_STRATEGY = "imagekit.cachefiles.strategies.Optimistic
 # Static files
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "static"
-# if not LOCALDEV:
-#     STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-#     # Enable WhiteNoise storage backend
-#     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+if not LOCALDEV:
+    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+    # Enable WhiteNoise storage backend
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 AUTHENTICATION_BACKENDS = (
