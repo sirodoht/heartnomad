@@ -41,6 +41,13 @@ class UserProfileFactory(DjangoModelFactory):
     class Meta:
         model = UserProfile
 
+    bio = factory.Faker("paragraph")
+    links = factory.Faker("url")
+    discussion = factory.Faker("paragraph")
+    city = factory.Faker("city")
+    projects = factory.Faker("paragraph")
+    sharing = factory.Faker("paragraph")
+
 
 class UserNote(DjangoModelFactory):
     pass
