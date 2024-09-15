@@ -46,3 +46,18 @@ And then edit `docker-compose.override.yml` at will. It's git-ignored, so no cha
 will show up on git.
 
 To learn about what can be configured, see the [configuration documentation](configuration.md).
+
+## Reset docker setup
+
+If you want to reset everything (and delete all local database data), run:
+
+```sh
+# stop containers
+docker compose stop
+
+# remove containers
+docker compose down
+
+# remove volume -- THIS WILL DELETE ALL LOCAL DATA
+docker volume rm modernomad_pgdata
+```
