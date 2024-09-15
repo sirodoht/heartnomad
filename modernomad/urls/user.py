@@ -21,7 +21,6 @@ from core.views.user import (
     user_email_settings,
     user_events,
     user_login,
-    user_subscriptions,
     username_available,
 )
 
@@ -65,11 +64,6 @@ urlpatterns = [
         r"^(?P<username>[\w\d\-\.@+_]+)/email/$",
         user_email_settings,
         name="user_email_settings",
-    ),
-    re_path(
-        r"^(?P<username>[\w\d\-\.@+_]+)/subscriptions/$",
-        user_subscriptions,
-        name="user_subscriptions",
     ),
     re_path(r"^(?P<username>[\w\d\-\.@+_]+)/events/$", user_events, name="user_events"),
     re_path(

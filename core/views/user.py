@@ -47,24 +47,6 @@ def user_email_settings(request, username):
 
 
 @login_required
-def user_subscriptions(request, username):
-    """TODO: rethink permissions here"""
-    user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
-    subscriptions = models.Subscription.objects.filter(user=user).order_by("start_date")
-
-    return render(
-        request,
-        "user_subscriptions.html",
-        {
-            "u": user,
-            "user_is_house_admin_somewhere": user_is_house_admin_somewhere,
-            "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY,
-            "subscriptions": subscriptions,
-        },
-    )
-
-
-@login_required
 def user_events(request, username):
     """TODO: rethink permissions here"""
     user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)

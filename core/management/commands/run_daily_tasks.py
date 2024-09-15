@@ -11,7 +11,6 @@ class Command(BaseCommand):
     help = "Run daily scheduled tasks from Heroku Scheduler, or similar."
 
     def handle(self, *args, **kwargs):
-        tasks.generate_subscription_bills()
         tasks.send_guests_residents_daily_update()
         tasks.send_admin_daily_update()
         tasks.send_guest_welcome()

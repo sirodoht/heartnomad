@@ -161,20 +161,6 @@ class Location(models.Model):
     def get_rooms(self):
         return list(Resource.objects.filter(location=self))
 
-    def get_members(self):
-        active_subscriptions = Subscription.objects.active_subscriptions().filter(
-            location=self
-        )
-        subscribers = []
-        for s in active_subscriptions:
-            subscribers.append(s.user)
-        return list(
-            list(self.residents())
-            + list(self.house_admins.all())
-            + list(self.event_admin_group.users.all())
-            + subscribers
-        )
-
     def rooms_with_future_capacity_choices(self):
         choices = []
         rooms = self.rooms_with_future_capacity()
@@ -278,13 +264,7 @@ class Location(models.Model):
     def people_today(self):
         guests = self.guests_today()
         residents = list(self.residents())
-        active_subscriptions = Subscription.objects.active_subscriptions().filter(
-            location=self
-        )
-        members = []
-        for s in active_subscriptions:
-            members.append(s.user)
-        return guests + residents + members
+        return guests + residents
 
     def people_in_coming_month(self):
         # pull out all bookings in the coming month
@@ -819,9 +799,6 @@ class Bill(models.Model):
     def is_booking_bill(self):
         return hasattr(self, "bookingbill")
 
-    def is_subscription_bill(self):
-        return hasattr(self, "subscriptionbill")
-
 
 class Membership(models.Model):
     class MembershipType(models.TextChoices):
@@ -848,420 +825,6 @@ class Membership(models.Model):
         return self.start_date <= target_date and (
             self.end_date is None or self.end_date >= target_date
         )
-
-
-class SubscriptionManager(models.Manager):
-    def inactive_subscriptions(self, target_date=None):
-        """inactive subscriptions all have an end date and those end dates are in the past."""
-        if not target_date:
-            target_date = timezone.now().date()
-        end_date_exists = Q(end_date__isnull=False)
-        end_date_in_past = Q(end_date__lt=target_date)
-        future_start = Q(start_date__gt=target_date)
-        return self.filter(
-            future_start | (end_date_exists & end_date_in_past)
-        ).distinct()
-
-    def active_subscriptions_between(self, start, end):
-        """returns subscriptions that were active at any points between start
-        and end dates."""
-        current = Q(start_date__lte=end)
-        unending = Q(end_date__isnull=True)
-        future_ending = Q(end_date__gte=start)
-        return self.filter(current & (unending | future_ending)).distinct()
-
-    def active_subscriptions(self, target_date=None):
-        if not target_date:
-            target_date = timezone.now().date()
-        current = Q(start_date__lte=target_date)
-        unending = Q(end_date__isnull=True)
-        future_ending = Q(end_date__gte=target_date)
-        return self.filter(current & (unending | future_ending)).distinct()
-
-    def to_be_billed(self, date_window=90):
-        subscriptions = []
-        starting_point = timezone.now() - timedelta(days=date_window)
-        for s in self.filter(updated__gte=starting_point):
-            if s.total_periods() < self.bills.count():
-                subscriptions.append(s)
-        return subscriptions
-
-    def ready_for_billing(self, location, target_date=None):
-        if not target_date:
-            target_date = timezone.localtime(timezone.now()).date()
-        pret_a_manger = []
-        active = Subscription.objects.active_subscriptions().filter(location=location)
-        for s in active:
-            (this_period_start, this_period_end) = s.get_period()
-            if this_period_start == target_date:
-                pret_a_manger.append(s)
-        return pret_a_manger
-
-
-class Subscription(models.Model):
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(User, related_name="+", on_delete=models.CASCADE)
-    location = models.ForeignKey(Location, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    price = models.DecimalField(decimal_places=2, max_digits=9)
-    description = models.CharField(max_length=256, blank=True, null=True)
-    start_date = models.DateField()
-    end_date = models.DateField(blank=True, null=True)
-
-    objects = SubscriptionManager()
-
-    def get_period(self, target_date=None):
-        """get period associated with a certain date. returns None if the
-        subscription is not active."""
-        if not target_date:
-            target_date = timezone.now().date()
-
-        if target_date < self.start_date or (
-            self.end_date and target_date > self.end_date
-        ):
-            return (None, None)
-
-        if target_date.day == self.start_date.day:
-            period_start = target_date
-        else:
-            month = target_date.month
-            year = target_date.year
-            if target_date.day < self.start_date.day:
-                if target_date.day == 1:
-                    month = 12
-                    year = target_date.year - 1
-                else:
-                    month = target_date.month - 1
-            # the period starts on the start_date.day of whatever month we're
-            # operating in.
-            period_start = date(year, month, self.start_date.day)
-
-        logger.debug("")
-        logger.debug(f"in get_period(). period_start={period_start}")
-        logger.debug("")
-        period_end = period_start + relativedelta(months=1)
-        if period_end.day == period_start.day:
-            period_end = period_end - timedelta(days=1)
-
-        return (period_start, period_end)
-
-    def get_next_period_start(self, target_date=None):
-        if not target_date:
-            target_date = timezone.now().date()
-            # if the subscrition starts in the future then the next
-            # period is when the subscription starts.
-        if self.start_date > target_date:
-            return self.start_date
-        this_period_start, this_period_end = self.get_period(target_date=target_date)
-
-        if this_period_end is None:
-            return None
-
-        next_period_start = this_period_end + timedelta(days=1)
-        if self.end_date and next_period_start > self.end_date:
-            return None
-
-        return next_period_start
-
-    def is_period_boundary(self, target_date=None):
-        if not target_date:
-            if not self.end_date:
-                return False
-            # we need to subtract one day from the end date since otherwise it
-            # will be treated as the start of the *next* period. ugh dates.
-            target_date = self.end_date - timedelta(days=1)
-
-        period = self.get_period(target_date=target_date)
-        return period and period[1] == target_date
-
-    def total_periods(self, target_date=None):
-        """returns total periods between subscription start date and target
-        date."""
-        if not target_date:
-            target_date = timezone.now().date()
-
-        if self.start_date > target_date:
-            return 0
-        if self.end_date and self.end_date < target_date:
-            target_date = self.end_date
-
-        rd = relativedelta(target_date + timedelta(days=1), self.start_date)
-        return rd.months + (12 * rd.years)
-
-    def bills_between(self, start, end):
-        d = start
-        bills = []
-        while d < end:
-            b = self.get_bill_for_date(d)
-            if b:
-                bills.append(b)
-            d = self.get_next_period_start(d)
-            if not d:
-                break
-        return bills
-
-    def get_bill_for_date(self, date):
-        result = SubscriptionBill.objects.filter(
-            subscription=self, period_start__lte=date, period_end__gte=date
-        )
-        logger.debug("subscription %d: get_bill_for_date %s" % (self.id, date))
-        logger.debug("bill object(s):")
-        logger.debug(result)
-        if result.count():
-            if result.count() > 1:
-                logger.debug(
-                    "Warning! Multiple bills found for one date. This shouldn't happen"
-                )
-                raise Exception("Error: multiple bills for one date:")
-            return result[0]
-        else:
-            return None
-
-    def days_between(self, start, end):
-        """return the number of days of this subscription that occur between start and end dates"""
-        days = 0
-        if not self.end_date:
-            # set the end date to be the end date passed in so we can work with
-            # a date object, but do NOT save.
-            self.end_date = end
-        if self.start_date >= start and self.end_date <= end:
-            days = (self.end_date - self.start_date).days
-        elif self.start_date <= start and self.end_date >= end:
-            days = (end - start).days
-        elif self.start_date < start:
-            days = (self.end_date - start).days
-        elif self.end_date > end:
-            days = (end - self.start_date).days
-        return days
-
-    def is_active(self, target_date=None):
-        if not target_date:
-            target_date = timezone.now().date()
-        return self.start_date <= target_date and (
-            self.end_date is None or self.end_date >= target_date
-        )
-
-    def generate_bill(self, delete_old_items=True, target_date=None):
-        """used to generate or regenerate a bill for the given target date, or
-        today.  the reason old line items are generally deleted is that we want
-        to make sure that a) the line item descriptions are correct, since they
-        are simply strings generated from the line items themselves, and b)
-        because if any fees have changed, then percentage based derivative fees
-        will also change."""
-
-        if not target_date:
-            target_date = timezone.now().date()
-
-        period_start, period_end = self.get_period(target_date)
-        if not period_start:
-            return None
-        logger.debug(" ")
-        logger.debug(
-            f"in generate_bill for target_date = {target_date} and get_period = ({period_start}, {period_end})"
-        )
-
-        # a subscription's last cycle could be a pro rated one. check to see if
-        # the subscription end date is before the period end; if so, change the
-        # period end to be the subscription end date.
-        prorated = False
-        if self.end_date and self.end_date < period_end:
-            prorated = True
-            original_period_end = period_end
-            period_end = self.end_date
-
-        try:
-            bill = SubscriptionBill.objects.get(
-                period_start=period_start, subscription=self
-            )
-            logger.debug(
-                "Found existing bill #%d for period start %s"
-                % (bill.id, period_start.strftime("%B %d %Y"))
-            )
-            # if the bill already exists but we're updating it to be prorated,
-            # we need to change the period end also.
-            if prorated and bill.period_end != period_end:
-                bill.period_end = period_end
-                bill.save()
-            # If we already have a bill and we don't want to clear out the old data
-            # we can stop right here and go with the existing line items.
-            if not delete_old_items:
-                return list(bill.line_items)
-        except Exception:
-            logger.debug("Generating new bill item")
-            bill = SubscriptionBill.objects.create(
-                period_start=period_start, period_end=period_end
-            )
-
-        # Save any custom line items before clearing out the old items
-        logger.debug(
-            "working with bill %d (%s)"
-            % (bill.id, bill.period_start.strftime("%B %d %Y"))
-        )
-        custom_items = list(bill.line_items.filter(custom=True))
-        if delete_old_items:
-            if bill.total_paid() > 0:
-                logger.debug("Warning: modifying a bill with payments on it.")
-            for item in bill.line_items.all():
-                item.delete()
-
-        line_items = []
-        # First line item is the subscription itself.
-        desc = f"{self.description} ({period_start} to {period_end})"
-        if prorated:
-            period_days = Decimal((period_end - period_start).days)
-            original_period_days = (original_period_end - period_start).days
-            price = (period_days / original_period_days) * self.price
-        else:
-            price = self.price
-
-        line_item = BillLineItem(
-            bill=bill, description=desc, amount=price, paid_by_house=False
-        )
-        line_items.append(line_item)
-
-        # Incorporate any custom fees or discounts. As well, track the
-        # effective resource charge to be used in calculation of percentage-based
-        # fees
-        effective_bill_charge = price
-        for item in custom_items:
-            line_items.append(item)
-            effective_bill_charge += item.amount  # may be negative
-            logger.debug(item.amount)
-        logger.debug(
-            "effective room charge after discounts: %d" % effective_bill_charge
-        )
-
-        # For now we are going to assume that all fees (of any kind) that are marked as "paid by house"
-        # will be applied to subscriptions as well -- JLS
-        for location_fee in LocationFee.objects.filter(
-            location=self.location, fee__paid_by_house=True
-        ):
-            desc = "%s (%s%c)" % (
-                location_fee.fee.description,
-                (location_fee.fee.percentage * 100),
-                "%",
-            )
-            amount = float(effective_bill_charge) * location_fee.fee.percentage
-            logger.debug("Fee %s for %d" % (desc, amount))
-            fee_line_item = BillLineItem(
-                bill=bill,
-                description=desc,
-                amount=amount,
-                paid_by_house=True,
-                fee=location_fee.fee,
-            )
-            line_items.append(fee_line_item)
-
-        # Save this beautiful bill
-        bill.save()
-        for item in line_items:
-            item.save()
-        self.bills.add(bill)
-        self.save()
-
-        return line_items
-
-    def generate_all_bills(self, target_date=None):
-        today = timezone.now().date()
-
-        if not target_date:
-            target_date = self.start_date
-
-        end_date = self.end_date if self.end_date and self.end_date < today else today
-
-        period_start = target_date
-        while period_start and (period_start < today) and (period_start < end_date):
-            self.generate_bill(target_date=period_start)
-            period_start = self.get_next_period_start(period_start)
-
-    def last_paid(self, include_partial=False):
-        """returns the end date of the last period with payments, unless no
-        bills have been paid in which case it returns the start date of the
-        first period.
-
-        If include_partial=True we will count partially paid bills as "paid"
-        """
-        bills = self.bills.order_by("period_start").reverse()
-        # go backwards in time through the bills
-        if not bills:
-            return None
-        for b in bills:
-            try:
-                (paid_until_start, paid_until_end) = self.get_period(
-                    target_date=b.period_end
-                )
-            except Exception:
-                logger.debug("didn't like date")
-                logger.debug(b.period_end)
-            if b.is_paid() or (include_partial and b.total_paid() > 0):
-                return paid_until_end
-        return b.period_start
-
-    def delete_unpaid_bills(self):
-        for bill in self.bills.all():
-            if bill.total_paid() == 0:
-                bill.delete()
-
-    def has_unpaid_bills(self):
-        return any(not bill.is_paid() for bill in self.bills.all())
-
-    def update_for_end_date(self, new_end_date):
-        """deletes and regenerates bills after a change in end date"""
-        self.end_date = new_end_date
-        self.save()
-
-        # if the new end date is not on a period boundary, the final bill needs
-        # to be pro-rated, so we need to regenerate it.
-        today = timezone.localtime(timezone.now()).date()
-        period_start, period_end = self.get_period(today)
-
-        # delete unpaid bills will skip any bills with payments on them.
-        self.delete_unpaid_bills()
-
-        # in general there are SO MANY edge cases about when to regenerate
-        # bills, that we just regenerate them in all cases.
-        self.generate_all_bills()
-
-    def expected_num_bills(self):
-        today = timezone.localtime(timezone.now()).date()
-        period_start = self.start_date
-        num_expected = 0
-        while (
-            period_start and (period_start < today) and (period_start < self.end_date)
-        ):
-            num_expected += 1
-            period_start = self.get_next_period_start(period_start)
-        return num_expected
-
-
-class SubscriptionBill(Bill):
-    period_start = models.DateField()
-    period_end = models.DateField()
-    subscription = models.ForeignKey(
-        Subscription, related_name="bills", null=True, on_delete=models.SET_NULL
-    )
-
-    class Meta:
-        ordering = ["-period_start"]
-
-    def days_between(self, start, end):
-        """return the number of days of this bill that occur between start and
-        end dates"""
-        days = 0
-        if not self.period_end:
-            # set the end date to be the end date passed in so we can work with
-            # a date object, but do NOT save.
-            self.period_end = end
-        if self.period_start >= start and self.period_end <= end:
-            days = (self.period_end - self.period_start).days
-        elif self.period_start <= start and self.period_end >= end:
-            days = (end - start).days
-        elif self.period_start < start:
-            days = (self.period_end - start).days
-        elif self.period_end > end:
-            days = (end - self.period_start).days
-        return days
 
 
 class BookingBill(Bill):
@@ -1713,12 +1276,6 @@ class PaymentManager(models.Manager):
         )
         return booking_payments
 
-    def subscription_payments_by_location(self, location):
-        subscription_payments = Payment.objects.filter(
-            bill__in=SubscriptionBill.objects.filter(subscription__location=location)
-        )
-        return subscription_payments
-
     def booking_payments_by_resource(self, resource):
         booking_payments = Payment.objects.filter(
             bill__in=BookingBill.objects.filter(booking__use__resource=resource)
@@ -2009,8 +1566,7 @@ class EmailTemplate(models.Model):
     FROM_ADDRESS = settings.DEFAULT_FROM_EMAIL
 
     BOOKING = "booking"
-    SUBSCRIPTION = "subscription"
-    context_options = ((BOOKING, "Booking"), (SUBSCRIPTION, "Subscription"))
+    context_options = ((BOOKING, "Booking"),)
 
     body = models.TextField(verbose_name="The body of the email")
     subject = models.CharField(max_length=200, verbose_name="Default Subject Line")
@@ -2032,7 +1588,6 @@ class LocationEmailTemplate(models.Model):
     GUEST_DAILY = "guest_daily_update"
     INVOICE = "invoice"
     RECEIPT = "receipt"
-    SUBSCRIPTION_RECEIPT = "subscription_receipt"
     NEW_BOOKING = "newbooking"
     WELCOME = "pre_arrival_welcome"
     DEPARTURE = "departure"
@@ -2042,7 +1597,6 @@ class LocationEmailTemplate(models.Model):
         (GUEST_DAILY, "Guest Daily Update"),
         (INVOICE, "Invoice"),
         (RECEIPT, "Booking Receipt"),
-        (SUBSCRIPTION_RECEIPT, "Subscription Receipt"),
         (NEW_BOOKING, "New Booking"),
         (WELCOME, "Pre-Arrival Welcome"),
         (DEPARTURE, "Departure"),
@@ -2163,22 +1717,6 @@ class UseNote(models.Model):
         return "%s - %d: %s" % (self.created.date(), self.booking.id, self.note)
 
 
-class SubscriptionNote(models.Model):
-    created = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
-    subscription = models.ForeignKey(
-        Subscription,
-        blank=False,
-        null=False,
-        related_name="communitysubscription_notes",
-        on_delete=models.CASCADE,
-    )
-    note = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        return "%s - %d: %s" % (self.created.date(), self.subscription.id, self.note)
-
-
 class CapacityChangeManager(models.Manager):
     def _latest_change(self, date, resource):
         return (
@@ -2286,9 +1824,6 @@ class Backing(models.Model):
     )
     drft_account = models.ForeignKey(
         Account, related_name="+", on_delete=models.CASCADE
-    )
-    subscription = models.ForeignKey(
-        Subscription, blank=True, null=True, on_delete=models.SET_NULL
     )
     users = models.ManyToManyField(User, related_name="backings")
     start = models.DateField(default=django.utils.timezone.now)

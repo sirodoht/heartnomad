@@ -13,7 +13,7 @@ from core.emails.messages import (
     guest_welcome,
     guests_residents_daily_update,
 )
-from core.models import Location, Subscription, Use
+from core.models import Location, Use
 
 logger = logging.getLogger(__name__)
 
@@ -76,29 +76,6 @@ def send_departure_email():
             did_send_email = True
 
     return did_send_email
-
-
-def generate_subscription_bills():
-    logger.info("Running task: generate_subscription_bills")
-    today = datetime.date.today()
-    # using the exclude is an easier way to filter for subscriptions with an
-    # end date of None *or* in the future.
-    locations = Location.objects.all()
-    for l in locations:
-        subscriptions_ready = Subscription.objects.ready_for_billing(
-            location=l, target_date=today
-        )
-        if len(subscriptions_ready) == 0:
-            logger.debug(f"no subscriptions are ready for billing at {l.name} today.")
-        for s in subscriptions_ready:
-            logger.debug("")
-            logger.debug("automatically generating bill for subscription %d" % s.id)
-            # JKS - we *could* double check to see whether there is already a
-            # bill for this date. but, i'm worried about edge cases, and the
-            # re-generation is non-destructive, so I just call generate_bill
-            # regardless. if we end up with a lot of subscriptions we'll need
-            # to revisit this)
-            s.generate_bill(target_date=today)
 
 
 def _format_attachment(use, color):

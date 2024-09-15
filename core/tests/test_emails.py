@@ -151,8 +151,3 @@ class EmailsTestCase(TestCase):
         # return value and check that all was copacetic
         resp = admin_daily_update(self.resource.location)
         self.assertEqual(resp.status_code, 200)
-
-    # subscriptions
-    # def send_subscription_receipt(subscription, bill):
-    # def subscription_note_notify(subscription):
-    # def admin_new_subscription_notify(subscription):

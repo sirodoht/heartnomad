@@ -31,20 +31,6 @@ def monthly_occupant_report_console(location_slug, year, month):
                 " ".join(map(str, v["ids"])),
             )
         )
-    logger.debug("Subscriptions")
-    for v in occupants["members"].values():
-        logger.debug(
-            "%s, %s, %d, %d, %d, %s, %s"
-            % (
-                v["name"],
-                v["email"],
-                v["total_nights"],
-                v["total_value"],
-                v["total_comped"],
-                " ".join(map(str, v["owing"])),
-                " ".join(map(str, v["ids"])),
-            )
-        )
 
     for message in messages:
         logger.debug(message)

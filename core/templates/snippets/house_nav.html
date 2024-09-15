@@ -76,7 +76,6 @@
                     {% if user in location.house_admins.all %}
                         <li><a tabindex="-1" href="{% url 'booking_manage_list' location.slug %}">Bookings</a></li>
                         <li><a href="{% url 'booking_manage_create' location.slug %}">New Booking</a></li>
-                        <li><a href="{% url 'subscriptions_manage_list' location.slug %}">Subscriptions</a></li>
                     {% endif %}
                 {% endif %}
                 {% if user in location.house_admins.all %}

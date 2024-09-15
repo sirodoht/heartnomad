@@ -12,7 +12,6 @@ admin.autodiscover()
 urlpatterns = [
     re_path(r"^$", modernomad.views.index),
     re_path(r"^about/$", modernomad.views.about),
-    re_path(r"^membership/$", modernomad.views.membership, name="membership"),
     re_path(r"^host/$", modernomad.views.host, name="host"),
     re_path(r"^stay/$", modernomad.views.stay),
     re_path(r"^404/$", modernomad.views.ErrorView),

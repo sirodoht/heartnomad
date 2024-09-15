@@ -1774,10 +1774,6 @@ input.disabled {
   margin-left: 20px;
 }
 
-.subscription-send-receipt {
-  display: inline;
-}
-
 .no-data {
   color: #666666;
   font-size: 140%;
