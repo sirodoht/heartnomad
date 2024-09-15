@@ -52,13 +52,6 @@
                     <form class="userprofile-card-form" action="{% url 'create_checkout_session' user.username %}" method="POST">
                         {% csrf_token %}
                         <input type="submit" id="pay-button" class="btn btn-success res-status-btn" value="Add Credit Card">
-                        <div>
-                            <p>
-                                <em><small>We use <a href="http://stripe.com">Stripe's</a>
-                                secure credit card processing with SSL encryption. Your card
-                                information is never stored on our servers.</small></em>
-                            </p>
-                        </div>
                     </form>
                 </div>
             {% endif %}

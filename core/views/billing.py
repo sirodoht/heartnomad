@@ -21,17 +21,10 @@ from stripe.error import CardError
 from core import payment_gateway
 from core.decorators import house_admin_required, resident_or_admin_required
 from core.emails.messages import (
-    admin_new_subscription_notify,
     send_booking_receipt,
     send_from_location_address,
-    send_subscription_receipt,
-    subscription_note_notify,
 )
-from core.forms import (
-    AdminSubscriptionForm,
-    PaymentForm,
-    SubscriptionEmailTemplateForm,
-)
+from core.forms import PaymentForm
 from core.models import (
     Bill,
     BillLineItem,
@@ -40,8 +33,6 @@ from core.models import (
     Location,
     LocationFee,
     Payment,
-    Subscription,
-    SubscriptionNote,
     UserNote,
 )
 from core.tasks import guest_welcome
@@ -205,15 +196,7 @@ def ManagePayment(request, location_slug, bill_id):
                     "A refund for $%d was applied." % (Decimal(refund_amount)),
                 )
             else:
-                messages.add_message(
-                    request,
-                    messages.INFO,
-                    "A refund for $%d was applied to the %s billing cycle."
-                    % (
-                        Decimal(refund_amount),
-                        bill.subscriptionbill.period_start.strftime("%B %d, %Y"),
-                    ),
-                )
+                raise Exception("not a booking bill or any other type")
     elif action == "Save":
         logger.debug("saving record of external payment")
         # record a manual payment
@@ -232,15 +215,7 @@ def ManagePayment(request, location_slug, bill_id):
         if bill.is_booking_bill():
             messages.add_message(request, messages.INFO, "Manual payment recorded")
         else:
-            messages.add_message(
-                request,
-                messages.INFO,
-                "A manual payment for $%d was applied to the %s billing cycle"
-                % (
-                    Decimal(paid_amount),
-                    bill.subscriptionbill.period_start.strftime("%B %d, %Y"),
-                ),
-            )
+            raise Exception("not a booking bill or any other type")
 
     # JKS this is a little inelegant as it assumes that this page will always
     # a) want to redirect to a manage page and b) that there are only two types
@@ -250,40 +225,7 @@ def ManagePayment(request, location_slug, bill_id):
             reverse("booking_manage", args=(location_slug, bill.bookingbill.booking.id))
         )
     else:
-        return HttpResponseRedirect(
-            reverse(
-                "subscription_manage_detail",
-                args=(location_slug, bill.subscriptionbill.subscription.id),
-            )
-        )
-
-
-@house_admin_required
-def SubscriptionSendReceipt(request, location_slug, subscription_id, bill_id):
-    if request.method != "POST":
-        return HttpResponseRedirect("/404")
-    get_object_or_404(Location, slug=location_slug)
-    subscription = Subscription.objects.get(id=subscription_id)
-    bill = Bill.objects.get(id=bill_id)
-    if bill.is_paid():
-        status = send_subscription_receipt(subscription, bill)
-        if status is not False:
-            messages.add_message(request, messages.INFO, "A receipt was sent.")
-        else:
-            messages.add_message(
-                request,
-                messages.INFO,
-                "Hmm, there was a problem and the receipt was not sent. Please contact an administrator.",
-            )
-    else:
-        messages.add_message(
-            request,
-            messages.INFO,
-            "This booking has not been paid, so the receipt was not sent.",
-        )
-    return HttpResponseRedirect(
-        reverse("subscription_manage_detail", args=(location_slug, subscription_id))
-    )
+        raise Exception("not a booking bill or any other type")
 
 
 @house_admin_required
@@ -304,13 +246,6 @@ def RecalculateBill(request, location_slug, bill_id):
         messages.add_message(request, messages.INFO, "The bill has been recalculated.")
         return HttpResponseRedirect(
             reverse("booking_manage", args=(location.slug, booking.id))
-        )
-    elif bill.is_subscription_bill():
-        subscription = bill.subscriptionbill.subscription
-        subscription.generate_bill()
-        messages.add_message(request, messages.INFO, "The bill has been recalculated.")
-        return HttpResponseRedirect(
-            reverse("subscription_manage_detail", args=(location.slug, subscription.id))
         )
     else:
         raise Exception("Unrecognized bill object")
@@ -337,29 +272,6 @@ def DeleteBillLineItem(request, location_slug, bill_id):
         return HttpResponseRedirect(
             reverse("booking_manage", args=(location.slug, booking.id))
         )
-    elif bill.is_subscription_bill():
-        subscription = bill.subscriptionbill.subscription
-        logger.debug("in delete bill line item")
-        logger.debug(request.POST)
-        item_id = int(request.POST.get("payment_id"))
-        line_item = BillLineItem.objects.get(id=item_id)
-        line_item.delete()
-        # subscriptions don't support external fees yet but if we add this,
-        # then we should include the ability to suppress a fee. until then this won't work.
-        # if line_item.fee:
-        #    subscription.suppress_fee(line_item)
-        subscription.generate_bill(target_date=bill.subscriptionbill.period_start)
-
-        messages.add_message(
-            request,
-            messages.INFO,
-            "The line item was deleted from the bill for {}.".format(
-                bill.subscriptionbill.period_start.strftime("%B %Y")
-            ),
-        )
-        return HttpResponseRedirect(
-            reverse("subscription_manage_detail", args=(location.slug, subscription.id))
-        )
     else:
         raise Exception("Unrecognized bill object")
 
@@ -382,23 +294,11 @@ def BillCharge(request, location_slug, bill_id):
             "Cannot charge more than remaining amount owed ($%d was requested on $%d owed)"
             % (charge_amount_dollars, bill.total_owed()),
         )
-        return HttpResponseRedirect(
-            reverse(
-                "subscription_manage_detail",
-                args=(location.slug, bill.subscriptionbill.subscription.id),
-            )
-        )
+        raise Exception("bill charge error: cannot charge more than remaining amount owed")
 
     if bill.is_booking_bill():
         user = bill.bookingbill.booking.user
         reference = "%d booking ref#%d" % (location.name, bill.bookingbill.booking.id)
-    elif bill.is_subscription_bill():
-        user = bill.subscriptionbill.subscription.user
-        reference = "%s subscription ref#%d.%d monthly" % (
-            location.name,
-            bill.subscriptionbill.subscription.id,
-            bill.id,
-        )
     else:
         raise Exception("Unknown bill type. Cannot determine user.")
 
@@ -415,12 +315,7 @@ def BillCharge(request, location_slug, bill_id):
                 )
             )
         else:
-            return HttpResponseRedirect(
-                reverse(
-                    "subscription_manage_detail",
-                    args=(location_slug, bill.subscriptionbill.subscription.id),
-                )
-            )
+            raise Exception("bill is of unknown type")
 
     if bill.is_booking_bill():
         messages.add_message(request, messages.INFO, "The card was charged.")
@@ -428,19 +323,7 @@ def BillCharge(request, location_slug, bill_id):
             reverse("booking_manage", args=(location_slug, bill.bookingbill.booking.id))
         )
     else:
-        messages.add_message(
-            request,
-            messages.INFO,
-            "The card was charged. You must manually send the user their receipt. Please do so from the {} bill detail page.".format(
-                bill.subscriptionbill.period_start.strftime("%B %d, %Y")
-            ),
-        )
-        return HttpResponseRedirect(
-            reverse(
-                "subscription_manage_detail",
-                args=(location_slug, bill.subscriptionbill.subscription.id),
-            )
-        )
+        raise Exception("bill is of unknown type")
 
 
 @house_admin_required
@@ -512,19 +395,6 @@ def AddBillLineItem(request, location_slug, bill_id):
         return HttpResponseRedirect(
             reverse("booking_manage", args=(location.slug, booking.id))
         )
-    elif bill.is_subscription_bill():
-        subscription = bill.subscriptionbill.subscription
-        subscription.generate_bill(target_date=bill.subscriptionbill.period_start)
-        messages.add_message(
-            request,
-            messages.INFO,
-            "The {} was added to the bill for {}.".format(
-                line_item_type, bill.subscriptionbill.period_start.strftime("%B %Y")
-            ),
-        )
-        return HttpResponseRedirect(
-            reverse("subscription_manage_detail", args=(location.slug, subscription.id))
-        )
     else:
         raise Exception("Unrecognized bill object")
 
@@ -536,18 +406,6 @@ def _assemble_and_send_email(location_slug, post):
     body = post.get("body") + "\n\n" + post.get("footer")
     # TODO - This isn't fully implemented yet -JLS
     send_from_location_address(subject, body, None, recipient, location)
-
-
-@house_admin_required
-def SubscriptionSendMail(request, location_slug, subscription_id):
-    if request.method != "POST":
-        return HttpResponseRedirect("/404")
-
-    _assemble_and_send_email(location_slug, request.POST)
-    messages.add_message(request, messages.INFO, "Your message was sent.")
-    return HttpResponseRedirect(
-        reverse("subscription_manage_detail", args=(location_slug, subscription_id))
-    )
 
 
 @resident_or_admin_required
@@ -714,10 +572,6 @@ def payments(request, location_slug, year, month):
         "hotel_tax_percent": 0.0,
         "res_external_txs_paid": 0,
         "res_external_txs_fees": 0,
-        "all_subscriptions_net": 0,
-        "taxed_subscription_gross": 0,
-        "untaxed_subscription_net": 0,
-        "taxed_subscription_user_fees": 0,
         "sub_external_txs_paid": 0,
         "sub_external_txs_fees": 0,
     }
@@ -780,56 +634,6 @@ def payments(request, location_slug, year, month):
 
     ##############################
 
-    subscription_totals = {
-        "count": 0,
-        "house_fees": 0,
-        "to_house": 0,
-        "user_fees": 0,
-        "total_paid": 0,  # the paid amount is to_house + user_fees + house_fees
-    }
-
-    subscription_payments_this_month = (
-        Payment.objects.subscription_payments_by_location(location)
-        .filter(payment_date__gte=start, payment_date__lte=end)
-        .order_by("payment_date")
-        .reverse()
-    )
-    # house fees are fees paid by the house
-    # non house fees are fees passed on to the user
-    for p in subscription_payments_this_month:
-        # pull out the values we call multiple times to make this faster
-        to_house = p.to_house()
-        user_fees = (
-            p.bill.non_house_fees()
-        )  # p_bill_non_house_fees = p.bill.non_house_fees()
-        house_fees = p.house_fees()  # p_house_fees = p.house_fees()
-        total_paid = p.paid_amount
-
-        summary_totals["all_subscriptions_net"] += to_house
-        if user_fees > 0:
-            # the gross value of subscriptions that were taxed/had user fees
-            # applied are tracked as a separate line item for assistance with
-            # later accounting
-            summary_totals["taxed_subscription_gross"] += to_house + user_fees
-            summary_totals["taxed_subscription_net"] += to_house
-            summary_totals["taxed_subscription_user_fees"] += user_fees
-        else:
-            summary_totals["untaxed_subscription_net"] += to_house
-
-        # track subscription totals
-        subscription_totals["count"] = subscription_totals["count"] + 1
-        subscription_totals["to_house"] = subscription_totals["to_house"] + to_house
-        subscription_totals["user_fees"] = subscription_totals["user_fees"] + user_fees
-        subscription_totals["house_fees"] = (
-            subscription_totals["house_fees"] + house_fees
-        )
-        subscription_totals["total_paid"] = (
-            subscription_totals["total_paid"] + total_paid
-        )
-        if p.transaction_id == "Manual":
-            summary_totals["sub_external_txs_paid"] += total_paid
-            summary_totals["sub_external_txs_fees"] += house_fees
-
     summary_totals["res_total_transfer"] = (
         summary_totals["gross_rent"]
         + summary_totals["hotel_tax"]
@@ -837,22 +641,9 @@ def payments(request, location_slug, year, month):
         - summary_totals["res_external_txs_fees"]
     )
 
-    summary_totals["sub_total_transfer"] = (
-        summary_totals["all_subscriptions_net"]
-        + summary_totals["taxed_subscription_user_fees"]
-        - summary_totals["sub_external_txs_paid"]
-        - summary_totals["sub_external_txs_fees"]
-    )
-
-    summary_totals["total_transfer"] = (
-        summary_totals["res_total_transfer"] + summary_totals["sub_total_transfer"]
-    )
+    summary_totals["total_transfer"] = summary_totals["res_total_transfer"]
     summary_totals["gross_bookings"] = (
         summary_totals["gross_rent_transient"] + summary_totals["net_rent_resident"]
-    )
-    summary_totals["gross_subscriptions"] = (
-        summary_totals["taxed_subscription_gross"]
-        + summary_totals["untaxed_subscription_net"]
     )
 
     t1 = time.time()
@@ -865,207 +656,10 @@ def payments(request, location_slug, year, month):
         {
             "booking_payments": booking_payments_this_month,
             "summary_totals": summary_totals,
-            "subscription_payments": subscription_payments_this_month,
-            "subscription_totals": subscription_totals,
             "booking_totals": booking_totals,
             "location": location,
             "this_month": start,
             "previous_date": prev_month,
             "next_date": next_month,
         },
-    )
-
-
-@house_admin_required
-def SubscriptionManageCreate(request, location_slug):
-    if request.method == "POST":
-        location = get_object_or_404(Location, slug=location_slug)
-        notify = request.POST.get("email_announce")
-        try:
-            username = request.POST.get("username")
-            subscription_user = User.objects.get(username=username)
-        except Exception:
-            messages.add_message(
-                request,
-                messages.INFO,
-                f"There is no user with the username {username}",
-            )
-            return HttpResponseRedirect(
-                reverse("booking_manage_create", args=(location.slug,))
-            )
-
-        form = AdminSubscriptionForm(request.POST)
-        if form.is_valid():
-            subscription = form.save(commit=False)
-            subscription.location = location
-            subscription.user = subscription_user
-            subscription.created_by = request.user
-            subscription.save()
-            subscription.generate_all_bills()
-            if notify:
-                admin_new_subscription_notify(subscription)
-            messages.add_message(
-                request,
-                messages.INFO,
-                f"The subscription for {subscription.user.first_name} {subscription.user.last_name} was created.",
-            )
-            return HttpResponseRedirect(
-                reverse(
-                    "subscription_manage_detail", args=(location.slug, subscription.id)
-                )
-            )
-        else:
-            logger.debug("the form had errors")
-            logger.debug(form.errors)
-            logger.debug(request.POST)
-
-    else:
-        form = AdminSubscriptionForm()
-    all_users = User.objects.all().order_by("username")
-    return render(
-        request,
-        "subscription_manage_create.html",
-        {"form": form, "all_users": all_users},
-    )
-
-
-@house_admin_required
-def SubscriptionsManageList(request, location_slug):
-    location = get_object_or_404(Location, slug=location_slug)
-    active = (
-        Subscription.objects.active_subscriptions()
-        .filter(location=location)
-        .order_by("-start_date")
-    )
-    inactive = (
-        Subscription.objects.inactive_subscriptions()
-        .filter(location=location)
-        .order_by("-end_date")
-    )
-    return render(
-        request,
-        "subscriptions_list.html",
-        {"active": active, "inactive": inactive, "location": location},
-    )
-
-
-@house_admin_required
-def SubscriptionManageDetail(request, location_slug, subscription_id):
-    location = get_object_or_404(Location, slug=location_slug)
-    subscription = get_object_or_404(Subscription, id=subscription_id)
-    user = User.objects.get(username=subscription.user.username)
-    domain = Site.objects.get_current().domain
-    logger.debug("SubscriptionManageDetail:")
-
-    email_forms = []
-    email_templates_by_name = []
-
-    emails = EmailTemplate.objects.filter(context="subscription")
-    for email_template in emails:
-        form = SubscriptionEmailTemplateForm(email_template, subscription, location)
-        email_forms.append(form)
-        email_templates_by_name.append(email_template.name)
-
-    # Pull all the booking notes for this person
-    if "note" in request.POST:
-        note = request.POST["note"]
-        if note:
-            SubscriptionNote.objects.create(
-                subscription=subscription, created_by=request.user, note=note
-            )
-            # The Right Thing is to do an HttpResponseRedirect after a form
-            # submission, which clears the POST request data (even though we
-            # are redirecting to the same view)
-            subscription_note_notify(subscription)
-            return HttpResponseRedirect(
-                reverse(
-                    "subscription_manage_detail", args=(location_slug, subscription_id)
-                )
-            )
-    subscription_notes = SubscriptionNote.objects.filter(subscription=subscription)
-
-    # Pull all the user notes for this person
-    if "user_note" in request.POST:
-        note = request.POST["user_note"]
-        if note:
-            UserNote.objects.create(user=user, created_by=request.user, note=note)
-            # The Right Thing is to do an HttpResponseRedirect after a form submission
-            return HttpResponseRedirect(
-                reverse("subscription_manage_detail", args=(location_slug, booking_id))
-            )
-    user_notes = UserNote.objects.filter(user=user)
-
-    return render(
-        request,
-        "subscription_manage.html",
-        {
-            "s": subscription,
-            "user_notes": user_notes,
-            "subscription_notes": subscription_notes,
-            "email_forms": email_forms,
-            "email_templates_by_name": email_templates_by_name,
-            "domain": domain,
-            "location": location,
-        },
-    )
-
-
-@house_admin_required
-def SubscriptionManageUpdateEndDate(request, location_slug, subscription_id):
-    get_object_or_404(Location, slug=location_slug)
-    subscription = Subscription.objects.get(id=subscription_id)
-    logger.debug(request.POST)
-
-    new_end_date = None  # an empty end date is an ongoing subscription.
-    old_end_date = subscription.end_date
-    if request.POST.get("end_date"):
-        new_end_date = datetime.datetime.strptime(
-            request.POST["end_date"], settings.DATE_FORMAT
-        ).date()
-        # disable setting the end date earlier than any recorded payments for associated bills (even partial payments)
-        most_recent_paid = subscription.last_paid(include_partial=True)
-
-        # careful, a subscription which has not had any bills generated yet
-        # will have a paid_until value of None but is not problematic to change
-        # the date.
-        if most_recent_paid and new_end_date < most_recent_paid:
-            messages.add_message(
-                request,
-                messages.INFO,
-                "Error! This subscription already has payments past the requested end date. Please choose an end date after {}.".format(
-                    most_recent_paid.strftime("%B %d, %Y")
-                ),
-            )
-            return HttpResponseRedirect(
-                reverse(
-                    "subscription_manage_detail", args=(location_slug, subscription_id)
-                )
-            )
-
-        if old_end_date and new_end_date == old_end_date:
-            messages.add_message(
-                request, messages.INFO, "The new end date was the same."
-            )
-            return HttpResponseRedirect(
-                reverse(
-                    "subscription_manage_detail", args=(location_slug, subscription_id)
-                )
-            )
-
-    subscription.update_for_end_date(new_end_date)
-    messages.add_message(request, messages.INFO, "Subscription end date updated.")
-    return HttpResponseRedirect(
-        reverse("subscription_manage_detail", args=(location_slug, subscription_id))
-    )
-
-
-@house_admin_required
-def SubscriptionManageGenerateAllBills(request, location_slug, subscription_id):
-    subscription = get_object_or_404(Subscription, pk=subscription_id)
-    subscription.generate_all_bills()
-    messages.add_message(
-        request, messages.INFO, "Bills up to the current period were generated."
-    )
-    return HttpResponseRedirect(
-        reverse("subscription_manage_detail", args=(location_slug, subscription.id))
     )

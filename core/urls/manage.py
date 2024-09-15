@@ -78,39 +78,4 @@ urlpatterns = [
         booking_management.BookingManageEdit,
         name="booking_manage_edit",
     ),
-    re_path(
-        r"^subscription/(?P<subscription_id>\d+)/bill/(?P<bill_id>\d+)/sendreceipt/$",
-        billing.SubscriptionSendReceipt,
-        name="subscription_send_receipt",
-    ),
-    re_path(
-        r"^subscriptions/(?P<subscription_id>\d+)/sendmail/$",
-        billing.SubscriptionSendMail,
-        name="subscription_send_mail",
-    ),
-    re_path(
-        r"^subscriptions/create$",
-        billing.SubscriptionManageCreate,
-        name="subscription_manage_create",
-    ),
-    re_path(
-        r"^subscriptions/(?P<subscription_id>\d+)/$",
-        billing.SubscriptionManageDetail,
-        name="subscription_manage_detail",
-    ),
-    re_path(
-        r"^subscriptions/(?P<subscription_id>\d+)/update_end_date/$",
-        billing.SubscriptionManageUpdateEndDate,
-        name="subscription_manage_update_end_date",
-    ),
-    re_path(
-        r"^subscriptions/(?P<subscription_id>\d+)/generateallbills/$",
-        billing.SubscriptionManageGenerateAllBills,
-        name="subscription_manage_all_bills",
-    ),
-    re_path(
-        r"^subscriptions/$",
-        billing.SubscriptionsManageList,
-        name="subscriptions_manage_list",
-    ),
 ]

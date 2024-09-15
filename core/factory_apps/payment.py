@@ -8,44 +8,15 @@ from .location import FeeFactory, LocationFactory, ResourceFactory
 from .user import UserFactory
 
 
-class SubscriptionFactory(DjangoModelFactory):
-    class Meta:
-        model = models.Subscription
-
-    created = factory.Faker("past_datetime", tzinfo=ZoneInfo("UTC"))
-    updated = factory.Faker("past_datetime", tzinfo=ZoneInfo("UTC"))
-
-    created_by = factory.SubFactory(UserFactory)
-    location = factory.SubFactory(LocationFactory)
-    user = factory.SubFactory(UserFactory)
-
-    price = factory.Faker("pydecimal", left_digits=3, positive=True)
-    description = factory.Faker("words")
-
-    start_date = factory.Faker("future_date", tzinfo=ZoneInfo("UTC"))
-    end_date = factory.Faker("future_date", tzinfo=ZoneInfo("UTC"))
-
 
 class BillFactory(DjangoModelFactory):
-    """Bookings, BillLineItem or Subscription"""
+    """Bookings or BillLineItem"""
 
     class Meta:
         model = models.Bill
 
     generated_on = factory.Faker("past_datetime", tzinfo=ZoneInfo("UTC"))
     comment = factory.Faker("paragraph")
-
-
-class SubscriptionBillFactory(DjangoModelFactory):
-    class Meta:
-        model = models.SubscriptionBill
-
-    generated_on = factory.Faker("past_datetime", tzinfo=ZoneInfo("UTC"))
-    comment = factory.Faker("paragraph")
-
-    period_start = factory.Faker("future_date", tzinfo=ZoneInfo("UTC"))
-    period_end = factory.Faker("future_date", tzinfo=ZoneInfo("UTC"))
-    subscription = factory.SubFactory(SubscriptionFactory)
 
 
 class BookingBillFactory(DjangoModelFactory):
@@ -132,8 +103,3 @@ class PaymentFactory(DjangoModelFactory):
 class UseNoteFactory(DjangoModelFactory):
     class Meta:
         model = models.UseNote
-
-
-class SubscriptionNoteFactory(DjangoModelFactory):
-    class Meta:
-        model = models.SubscriptionNote

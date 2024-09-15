@@ -123,10 +123,6 @@ class LocationFactory(DjangoModelFactory):
         menu = LocationMenuFactory(location=self)
         LocationFlatPageFactory(menu=menu)
 
-        # payments
-        subscription = payment.SubscriptionFactory(location=self)
-        payment.SubscriptionBillFactory(subscription=subscription)
-
 
 class ResourceFactory(DjangoModelFactory):
     class Meta:

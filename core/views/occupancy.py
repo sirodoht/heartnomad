@@ -19,7 +19,6 @@ from core.models import (
     Location,
     Payment,
     Resource,
-    Subscription,
     Use,
 )
 from gather.tasks import published_events_today_local
@@ -230,7 +229,6 @@ def monthly_occupant_report(location_slug, year, month):
     occupants = {}
     occupants["residents"] = {}
     occupants["guests"] = {}
-    occupants["members"] = {}
     messages = []
 
     # calculate datas for people this month (as relevant), including: name, email, total_nights, total_value, total_comped, owing, and reference ids
@@ -284,67 +282,6 @@ def monthly_occupant_report(location_slug, year, month):
                 occupants["guests"][u]["owing"].append(owing)
             occupants["guests"][u]["ids"].append(use.booking.id)
 
-    # check for subscriptions that were active for any days this month.
-    subscriptions = list(
-        Subscription.objects.active_subscriptions_between(start, end).filter(
-            location=location
-        )
-    )
-    for s in subscriptions:
-        days_this_month = s.days_between(start, end)
-        u = s.user
-        comped_days_this_month = 0
-        owing = None
-        # for subscriptions, the 'value' is the sum of the effective daily rate
-        # associated with the days of the bill(s) that occurred this month.
-        bills_between = s.bills_between(start, end)
-        value_this_month = 0
-        logger.debug("subscription %d" % s.id)
-        for b in bills_between:
-            logger.debug(b.subtotal_amount())
-            logger.debug(b.period_end)
-            logger.debug(b.period_start)
-            if (b.period_end - b.period_start).days > 0:
-                effective_rate = (
-                    b.subtotal_amount() / (b.period_end - b.period_start).days
-                )
-                value_this_bill_this_month = effective_rate * b.days_between(start, end)
-                value_this_month += value_this_bill_this_month
-
-            # also make a note if this subscription has any bills that have an
-            # outstanding balance. we store the subscription not the bill,
-            # since that's the way an admin would view it from the website, so
-            # check for duplicates since there could be multiple unpaid but we
-            # still are pointing people to the same subscription.
-            if b.total_owed() > 0 and not owing:
-                owing = b.subscription.id
-
-            if b.amount() == 0:
-                comped_days_this_month += b.days_between(start, end)
-
-        # ok now asssemble the dicts!
-        if u not in occupants["members"]:
-            occupants["members"][u] = {
-                "name": u.get_full_name(),
-                "email": u.email,
-                "total_nights": days_this_month,
-                "total_value": value_this_month,
-                "total_comped": comped_days_this_month,
-                "owing": [owing],
-                "ids": [s.id],
-            }
-        else:
-            occupants["members"][u]["total_nights"] += nights_this_month
-            occupants["members"][u]["total_value"] += value_this_month
-            occupants["members"][u]["total_comped"] += comped_nights_this_month
-            if owing:
-                occupants["members"][u]["owing"].append(owing)
-            occupants["members"][u]["ids"].append(s.id)
-
-    messages.append(
-        "If a membership has a weird total_value, it is likely because there was a discount or fee applied to an "
-        + "individual bill. Check the membership page."
-    )
     return occupants, messages
 
 
