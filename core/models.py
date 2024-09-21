@@ -824,6 +824,9 @@ class Membership(models.Model):
             self.end_date is None or self.end_date >= target_date
         )
 
+    def __str__(self):
+        return f"({self.id}) {self.membership_type} membership"
+
 
 class BookingBill(Bill):
     pass
