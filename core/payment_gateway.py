@@ -25,6 +25,22 @@ def _charge_description(booking):
     return descr
 
 
+def charge_short_term_membership(user):
+    amount_owed_cents = settings.SHORT_TERM_MEMBERSHIP_COST * 100
+    return_url = f"{settings.CANONICAL_URL}/people/{user.username}/"
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    stripe.PaymentIntent.create(
+        amount=amount_owed_cents,
+        currency="usd",
+        customer=user.profile.stripe_customer_id,
+        payment_method=user.profile.stripe_payment_method_id,
+        description="Short-term Membership",
+        confirm=True,
+        return_url=return_url,
+    )
+
+
 def charge_booking(booking):
     logger.debug(f"stripe_charge_booking(booking={booking.id})")
 
@@ -35,9 +51,9 @@ def charge_booking(booking):
 
     amt_owed = booking.bill.total_owed()
     amt_owed_cents = int(amt_owed * 100)
-    stripe.api_key = settings.STRIPE_SECRET_KEY
-
     return_url = f"{settings.CANONICAL_URL}/people/{booking.use.user.username}/"
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY
     stripe.PaymentIntent.create(
         amount=amt_owed_cents,
         currency="usd",
