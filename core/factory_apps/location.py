@@ -109,7 +109,7 @@ class LocationFactory(DjangoModelFactory):
     @factory.post_generation
     def add_stuff(self, create, extracted, **kwargs):
         # avoid recursive import
-        from . import events, payment
+        from . import events
 
         LocationFeeFactory(location=self)
 

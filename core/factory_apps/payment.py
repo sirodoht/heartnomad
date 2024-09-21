@@ -8,7 +8,6 @@ from .location import FeeFactory, LocationFactory, ResourceFactory
 from .user import UserFactory
 
 
-
 class BillFactory(DjangoModelFactory):
     """Bookings or BillLineItem"""
 

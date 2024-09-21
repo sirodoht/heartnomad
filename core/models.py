@@ -2,11 +2,9 @@ import datetime
 import logging
 import os
 import uuid
-from datetime import date, timedelta
 from decimal import Decimal
 
 import django.dispatch
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.flatpages.models import FlatPage

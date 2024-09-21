@@ -9,7 +9,6 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.contrib.sites.models import Site
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
@@ -29,11 +28,9 @@ from core.models import (
     Bill,
     BillLineItem,
     Booking,
-    EmailTemplate,
     Location,
     LocationFee,
     Payment,
-    UserNote,
 )
 from core.tasks import guest_welcome
 from core.views import occupancy
@@ -294,7 +291,9 @@ def BillCharge(request, location_slug, bill_id):
             "Cannot charge more than remaining amount owed ($%d was requested on $%d owed)"
             % (charge_amount_dollars, bill.total_owed()),
         )
-        raise Exception("bill charge error: cannot charge more than remaining amount owed")
+        raise Exception(
+            "bill charge error: cannot charge more than remaining amount owed"
+        )
 
     if bill.is_booking_bill():
         user = bill.bookingbill.booking.user
