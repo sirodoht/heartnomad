@@ -1,0 +1,71 @@
+{% extends "root.html" %}
+
+{% load static %}
+
+{% block body %}
+<div class="container">
+    {% include "snippets/messages.html" %}
+
+    {% if has_membership %}
+
+    <div class="row">
+        <div class="col-md-6">
+            <h1>Membership</h1>
+            <p>
+                You are already a member.
+            </p>
+        </div>
+    </div>
+
+    {% else %}
+
+    <div class="row">
+        <div class="col-md-6">
+            <h1>Membership</h1>
+            <p>
+                To become a member you need to sign the membership agreement. This will
+                be sent to you via email once your membership application has been
+                approved.
+            </p>
+            <p>
+                Once the above has been completed, please pay for your membership in
+                this page.
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            {% if user.profile.stripe_customer_id %}
+            <form class="userprofile-card-form" method="post" action="{% url 'user_delete_card' user.username %}">
+                {% csrf_token %}
+                <input type="submit" class="btn btn-danger btn-small" value="Delete Card">
+            </form>
+            {% else %}
+            <div>
+                <form class="userprofile-card-form" action="{% url 'create_checkout_session' user.username %}" method="POST">
+                    {% csrf_token %}
+                    <input type="submit" id="pay-button" class="btn btn-success res-status-btn" value="Add Credit Card">
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <p style="margin-top: 16px;">
+                <strong>NOTE: This DOES NOT grant you membership.</strong>
+            </p>
+            <div style="margin-top: 16px;">
+                <form action="{% url 'membership_charge' %}" method="POST">
+                    {% csrf_token %}
+                    <input type="submit" id="pay-button" class="btn btn-success res-status-btn" value="Pay for Short-Term Membership">
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}

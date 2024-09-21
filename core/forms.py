@@ -169,11 +169,10 @@ class UserProfileForm(forms.ModelForm):
 
     def clean_email(self):
         email = self.cleaned_data["email"]
-        if not self.instance.id:
-            if email and models.User.objects.filter(email=email):
-                raise forms.ValidationError(
-                    "There is already a user with this email. If this is your account and you need to recover your password, you can do so from the login page."
-                )
+        if not self.instance.id and (email and models.User.objects.filter(email=email)):
+            raise forms.ValidationError(
+                "There is already a user with this email. If this is your account and you need to recover your password, you can do so from the login page."
+            )
         return email
 
     def clean(self):
@@ -200,15 +199,15 @@ class UserProfileForm(forms.ModelForm):
             # the UrlField class has some lovely validation code written already.
             url = forms.URLField()
             cleaned_links = []
-            for l in raw_link_list:
+            for link in raw_link_list:
                 try:
-                    cleaned = url.clean(l.strip())
+                    cleaned = url.clean(link.strip())
                     cleaned_links.append(cleaned)
-                except forms.ValidationError:
+                except forms.ValidationError as ex:
                     # customize the error raised by UrlField.
                     raise forms.ValidationError(
                         "At least one of the URLs is not correctly formatted."
-                    )
+                    ) from ex
             links = ", ".join(cleaned_links)
         return links
 
@@ -259,7 +258,6 @@ class UserProfileForm(forms.ModelForm):
             # Adding
             user = self.create_user()
             profile.user = user
-            models.Membership.objects.create(user=profile.user)
 
         profile.save()
         return user

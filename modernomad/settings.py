@@ -237,10 +237,16 @@ os.environ["DJANGO_LIVE_TEST_SERVER_ADDRESS"] = "localhost:8000-8010,8080,9200-9
 
 # Enable Slack daily arrival/departure messages
 # TODO: Change hook URLs to be configured in the database per location
-ENABLE_SLACK = True if os.getenv("ENABLE_SLACK") == "1" else False
+ENABLE_SLACK = os.getenv("ENABLE_SLACK") == "1"
 
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# Memberships settings
+
+SHORT_TERM_MEMBERSHIP_COST = 90
+LONG_TERM_MEMBERSHIP_COST = 200

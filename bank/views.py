@@ -7,18 +7,17 @@ from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views.generic import View
 
-from bank.forms import *
-from bank.models import *
+from bank import forms, models
 
 logger = logging.getLogger(__name__)
 
 
 def create_transaction(reason, amount, from_account, to_account):
-    t = Transaction.objects.create(reason=reason)
-    e1 = Entry.objects.create(
+    t = models.Transaction.objects.create(reason=reason)
+    e1 = models.Entry.objects.create(
         account=from_account, amount=(amount) * (-1), transaction=t
     )
-    e2 = Entry.objects.create(account=to_account, amount=(amount), transaction=t)
+    e2 = models.Entry.objects.create(account=to_account, amount=(amount), transaction=t)
 
     try:
         assert t.valid
@@ -37,7 +36,7 @@ class AccountDetail(View):
 
     def get(self, request, account_id):
         try:
-            account = Account.objects.get(id=account_id)
+            account = models.Account.objects.get(id=account_id)
             # ensure user has permissions
             assert (
                 request.user in account.owners.all()
@@ -54,11 +53,13 @@ class AccountDetail(View):
 
 class AccountList(View):
     template_name = "accounts_list.html"
-    form_class = TransactionForm
+    form_class = forms.TransactionForm
 
     @method_decorator(login_required)
     def get(self, request):
-        accounts = Account.objects.filter(owners=request.user).order_by("currency")
+        accounts = models.Account.objects.filter(owners=request.user).order_by(
+            "currency"
+        )
         transaction_form = self.form_class(request.user)
         return render(
             request,
@@ -72,8 +73,8 @@ class AccountList(View):
         if transaction_form.is_valid():
             to_account_id = request.POST.get("to_account")
             from_account_id = request.POST.get("from_account")
-            to_account = Account.objects.get(id=to_account_id)
-            from_account = Account.objects.get(id=from_account_id)
+            to_account = models.Account.objects.get(id=to_account_id)
+            from_account = models.Account.objects.get(id=from_account_id)
             amount = int(request.POST.get("amount"))
             reason = request.POST.get("reason")
 

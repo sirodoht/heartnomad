@@ -13,17 +13,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
-from core import models
-from core.data_fetchers import (
-    SerializedResourceCapacity,
-)
-from core.emails.messages import (
-    new_booking_notify,
-)
-from core.forms import (
-    LocationRoomForm,
-    UserProfileForm,
-)
+from core import data_fetchers, forms, models
+from core.emails import messages as email_messages
 
 from .view_helpers import _get_user_and_perms
 
@@ -76,12 +67,12 @@ def user_edit_room(request, username, room_id):
         return HttpResponseRedirect("/404")
 
     has_image = bool(room.image)
-    resource_capacity = SerializedResourceCapacity(
+    resource_capacity = data_fetchers.SerializedResourceCapacity(
         room, timezone.localtime(timezone.now())
     )
     room_capacity = json.dumps(resource_capacity.as_dict())
     location = room.location
-    form = LocationRoomForm(instance=room)
+    form = forms.LocationRoomForm(instance=room)
 
     return render(
         request,
@@ -157,7 +148,7 @@ def process_unsaved_booking(request):
         booking.save()
 
         logger.debug("new booking %d saved." % booking.id)
-        new_booking_notify(booking)
+        email_messages.new_booking_notify(booking)
         # we can't just redirect here because the user doesn't get logged
         # in. so save the reservaton ID and redirect below.
         request.session["new_booking_redirect"] = {
@@ -222,7 +213,7 @@ def user_login(request, username=None):
 def register(request):
     booking = request.session.get("booking")
     if request.method == "POST":
-        profile_form = UserProfileForm(request.POST, request.FILES)
+        profile_form = forms.UserProfileForm(request.POST, request.FILES)
         if profile_form.is_valid():
             user = profile_form.save()
             return user_login(request, username=user.username)
@@ -238,7 +229,7 @@ def register(request):
             return HttpResponseRedirect(
                 reverse("user_detail", args=(request.user.username,))
             )
-        profile_form = UserProfileForm()
+        profile_form = forms.UserProfileForm()
     all_users = User.objects.all()
     return render(
         request,
@@ -256,7 +247,9 @@ def UserEdit(request, username):
         return HttpResponseRedirect("/404")
 
     if request.method == "POST":
-        profile_form = UserProfileForm(request.POST, request.FILES, instance=profile)
+        profile_form = forms.UserProfileForm(
+            request.POST, request.FILES, instance=profile
+        )
         if profile_form.is_valid():
             user = profile_form.save()
             messages.info(request, "Your profile has been updated.")
@@ -265,7 +258,7 @@ def UserEdit(request, username):
             logger.debug("profile form contained errors:")
             logger.debug(profile_form.errors)
     else:
-        profile_form = UserProfileForm(instance=profile)
+        profile_form = forms.UserProfileForm(instance=profile)
     has_image = bool(profile.image)
     return render(
         request,

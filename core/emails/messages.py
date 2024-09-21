@@ -108,10 +108,11 @@ def send_booking_receipt(booking, send_to=None):
 
 
 def send_invoice(booking):
-    """trigger a reminder email to the guest about payment."""
-    if booking.is_comped():
-        # FIXME: undefined!
-        return send_comp_invoice(booking)
+    """Trigger a reminder email to the guest about payment."""
+
+    # TODO: Implement send_comp_invoice
+    # if booking.is_comped():
+    #     return send_comp_invoice(booking)
 
     location = booking.use.location
     subject = f"[{location.email_subject_prefix}] Thanks for Staying with us!"
@@ -180,7 +181,6 @@ def new_booking_notify(booking):
 
 
 def updated_booking_notify(booking):
-    Site.objects.get_current().domain
     reverse(
         "booking_manage",
         args=(
