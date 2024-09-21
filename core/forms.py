@@ -259,7 +259,6 @@ class UserProfileForm(forms.ModelForm):
             # Adding
             user = self.create_user()
             profile.user = user
-            models.Membership.objects.create(user=profile.user)
 
         profile.save()
         return user
