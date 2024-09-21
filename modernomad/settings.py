@@ -244,3 +244,9 @@ ENABLE_SLACK = True if os.getenv("ENABLE_SLACK") == "1" else False
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# Memberships settings
+
+SHORT_TERM_MEMBERSHIP_COST = 90
+LONG_TERM_MEMBERSHIP_COST = 200
