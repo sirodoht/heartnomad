@@ -314,7 +314,7 @@ def BillCharge(request, location_slug, bill_id):
                 )
             )
         else:
-            raise Exception("bill is of unknown type")
+            raise Exception("bill is of unknown type") from e
 
     if bill.is_booking_bill():
         messages.add_message(request, messages.INFO, "The card was charged.")
@@ -349,13 +349,18 @@ def AddBillLineItem(request, location_slug, bill_id):
                     request, messages.INFO, "Invalid percent value given."
                 )
                 return HttpResponseRedirect(
-                    reverse("booking_manage", args=(location.slug, booking_id))
+                    reverse(
+                        "booking_manage",
+                        args=(location.slug, bill.bookingbill.booking.id),
+                    )
                 )
             amount = -(bill.subtotal_amount() * percent)
         else:
             messages.add_message(request, messages.INFO, "Invalid discount type.")
             return HttpResponseRedirect(
-                reverse("booking_manage", args=(location.slug, booking_id))
+                reverse(
+                    "booking_manage", args=(location.slug, bill.bookingbill.booking.id)
+                )
             )
     else:
         # then it's a fee
@@ -370,13 +375,18 @@ def AddBillLineItem(request, location_slug, bill_id):
                     request, messages.INFO, "Invalid percent value given."
                 )
                 return HttpResponseRedirect(
-                    reverse("booking_manage", args=(location.slug, booking_id))
+                    reverse(
+                        "booking_manage",
+                        args=(location.slug, bill.bookingbill.booking.id),
+                    )
                 )
             amount = bill.subtotal_amount() * percent
         else:
             messages.add_message(request, messages.INFO, "Invalid fee type.")
             return HttpResponseRedirect(
-                reverse("booking_manage", args=(location.slug, booking_id))
+                reverse(
+                    "booking_manage", args=(location.slug, bill.bookingbill.booking.id)
+                )
             )
 
     new_line_item = BillLineItem(

@@ -98,10 +98,10 @@ def issue_refund(payment, amount=None):
     stripe.api_key = settings.STRIPE_SECRET_KEY
     charge = stripe.Charge.retrieve(payment.transaction_id)
     logger.debug("refunding amount")
-    logger.debug(refund_amount)
-    if refund_amount:
+    logger.debug(amount)
+    if amount:
         # amount refunded has to be given in cents
-        refund_amount_cents = int(float(refund_amount) * 100)
+        refund_amount_cents = int(float(amount) * 100)
         logger.debug(refund_amount_cents)
         refund = charge.refund(amount=refund_amount_cents)
     else:
@@ -113,7 +113,7 @@ def issue_refund(payment, amount=None):
         user=payment.user,
         payment_service="Stripe",
         payment_method="Refund",
-        paid_amount=-1 * Decimal(refund_amount),
+        paid_amount=-1 * Decimal(amount),
         transaction_id=refund.id,
     )
 
