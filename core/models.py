@@ -225,9 +225,7 @@ class Location(models.Model):
         if not arrive:
             arrive = timezone.localtime(timezone.now())
             depart = arrive + datetime.timedelta(1)
-        if self.rooms_free(arrive, depart):
-            return True
-        return False
+        return bool(self.rooms_free(arrive, depart))
 
     def events(self, user=None):
         if "gather" in settings.INSTALLED_APPS:
@@ -1340,9 +1338,7 @@ class Payment(models.Model):
 
     def is_fully_refunded(self):
         balance = self.net_paid()
-        if balance > 0:
-            return False
-        return True
+        return not balance > 0
 
     def non_house_fees(self):
         """returns the absolute amount of the user paid (non-house) fee(s)"""
