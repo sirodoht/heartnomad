@@ -59,6 +59,26 @@ docker compose run --rm django python manage.py shell
 
 `--rm` means that the container will be deleted after exit.
 
+## Debugging
+
+You can add a `breakpoint()` in your Python code and step into the code. To do this
+you need to attach to the django docker container.
+
+Run this and get the first column, the container ID:
+
+```sh
+docker ps|grep modernomad-django
+```
+
+Then, run this in a separate terminal:
+
+```sh
+docker attach <container-id>
+# eg. docker attach ee8e1887e766
+```
+
+Now, this new terminal will give you input if the code encounters a breakpoint.
+
 ## Reset docker setup
 
 If you want to reset everything (and delete all local database data), run:
