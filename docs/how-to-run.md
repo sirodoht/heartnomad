@@ -1,12 +1,17 @@
 ## How to Run the First Time
 
-Assuming you have all the prerequisites and dependencies outlined in [environment-setup](environment-setup.md), we can proceed with making the virtual environemnt, populating it with required libraries, getting your local configuration working and starting up the app.
+Assuming you have all the prerequisites and dependencies outlined in
+[environment-setup](environment-setup.md), we can proceed with making the virtual
+environemnt, populating it with required libraries, getting your local configuration
+working and starting up the app.
 
 ## virtualenv
-create a new virtual environment for this project:
-- `mkvirtualenv modernomad`
 
-this will usually cause you to "enter" the virtualenv automatically, as will be reflected by the prompt now prefixed with (modernomad). use the following commands to work with virtualenvwrapper: `workon` to work on a specific virtual env, `pip install blah` to install packages, `lssitepackages` to see packaged installed in the virtual env.
+Create a new virtual environment for this project:
+
+```
+python3 -m venv .venv
+```
 
 ## clone the repository
 
@@ -106,7 +111,3 @@ Start django and node services
 
 ## model updates
 see the instructions in [updates](updates.md) for how to create and run database migrations if you add or remove fields from models.
-
-
-
-

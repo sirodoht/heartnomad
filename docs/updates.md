@@ -1,30 +1,37 @@
-## Model Updates - brief cheat sheet
+## Model Updates - Brief Cheat Sheet
 
-If you update a model, create a migration and migrate (this assumes
-`./manage.py makemigrations --initial` was run when you set up your project
-initially).
+If you update a model, create a migration and migrate.
 
-create the migration
+Create the migration:
 
-`$ ./manage.py makemigrations core --auto`
+```sh
+$ ./manage.py makemigrations
+```
 
-if you have a fixtures file, add/change field(s) to correspond to any model
-changes you made, if necessary.
+If you have a fixtures file, add/change field(s) to correspond to any model changes you
+made, if necessary.
 
-then, as instructed, run
+Then, as instructed, run:
 
-`$ ./manage.py migrate <appname>`
+```sh
+$ ./manage.py migrate
+```
 
-if you want to sanity check things first, you can start by running the command
-with the db-dry-run flag. don't forget to run it for reals after:
+If you want to sanity check things first, you can start by running the command with the
+db-dry-run flag. Don't forget to run it for reals after:
 
-`$ ./manage.py migrate <appname> --dry-run`
+```sh
+$ ./manage.py migrate --dry-run
+```
 
-when you pull changes that include new migrations on a remote copy of the repo, run the migrate command again:
+When you pull changes that include new migrations on a remote copy of the repo, run the
+migrate command again:
 
-`$ ./manage.py migrate <appname>`
+```sh
+$ ./manage.py migrate
+```
 
-for changes in where or what data is stored, use datamigrations:
+For changes in where or what data is stored, use datamigrations:
 
 1. create the new field (in the same or other model)
 2. create a schemamigration for the new field (and optionally run it)
@@ -34,7 +41,8 @@ for changes in where or what data is stored, use datamigrations:
 6. delete the old field
 7. create a schemamigration to reflect the deleted field (as/if necessary)
 
-new models and permissions: to get the id for the permissions associated with a model (there are 3 by default - add, change, delete), do the following:
+Note for new models and permissions: to get the id for the permissions associated with a
+model (there are 3 by default - add, change, delete), do the following:
 
 ```
 from django.contrib.contenttypes.models import ContentType
@@ -46,7 +54,8 @@ from django.contrib.auth.models import Permission
 [40, 41, 42]
 ```
 
-`modelname` is a string, the lowercase version of the model class name in your app's models.py. then add these to the list in appname/fixtures/initial_data.json, eg.:
+`modelname` is a string, the lowercase version of the model class name in your app's
+models.py. Then add these to the list in appname/fixtures/initial_data.json, eg.:
 
 ```
 [
@@ -65,4 +74,3 @@ from django.contrib.auth.models import Permission
     ...
 ]
 ```
-
