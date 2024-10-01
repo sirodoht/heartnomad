@@ -29,6 +29,7 @@ from core.models import (
     LocationMenu,
     Resource,
 )
+from core.views import view_helpers
 
 logger = logging.getLogger(__name__)
 
@@ -57,10 +58,6 @@ def guests(request, location_slug):
     )
 
 
-def projects(request, location_slug):
-    pass
-
-
 class LocationDetail(PermissionRequiredMixin, DetailView):
     model = Location
     context_object_name = "location"
@@ -77,6 +74,11 @@ class LocationDetail(PermissionRequiredMixin, DetailView):
         raise Http404(
             "The location does not exist or you do not have permission to view it"
         )
+
+    def dispatch(self, request, *args, **kwargs):
+        if not view_helpers.has_active_membership(request.user):
+            return HttpResponseRedirect("/membership/")
+        return super().dispatch(request, *args, **kwargs)
 
 
 @house_admin_required

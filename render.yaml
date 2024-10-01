@@ -31,4 +31,4 @@ services:
       - key: STRIPE_PUBLISHABLE_KEY
         sync: false
       - key: DOMAIN_NAME
-        value: modernomad.onrender.com
+        sync: false

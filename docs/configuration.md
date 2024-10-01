@@ -1,4 +1,7 @@
-When getting a new instance up and running in a production setting, there are several things to be configured for your particular uses.
+# Configuration
+
+When getting a new instance up and running in a production setting, there are several
+things to be configured for your particular uses.
 
 The majority of the configuration is around
 

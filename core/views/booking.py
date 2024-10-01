@@ -19,7 +19,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import TemplateView
 from rest_framework import generics, mixins
 
-from core import payment_gateway
+from core import models, payment_gateway
 from core.emails.messages import (
     guest_welcome,
     new_booking_notify,
@@ -27,11 +27,9 @@ from core.emails.messages import (
     updated_booking_notify,
 )
 from core.forms import BookingUseForm
-from core.models import Booking, Fee, Location, Resource, Use
 from core.serializers import FeeSerializer, ResourceSerializer
 from core.shortcuts import get_qs_or_404
-
-from .view_helpers import _get_user_and_perms
+from core.views import view_helpers
 
 ensure_csrf = method_decorator(ensure_csrf_cookie)
 logger = logging.getLogger(__name__)
@@ -46,7 +44,7 @@ class DateEncoder(JSONEncoder):
 
 
 class RoomApiList(mixins.ListModelMixin, generics.GenericAPIView):
-    queryset = Resource.objects.all()
+    queryset = models.Resource.objects.all()
     serializer_class = ResourceSerializer
     lookup_field = "location_slug"
 
@@ -81,7 +79,7 @@ class RoomApiList(mixins.ListModelMixin, generics.GenericAPIView):
 
 
 class RoomApiDetail(mixins.RetrieveModelMixin, generics.GenericAPIView):
-    queryset = Resource.objects.all()
+    queryset = models.Resource.objects.all()
     serializer_class = ResourceSerializer
     lookup_url_kwarg = "room_id"
 
@@ -98,13 +96,15 @@ class StayView(TemplateView):
         room_id = kwargs.get("room_id")
         if room_id:
             self.room = (
-                get_qs_or_404(Resource, pk=room_id).select_related("location").first()
+                get_qs_or_404(models.Resource, pk=room_id)
+                .select_related("location")
+                .first()
             )
             self.location = self.room.location
         else:
             self.room = None
             self.location = get_object_or_404(
-                Location, slug=kwargs.get("location_slug")
+                models.Location, slug=kwargs.get("location_slug")
             )
 
         if not self.location.rooms_with_future_capacity():
@@ -139,7 +139,7 @@ class StayView(TemplateView):
         else:
             user_drft_balance = 0
 
-        fees = Fee.objects.filter(locationfee__location=self.location)
+        fees = models.Fee.objects.filter(locationfee__location=self.location)
 
         react_data = {
             "is_house_admin": is_admin,
@@ -161,19 +161,19 @@ def BookingSubmit(request, location_slug):
     if request.method != "POST":
         return HttpResponseRedirect("/404")
 
-    location = get_object_or_404(Location, slug=location_slug)
+    location = get_object_or_404(models.Location, slug=location_slug)
 
     form = BookingUseForm(location, request.POST)
     if form.is_valid():
         comments = request.POST.get("comments")
         use = form.save(commit=False)
         use.location = location
-        booking = Booking(use=use, comments=comments)
+        booking = models.Booking(use=use, comments=comments)
         # reset_rate also generates the bill.
         if request.user.is_authenticated:
             use.user = request.user
             if use.suggest_drft():
-                use.accounted_by = Use.DRFT
+                use.accounted_by = models.Use.DRFT
             use.save()
             # we already set the value of 'use' when creating the Booking,
             # but it wasn't saved at that point, and Django complains about
@@ -185,7 +185,10 @@ def BookingSubmit(request, location_slug):
             messages.add_message(
                 request,
                 messages.INFO,
-                f'Thanks! Your booking was submitted. You will receive an email when it has been reviewed. You may wish to <a href="/people/{booking.use.user.username}/edit/">update your profile</a> if your projects or ideas have changed since your last visit.',
+                f"Thanks! Your booking was submitted. You will receive an email when it"
+                f" has been reviewed. You may wish to "
+                f'<a href="/people/{booking.use.user.username}/edit/">update your profi'
+                "le</a> if your projects or ideas have changed since your last visit.",
             )
             return HttpResponseRedirect(
                 reverse("booking_detail", args=(location_slug, booking.id))
@@ -222,9 +225,12 @@ def BookingSubmit(request, location_slug):
 @login_required
 def UserBookings(request, username):
     """TODO: rethink permissions here"""
-    user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
-    # uses = Use.objects.filter(user=user).exclude(status='deleted').order_by('arrive')
-    bookings = Booking.objects.filter(use__user=user).exclude(use__status="deleted")
+    user, user_is_house_admin_somewhere = view_helpers.get_user_and_perms(
+        request, username
+    )
+    bookings = models.Booking.objects.filter(use__user=user).exclude(
+        use__status="deleted"
+    )
     past_bookings = []
     upcoming_bookings = []
     for booking in bookings:
@@ -248,13 +254,13 @@ def UserBookings(request, username):
 
 @login_required
 def BookingDetail(request, booking_id, location_slug):
-    location = get_object_or_404(Location, slug=location_slug)
+    location = get_object_or_404(models.Location, slug=location_slug)
     try:
-        booking = Booking.objects.get(id=booking_id)
+        booking = models.Booking.objects.get(id=booking_id)
         use = booking.use
         if not booking:
-            raise Booking.DoesNotExist
-    except Booking.DoesNotExist:
+            raise models.Booking.DoesNotExist
+    except models.Booking.DoesNotExist:
         msg = "The booking you requested do not exist"
         messages.add_message(request, messages.ERROR, msg)
         return HttpResponseRedirect("/404")
@@ -267,6 +273,11 @@ def BookingDetail(request, booking_id, location_slug):
         or (request.user in location.readonly_admins.all())
         or (request.user in location.residents.all())
     ):
+        if not view_helpers.has_active_membership(request.user):
+            msg = "Before booking you need to apply for a membership."
+            messages.warning(request, msg)
+            return HttpResponseRedirect("/membership")
+
         past = not use.arrive >= datetime.date.today()
         paid = bool(booking.is_paid())
 
@@ -275,7 +286,7 @@ def BookingDetail(request, booking_id, location_slug):
         # users that intersect this stay
         users_during_stay = []
         uses = (
-            Use.objects.filter(status="confirmed")
+            models.Use.objects.filter(status="confirmed")
             .filter(location=location)
             .exclude(depart__lt=use.arrive)
             .exclude(arrive__gt=use.depart)
@@ -313,11 +324,12 @@ def BookingDetail(request, booking_id, location_slug):
 
 @login_required
 def BookingReceipt(request, location_slug, booking_id):
-    location = get_object_or_404(Location, slug=location_slug)
-    booking = get_object_or_404(Booking, id=booking_id)
-    if request.user != booking.use.user or location != booking.use.location:
-        if not request.user.is_staff:
-            return HttpResponseRedirect("/404")
+    location = get_object_or_404(models.Location, slug=location_slug)
+    booking = get_object_or_404(models.Booking, id=booking_id)
+    if (request.user != booking.use.user or location != booking.use.location) and (
+        not request.user.is_staff
+    ):
+        return HttpResponseRedirect("/404")
 
     # I want to render the receipt exactly like we do in the email
     htmltext = get_template("emails/receipt.html")
@@ -343,8 +355,8 @@ def BookingReceipt(request, location_slug, booking_id):
 def BookingEdit(request, booking_id, location_slug):
     logger.debug("Entering BookingEdit")
 
-    location = get_object_or_404(Location, slug=location_slug)
-    booking = Booking.objects.get(id=booking_id)
+    location = get_object_or_404(models.Location, slug=location_slug)
+    booking = models.Booking.objects.get(id=booking_id)
     # need to pull these dates out before we pass the instance into
     # the BookingUseForm, since it (apparently) updates the instance
     # immediately (which is weird, since it hasn't validated the form
@@ -383,10 +395,13 @@ def BookingEdit(request, booking_id, location_slug):
                         updated_booking_notify(booking)
                     except Exception:
                         logger.debug(
-                            "Booking %d was updated but admin notification failed to send"
-                            % booking.id
+                            f"Booking {booking.id} was updated but admin notification "
+                            f"failed to send"
                         )
-                    client_msg = "The booking was updated and the new information will be reviewed for availability."
+                    client_msg = (
+                        "The booking was updated and the new information will be "
+                        "reviewed for availability."
+                    )
                 else:
                     client_msg = "The booking was updated."
                 # save the instance *after* the status has been updated as needed.
@@ -417,7 +432,7 @@ def BookingEdit(request, booking_id, location_slug):
 
 @login_required
 def BookingConfirm(request, booking_id, location_slug):
-    booking = Booking.objects.get(id=booking_id)
+    booking = models.Booking.objects.get(id=booking_id)
     if not (
         request.user.is_authenticated
         and request.user == booking.use.user
@@ -446,14 +461,18 @@ def BookingConfirm(request, booking_id, location_slug):
             messages.add_message(
                 request,
                 messages.INFO,
-                f"Thank you! Your payment has been received and a receipt emailed to you at {booking.use.user.email}",
+                f"Thank you! Your payment has been received and a receipt emailed to "
+                f"you at {booking.use.user.email}",
             )
         except stripe.CardError:
             messages.add_message(
                 request,
                 messages.WARNING,
-                "Drat, it looks like there was a problem with your card: %s. Please add a different card on your "
-                + f'<a href="/people/{booking.use.user.username}/edit/">profile</a>.',
+                (
+                    "Drat, it looks like there was a problem with your card. Please "
+                    "add a different card on your "
+                    f'<a href="/people/{booking.use.user.username}/edit/">profile</a>.',
+                ),
             )
 
     return HttpResponseRedirect(
@@ -463,7 +482,7 @@ def BookingConfirm(request, booking_id, location_slug):
 
 @login_required
 def BookingDelete(request, booking_id, location_slug):
-    booking = Booking.objects.get(id=booking_id)
+    booking = models.Booking.objects.get(id=booking_id)
     if (
         request.user.is_authenticated
         and request.user == booking.use.user
@@ -487,8 +506,8 @@ def BookingCancel(request, booking_id, location_slug):
     if request.method != "POST":
         return HttpResponseRedirect("/404")
 
-    location = get_object_or_404(Location, slug=location_slug)
-    booking = Booking.objects.get(id=booking_id)
+    location = get_object_or_404(models.Location, slug=location_slug)
+    booking = models.Booking.objects.get(id=booking_id)
     if (
         not (request.user.is_authenticated and request.user == booking.use.user)
         and request.user not in location.house_admins.all()

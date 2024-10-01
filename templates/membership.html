@@ -21,7 +21,7 @@
 
     <div class="row">
         <div class="col-md-6">
-            <h1>Membership</h1>
+            <h1>Membership Application</h1>
             <p>
                 To become a member you need to sign the membership agreement. This will
                 be sent to you via email once your membership application has been
@@ -30,6 +30,12 @@
             <p>
                 Once the above has been completed, please pay for your membership in
                 this page.
+            </p>
+            <p>
+                <strong>
+                    NOTE 1: Being a member does not guarantee that a location will
+                    accept your stay or future booking.
+                </strong>
             </p>
         </div>
     </div>
@@ -55,7 +61,7 @@
     <div class="row">
         <div class="col-md-6">
             <p style="margin-top: 16px;">
-                <strong>NOTE: This DOES NOT grant you membership.</strong>
+                <strong>NOTE 2: This DOES NOT grant you membership.</strong>
             </p>
             <div style="margin-top: 16px;">
                 <form action="{% url 'membership_charge' %}" method="POST">
