@@ -15,8 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from core import data_fetchers, forms, models
 from core.emails import messages as email_messages
-
-from .view_helpers import _get_user_and_perms
+from core.views.view_helpers import get_user_and_perms
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +23,7 @@ logger = logging.getLogger(__name__)
 @login_required
 def user_email_settings(request, username):
     """TODO: rethink permissions here"""
-    user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
+    user, user_is_house_admin_somewhere = get_user_and_perms(request, username)
 
     return render(
         request,
@@ -40,7 +39,7 @@ def user_email_settings(request, username):
 @login_required
 def user_events(request, username):
     """TODO: rethink permissions here"""
-    user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
+    user, user_is_house_admin_somewhere = get_user_and_perms(request, username)
     events = list(user.events_attending.all())
     events.reverse()
 
@@ -58,7 +57,7 @@ def user_events(request, username):
 
 @login_required
 def user_edit_room(request, username, room_id):
-    user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
+    user, user_is_house_admin_somewhere = get_user_and_perms(request, username)
 
     room = models.Resource.objects.get(id=room_id)
 
@@ -99,7 +98,7 @@ def ListUsers(request):
 
 @login_required
 def UserDetail(request, username):
-    user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
+    user, user_is_house_admin_somewhere = get_user_and_perms(request, username)
 
     return render(
         request,
