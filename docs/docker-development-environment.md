@@ -49,6 +49,16 @@ will show up on git.
 
 To learn about what can be configured, see the [configuration documentation](configuration.md).
 
+## Shell access
+
+You can access a Django shell using:
+
+```sh
+docker compose run --rm django python manage.py shell
+```
+
+`--rm` means that the container will be deleted after exit.
+
 ## Reset docker setup
 
 If you want to reset everything (and delete all local database data), run:
