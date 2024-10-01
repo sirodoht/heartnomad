@@ -13,8 +13,8 @@ services:
       MAILGUN_API_KEY: xxx
       DEBUG: 1
       LOCALDEV: 1
-    links:
-      - postgres
+    stdin_open: true
+    tty: true
     volumes:
       - "./:/app"
 
@@ -37,6 +37,8 @@ services:
       retries: 5
     environment:
       POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
