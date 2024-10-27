@@ -259,5 +259,5 @@ User.event_notifications = property(
 def add_user_event_notifications(sender, instance, created, using, **kwargs):
     # just accessing the field will create the object, since the field is
     # defined with get_or_create, above.
-    instance.event_notifications
+    instance.event_notifications  # noqa: B018
     return

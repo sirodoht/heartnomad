@@ -48,7 +48,7 @@ class EventForm(forms.ModelForm):
 
     def clean_co_organizers(self):
         co_organizers_usernames = (
-            self.cleaned_data.get("co_organizers").strip(", ").split(",")
+            self.cleaned_data.get("co_organizers", "").strip(", ").split(",")
         )
         logger.debug("here")
         logger.debug(co_organizers_usernames)
@@ -59,14 +59,14 @@ class EventForm(forms.ModelForm):
                 try:
                     User.objects.get(username=username)
                     co_organizers.append(User.objects.get(username=username))
-                except ObjectDoesNotExist:
+                except ObjectDoesNotExist as ex:
                     raise forms.ValidationError(
                         _(
-                            "'{}' is not a recognized user, please remove them to save your event. Only users with existing accounts can be listed as co-organizers (but you can always add them later!)".format(
-                                username
-                            )
+                            f"'{username}' is not a recognized user, please remove them"
+                            " to save your event. Only users with existing accounts can"
+                            " be listed as co-organizers (but you can always add them later!)"
                         ),
-                    )
+                    ) from ex
         return co_organizers
 
     def clean_description(self):

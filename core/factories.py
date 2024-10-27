@@ -1,7 +1,7 @@
 import factory
 from factory.django import DjangoModelFactory
 
-from core.models import *
+from core.models import Location, Resource, User
 
 
 class LocationFactory(DjangoModelFactory):

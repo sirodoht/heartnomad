@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from bank.models import *
+from bank.models import Account, Currency, Entry, SystemAccounts, Transaction
 
 
 class EntryReadOnlyInline(admin.TabularInline):

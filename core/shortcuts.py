@@ -14,14 +14,14 @@ def get_qs_or_404(klass, *args, **kwargs):
     queryset = _get_queryset(klass)
     try:
         qs = queryset.filter(*args, **kwargs)
-    except AttributeError:
+    except AttributeError as ex:
         klass__name = (
             klass.__name__ if isinstance(klass, type) else klass.__class__.__name__
         )
         raise ValueError(
             "First argument to get_object_or_404() must be a Model, Manager, "
             f"or QuerySet, not '{klass__name}'."
-        )
+        ) from ex
     if not qs.exists():
         raise Http404(f"No {queryset.model._meta.object_name} matches the given query.")
     return qs

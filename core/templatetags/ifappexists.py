@@ -19,10 +19,10 @@ def ifappexists(parser, token):
         tokens = token.split_contents()
         apps = []
         apps += tokens[1:]
-    except ValueError:
+    except ValueError as ex:
         raise template.TemplateSyntaxError(
             "Tag 'ifappexists' requires at least 1 argument."
-        )
+        ) from ex
 
     nodelist_true = parser.parse(("else", "endifappexists"))
     token = parser.next_token()
