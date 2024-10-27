@@ -11,11 +11,10 @@ from django.template.loader import get_template
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
+from core.emails.mailgun import mailgun_send
 from gather.models import Event, EventAdminGroup, EventNotifications
 
 logger = logging.getLogger(__name__)
-
-from core.emails.mailgun import mailgun_send
 
 
 def new_event_notification(event, location):
@@ -121,7 +120,6 @@ def event_published_notification(event, location):
     from_address = location.from_email()
     plaintext = get_template("emails/new_event_announce.txt")
     htmltext = get_template("emails/new_event_announce.html")
-    Site.objects.get_current().domain
 
     c_text = {
         "event": event,

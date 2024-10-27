@@ -20,13 +20,13 @@ class MailgunAPIError(Exception):
 class MailgunBackend(BaseEmailBackend):
     """A Django Email backend that uses mailgun."""
 
-    def __init__(self, fail_silently=False, *args, **kwargs):
+    def __init__(self, fail_silently=False, **kwargs):
         access_key, server_name = (
             kwargs.pop("access_key", None),
             kwargs.pop("server_name", None),
         )
 
-        super().__init__(fail_silently=fail_silently, *args, **kwargs)
+        super().__init__(fail_silently=fail_silently, **kwargs)
 
         try:
             self._access_key = access_key or settings.MAILGUN_API_KEY

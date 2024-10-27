@@ -2,9 +2,8 @@ from datetime import date
 
 from django.test import TestCase
 
-from api.commands import *
-from core.factories import *
-from core.models import *
+from core.factories import ResourceFactory
+from core.models import CapacityChange
 
 
 class CapacityQuantityOnTestCase(TestCase):

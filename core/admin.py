@@ -4,6 +4,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
 from core import models
+from core.emails import messages as email_messages
 from gather import models as gather_models
 
 
@@ -47,13 +48,13 @@ class ResourceAdminInline(admin.TabularInline):
 class LocationAdmin(admin.ModelAdmin):
     def send_admin_daily_update(self, request, queryset):
         for res in queryset:
-            admin_daily_update(res)
+            email_messages.admin_daily_update(res)
         msg = gen_message(queryset, "email", "emails", "sent")
         self.message_user(request, msg)
 
     def send_guests_residents_daily_update(self, request, queryset):
         for res in queryset:
-            guests_residents_daily_update(res)
+            email_messages.guests_residents_daily_update(res)
         msg = gen_message(queryset, "email", "emails", "sent")
         self.message_user(request, msg)
 
@@ -85,7 +86,7 @@ class PaymentAdmin(admin.ModelAdmin):
 
     def booking(self):
         b = self.bill.bookingbill.booking
-        return f"""<a href="/locations/{b.use.location.slug}/booking/{r.id}/">{r}"""
+        return f"""<a href="/locations/{b.use.location.slug}/booking/{b.id}/">{b}"""
 
     booking.allow_tags = True
 
@@ -167,7 +168,7 @@ class BookingAdmin(admin.ModelAdmin):
         success_list = []
         failure_list = []
         for res in queryset:
-            if send_booking_receipt(res):
+            if email_messages.send_booking_receipt(res):
                 success_list.append(str(res.id))
             else:
                 failure_list.append(str(res.id))
@@ -182,25 +183,25 @@ class BookingAdmin(admin.ModelAdmin):
 
     def send_invoice(self, request, queryset):
         for res in queryset:
-            send_invoice(res)
+            email_messages.send_invoice(res)
         msg = gen_message(queryset, "invoice", "invoices", "sent")
         self.message_user(request, msg)
 
     def send_new_booking_notify(self, request, queryset):
         for res in queryset:
-            new_booking_notify(res)
+            email_messages.new_booking_notify(res)
         msg = gen_message(queryset, "email", "emails", "sent")
         self.message_user(request, msg)
 
     def send_updated_booking_notify(self, request, queryset):
         for res in queryset:
-            updated_booking_notify(res)
+            email_messages.updated_booking_notify(res)
         msg = gen_message(queryset, "email", "emails", "sent")
         self.message_user(request, msg)
 
     def send_guest_welcome(self, request, queryset):
         for res in queryset:
-            guest_welcome(res)
+            email_messages.guest_welcome(res)
         msg = gen_message(queryset, "email", "emails", "sent")
         self.message_user(request, msg)
 

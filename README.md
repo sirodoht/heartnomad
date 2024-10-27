@@ -11,22 +11,21 @@ feature list](docs/features.md) is also available.
 
 ## Running in development
 
-The easiest way to get up and running in development is by using Docker. See [Docker development environment](docs/docker-development-environment.md).
-
-If you can't or don't want to use Docker, see [Environment Setup](docs/environment-setup.md) and [How to Run](docs/how-to-run.md).
+The easiest way to get up and running in development is by using Docker. See
+[Docker development environment](docs/docker-development-environment.md).
 
 ## Documentation
 
 - [Admin user guide](https://embassynetwork.gitbooks.io/modernomad/content/) - to help users set up and manage locations on Modernomad
 - [Browser tests](docs/browser-tests.md) - want to write a browser test or fix a broken one?
-- [Configuration](docs/browser-tests.md)
-- [Deployment](docs/deployment.md) - how embassynetwork.com works, and how to run your own copy of Modernomad
+- [Configuration](docs/configuration.md)
+- [Deployment](docs/deployment.md) - how to run your own copy of Modernomad
 
 ## Contributing
 
-We love contributors! Add an issue if you have an idea or bug report, visit the [Backlog](https://github.com/embassynetwork/modernomad/projects/1) to see what we're up to, or message [jessykate](https://github.com/jessykate) on [twitter](https://github.com/jessykate). 
-
-[Read more about contributing](docs/contributing.md).
+We love contributors! Add an issue if you have an idea or bug report, visit the
+project's [Issues](https://github.com/jdxnlabs/modernomad/issues) to see what
+we're up to.
 
 ## License
 

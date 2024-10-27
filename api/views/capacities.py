@@ -3,7 +3,8 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 
-from api.commands.capacities import *
+from api.command import CommandResult
+from api.commands import capacities as commands_capacities
 from api.utils.http import JSONResponse
 from core.data_fetchers import SerializedResourceCapacity
 from core.models import CapacityChange, Resource
@@ -16,13 +17,15 @@ def capacities(request):
     capacity_detail method."""
     if request.method == "POST":
         data = JSONParser().parse(request)
-        if not user_can_administer_a_resource(
+        if not commands_capacities.user_can_administer_a_resource(
             request.user, Resource.objects.get(id=data["resource"])
         ):
             return HttpResponseNotFound("404 not found")
 
-        capacity = get_or_create_unsaved_capacity(data)
-        errors, warnings = update_capacities_as_appropriate(capacity)
+        capacity = commands_capacities.get_or_create_unsaved_capacity(data)
+        errors, warnings = commands_capacities.update_capacities_as_appropriate(
+            capacity
+        )
 
         capacities = SerializedResourceCapacity(
             capacity.resource, timezone.localtime(timezone.now())
@@ -46,7 +49,9 @@ def capacity_detail(request, capacity_id):
         return JSONResponse(serializer.data)
 
     elif request.method == "DELETE":
-        command = DeleteCapacityChange(request.user, capacity=capacity)
+        command = commands_capacities.DeleteCapacityChange(
+            request.user, capacity=capacity
+        )
         command.execute()
         return JSONResponse(
             command.result().serialize(), status=command.result().http_status()

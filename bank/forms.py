@@ -19,7 +19,7 @@ def user_accounts(user):
     return choices
 
 
-def recipient_accounts():
+def recipient_accounts(user):
     # user_accounts = Account.objects.all()
     account_list = user.profile.accounts_in_currency(Currency.objects.get(name="DRFT"))
     accounts = Account.objects.all()

@@ -2,8 +2,8 @@ from datetime import date, timedelta
 
 from django.test import TestCase
 
-from api.commands.bookings import *
-from core.factories import *
+from api.commands.bookings import RequestBooking
+from core.factories import ResourceFactory, UserFactory
 
 
 class CommandErrorMatchers:

@@ -47,8 +47,10 @@ def ifusergroup(parser, token):
     """
     try:
         tag, group = token.split_contents()
-    except ValueError:
-        raise template.TemplateSyntaxError("Tag 'ifusergroup' requires 1 argument.")
+    except ValueError as ex:
+        raise template.TemplateSyntaxError(
+            "Tag 'ifusergroup' requires 1 argument."
+        ) from ex
 
     nodelist_true = parser.parse(("else", "endifusergroup"))
     token = parser.next_token()

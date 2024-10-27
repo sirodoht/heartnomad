@@ -1,6 +1,6 @@
 import graphene
 from graphene import Node
-from graphene.types.datetime import *
+from graphene.types.datetime import DateTime
 from graphene_django.types import DjangoObjectType
 
 from api.commands.bookings import RequestBooking
