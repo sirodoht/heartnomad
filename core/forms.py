@@ -86,15 +86,26 @@ class UserProfileForm(forms.ModelForm):
 
     class Meta:
         model = models.UserProfile
-        exclude = [
-            "user",
-            "status",
-            "image_thumb",
-            "stripe_customer_id",
-            "primary_accounts",
-            "membership",
+        # TODO: enable fields when testing is done
+        fields = [
+            # Section 1
+            "image",
+            "bio",
+            "projects",
+            "sharing",
+            "discussion",
+            "links",
+            # Section 2
+            "first_name",
+            "last_name",
+            "referral",
+            "city",
+            # Section 3
+            "email",
+            "phone",
+            "password1",
+            "password2",
         ]
-        # fields = ['first_name', 'last_name', 'email', 'username', 'password1', 'password2', 'image', 'bio', 'links']
         widgets = {
             "bio": forms.Textarea(
                 attrs={"class": "form-control", "rows": "2", "required": "true"}
