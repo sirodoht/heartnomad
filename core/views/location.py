@@ -76,8 +76,11 @@ class LocationDetail(PermissionRequiredMixin, DetailView):
         )
 
     def dispatch(self, request, *args, **kwargs):
-        if not view_helpers.has_active_membership(request.user):
-            return HttpResponseRedirect("/membership/")
+        if not request.user.is_superuser:
+            if not request.user.is_authenticated:
+                return HttpResponseRedirect("/membership/")
+            if not view_helpers.has_active_membership(request.user):
+                return HttpResponseRedirect("/membership/")
         return super().dispatch(request, *args, **kwargs)
 
 

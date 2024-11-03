@@ -58,10 +58,24 @@
         </div>
     </div>
 
+    {% if user.profile.stripe_payment_method_id and not user.profile.contract_terms_accepted %}
+    <div class="row">
+        <div class="col-md-6">
+            <p style="margin-top: 16px; font-weight: 700;">
+                Registration is now pending.
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if user.profile.contract_terms_accepted %}
     <div class="row">
         <div class="col-md-6">
             <p style="margin-top: 16px;">
-                <strong>NOTE 2: This DOES NOT grant you membership.</strong>
+                <strong>
+                    NOTE 2: This is a requirement for membership but it DOES NOT
+                    grant you membership.
+                </strong>
             </p>
             <div style="margin-top: 16px;">
                 <form action="{% url 'membership_charge' %}" method="POST">
@@ -71,6 +85,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
     {% endif %}
 </div>
