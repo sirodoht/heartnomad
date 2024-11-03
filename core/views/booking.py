@@ -273,6 +273,8 @@ def BookingDetail(request, booking_id, location_slug):
         or (request.user in location.readonly_admins.all())
         or (request.user in location.residents.all())
     ):
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect("/membership/")
         if not view_helpers.has_active_membership(request.user):
             msg = "Before booking you need to apply for a membership."
             messages.warning(request, msg)

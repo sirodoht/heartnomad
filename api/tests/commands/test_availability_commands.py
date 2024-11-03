@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 from django.test import TestCase
 
@@ -21,7 +21,7 @@ class DeleteCapacityChangeTestCase(TestCase):
 
     def test_that_command_from_non_house_admin_fails(self):
         capacity = CapacityChange.objects.create(
-            start_date=datetime.date(4016, 1, 13), resource=self.resource, quantity=2
+            start_date=date(4016, 1, 13), resource=self.resource, quantity=2
         )
         non_admin = UserFactory(username="samwise")
         self.command = DeleteCapacityChange(non_admin, capacity=capacity)
@@ -29,7 +29,7 @@ class DeleteCapacityChangeTestCase(TestCase):
 
     def test_cant_delete_capacity_in_the_past(self):
         capacity = CapacityChange.objects.create(
-            start_date=datetime.date(1016, 1, 13), resource=self.resource, quantity=2
+            start_date=date(1016, 1, 13), resource=self.resource, quantity=2
         )
 
         command = DeleteCapacityChange(self.user, capacity=capacity)
@@ -42,7 +42,7 @@ class DeleteCapacityChangeTestCase(TestCase):
 
     def test_can_delete_capacity_in_the_future(self):
         capacity = CapacityChange.objects.create(
-            start_date=datetime.date(4016, 1, 13), resource=self.resource, quantity=2
+            start_date=date(4016, 1, 13), resource=self.resource, quantity=2
         )
         self.command = DeleteCapacityChange(self.user, capacity=capacity)
         self.expect_deleted_capacities([capacity.pk])
@@ -51,13 +51,13 @@ class DeleteCapacityChangeTestCase(TestCase):
         self,
     ):
         CapacityChange.objects.create(
-            start_date=datetime.date(4016, 1, 12), resource=self.resource, quantity=3
+            start_date=date(4016, 1, 12), resource=self.resource, quantity=3
         )
         capacity = CapacityChange.objects.create(
-            start_date=datetime.date(4016, 1, 13), resource=self.resource, quantity=2
+            start_date=date(4016, 1, 13), resource=self.resource, quantity=2
         )
         next_capacity = CapacityChange.objects.create(
-            start_date=datetime.date(4016, 1, 14), resource=self.resource, quantity=3
+            start_date=date(4016, 1, 14), resource=self.resource, quantity=3
         )
         self.command = DeleteCapacityChange(self.user, capacity=capacity)
         self.expect_deleted_capacities([capacity.pk, next_capacity.pk], remaining=1)
@@ -66,13 +66,13 @@ class DeleteCapacityChangeTestCase(TestCase):
         self,
     ):
         CapacityChange.objects.create(
-            start_date=datetime.date(4016, 1, 12), resource=self.resource, quantity=4
+            start_date=date(4016, 1, 12), resource=self.resource, quantity=4
         )
         capacity = CapacityChange.objects.create(
-            start_date=datetime.date(4016, 1, 13), resource=self.resource, quantity=2
+            start_date=date(4016, 1, 13), resource=self.resource, quantity=2
         )
         CapacityChange.objects.create(
-            start_date=datetime.date(4016, 1, 14), resource=self.resource, quantity=3
+            start_date=date(4016, 1, 14), resource=self.resource, quantity=3
         )
         self.command = DeleteCapacityChange(self.user, capacity=capacity)
         self.expect_deleted_capacities([capacity.pk], remaining=2)
