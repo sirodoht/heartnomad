@@ -1458,6 +1458,7 @@ class UserProfile(models.Model):
 
     stripe_customer_id = models.CharField(max_length=200, blank=True, null=True)
     stripe_payment_method_id = models.CharField(max_length=200, blank=True, null=True)
+    contract_terms_accepted = models.BooleanField(default=False)
 
     primary_accounts = models.ManyToManyField(
         Account,
