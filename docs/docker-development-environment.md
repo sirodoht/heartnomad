@@ -11,7 +11,7 @@ This will boot up everything that Modernomad needs to run, and stay running in t
 In another console, run these commands to set up the database and set up a user:
 
 ```sh
-docker compose run django ./manage.py migrate
+docker compose run --rm django ./manage.py migrate
 ```
 
 Your docker image is now running with your local development code. Browse to
@@ -19,13 +19,13 @@ Your docker image is now running with your local development code. Browse to
 `manage.py` commands in the same way. E.g., to run the test suite:
 
 ```sh
-docker compose run django ./manage.py test
+docker compose run --rm django ./manage.py test
 ```
 
 The first time you get this going, you will want to generate some test data:
 
 ```sh
-docker compose run django ./manage.py generate_test_data
+docker compose run --rm django ./manage.py generate_test_data
 ```
 
 This will create a superuser with the credentials `admin` and `password`.
