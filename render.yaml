@@ -1,7 +1,7 @@
 databases:
   - name: modernomad
-    plan: starter
-    region: oregon
+    plan: basic-256mb
+    region: frankfurt
     databaseName: modernomad
     user: modernomad
     postgresMajorVersion: "16"
@@ -9,7 +9,7 @@ databases:
 services:
   - type: web
     plan: starter
-    region: oregon
+    region: frankfurt
     branch: main
     name: modernomad
     runtime: python
